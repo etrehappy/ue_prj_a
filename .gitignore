@@ -76,8 +76,11 @@ Project_A/DerivedDataCache/*
 
 
 Project_A/Content/*
-!Project_A/Content/Project_A_Root
-!Project_A/Content/ThirdPerson
 Project_A/Source/Project_A/Variant_Combat
 Project_A/Source/Project_A/Variant_Platforming
 Project_A/Source/Project_A/Variant_SideScrolling
+
+!Project_A/Content/Project_A_Root
+!Project_A/Content/ThirdPerson
+!Project_A/Content/Demo/Geometry
+!Project_A/Content/Demo/ThirdPerson/Meshes

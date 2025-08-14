@@ -34,7 +34,7 @@ public class Project_A : ModuleRules
 			"Project_A/Variant_SideScrolling",
 			"Project_A/Variant_SideScrolling/Gameplay",
 			"Project_A/Variant_SideScrolling/AI",
-            "Project_A/Tests/Test_0"
+            "Project_A/Tests/"
 
         });
 

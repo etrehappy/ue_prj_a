@@ -50,7 +50,7 @@
 <b>Основное</b>
 
 - [x]  Разобраны автотесты.
-- [x]  В файле [TrainingTest.cpp](https://github.com/etrehappy/ue_prj_a/blob/v_2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.cpp) есть 4 теста: 
+- [x]  В файле [TrainingTest.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.cpp) есть 4 теста: 
     - открытие карты — FOpenLevelTest — с использованием Latent-команд;
     - проверка позиции ассета — FGetBpActorPropertiesFromEditorTest — по заданию;
     - проверка контекста текущего мира — FShowWorldTypeTest (просто для практики, смысловой нагрузки нет)
@@ -58,7 +58,7 @@
 
 <b> Дополнительно </b>
 - [x]  Разобран синтаксис Spec-тестов
-- [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/v_2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлено несколько тестов для практики.
+- [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлено несколько тестов для практики.
     <div style="text-align: center;">
         <img src="./img_for_readme/training_test_results.jpg" alt="Окружение" width="500" height="85
         ">   

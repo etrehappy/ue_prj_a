@@ -1,0 +1,197 @@
+# This is a basic workflow to help you get started with Actions
+
+name: PACK
+
+on:
+  workflow_dispatch:
+    inputs:
+      SHOULD_BUILD:
+        type: boolean
+        default: false
+      SHOULD_COOK:
+        type: boolean
+        default: false
+      SHOULD_STAGE:
+        type: boolean
+        default: false
+      SHOULD_PACK:
+        type: boolean
+        default: false
+      SHOULD_ARCHIVE:
+        type: boolean
+        default: false
+      SHOULD_CREATE_RELEASE:
+        type: boolean
+        default: false
+
+env:
+  BUILD_CONFIG: Shipping   #  Development
+  BUILD_PLATFORM: Win64
+  BUILD_TARGET_NAME: Project_A # 
+  PROJECT_NAME: Project_A
+  #COOK_MAPS: "/Game/TestMap+/Game/SecondTestMap"
+
+  SHOULD_BUILD:  ${{ inputs.SHOULD_BUILD }}
+  SHOULD_COOK:   ${{ inputs.SHOULD_COOK}}
+  SHOULD_STAGE:     ${{ inputs.SHOULD_STAGE}}
+  SHOULD_PACK:   ${{ inputs.SHOULD_PACK}}
+  SHOULD_ARCHIVE:   ${{ inputs.SHOULD_ARCHIVE}}
+
+
+jobs:
+  init:
+    runs-on: self-hosted
+    outputs:
+      repo_dir: ${{ steps.setenv.outputs.runner_repo_dir }}
+      project_dir: ${{ steps.setenv.outputs.runner_project_dir }}
+      uat_path: ${{ steps.setenv.outputs.runner_uat_path }}
+      uproject_path: ${{ steps.setenv.outputs.runner_uproject_path }}
+      report_dir: ${{ steps.setenv.outputs.runner_report_dir }}
+      archive_dir: ${{ steps.setenv.outputs.runner_archive_dir }}     
+      ue_cmd_path: ${{ steps.setenv.outputs.runner_ue_cmd_path }}
+
+
+    defaults:
+          run:
+            shell: pwsh
+
+    steps:
+      - name: Set multiple env variables
+        id: setenv
+        shell: pwsh
+        run: |
+          $baseGitFolder = "$env:UE_Projects\ue_prj_a"
+
+          $vars = @{
+            runner_repo_dir     = $baseGitFolder
+            runner_project_dir  = "$baseGitFolder\$env:PROJECT_NAME"
+            runner_uat_path     = "$env:UE_git_5_6\Build\BatchFiles\RunUAT.bat"
+            runner_uproject_path= "$baseGitFolder\$env:PROJECT_NAME\$env:PROJECT_NAME.uproject"
+            runner_report_dir   = "$baseGitFolder\$env:PROJECT_NAME\TestReports"
+            runner_archive_dir  = "$baseGitFolder\$env:PROJECT_NAME\PrjPackages\Archive"
+            runner_ue_cmd_path  = "$env:UE_git_5_6\Engine\Binaries\Win64\UnrealEditor-Cmd.exe"
+          }
+
+          foreach ($k in $vars.Keys) {
+            "$k=$($vars[$k])" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          }      
+
+      - name: Ensure archive dir exists
+        run: |
+          New-Item -ItemType Directory -Force -Path "${{ steps.setenv.outputs.runner_archive_dir }}" | Out-Null
+
+  build:
+    needs: init    
+    runs-on: self-hosted
+    env:
+      # RUNNER_REPO_DIR: ${{ needs.init.outputs.repo_dir }}
+      # RUNNER_REPORT_DIR: ${{ needs.init.outputs.report_dir }}
+      # RUNNER_UE_CMD_PATH: ${{ needs.init.outputs.ue_cmd_path }}
+      RUNNER_PROJECT_DIR: ${{ needs.init.outputs.project_dir }}
+      RUNNER_UAT_PATH: ${{ needs.init.outputs.uat_path }}    
+      RUNNER_UPROJECT_PATH: ${{ needs.init.outputs.uproject_path }}        
+      RUNNER_ARCHIVE_DIR: ${{ needs.init.outputs.archive_dir }}
+
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      # - name: Checkout repository
+      #   uses: actions/checkout@v4 
+
+      - name: empty # for next job
+        run: ""       
+
+      - name: RunUAT.bat
+        if: ${{ inputs.SHOULD_BUILD || inputs.SHOULD_COOK || inputs.SHOULD_STAGE || inputs.SHOULD_PACK || inputs.SHOULD_ARCHIVE }}        
+        working-directory: ${{ env.RUNNER_PROJECT_DIR }}
+        run: |
+          # base command
+          $cmd = @()
+          $cmd += "$env:RUNNER_UAT_PATH"
+          $cmd += "BuildCookRun"
+          $cmd += "-project=`"$env:RUNNER_UPROJECT_PATH`""
+          $cmd += "-noP4"
+          $cmd += "-platform=$env:BUILD_PLATFORM"
+          $cmd += "-clientconfig=$env:BUILD_CONFIG"
+
+          ############# BUILD ############
+          if ($env:SHOULD_BUILD -eq 'true') {
+            $cmd += "-build"
+          } else {
+            $cmd += "-noBuild"
+          }
+
+          ############# COOK ############ 
+          if ($env:SHOULD_COOK -eq 'true') {
+              $cmd += "-cook"
+          } else {
+            $cmd += "-skipcook"
+          }
+
+          ############# STAGE / PACK / ARCHIVE ############
+          if ($env:SHOULD_STAGE -eq 'true')  { $cmd += "-stage" } else { $cmd += "-skipstage" }
+          if ($env:SHOULD_PACK -eq 'true'){ $cmd += "-pak" } else { $cmd += "-skippak" }
+          if ($env:SHOULD_ARCHIVE -eq 'true') {
+            $cmd += "-archive"
+            $cmd += "-archivedirectory=`"$env:RUNNER_ARCHIVE_DIR`""
+          }
+
+          ############ Additional ############
+          $cmd += "-unattended -utf8output -nocompileeditor -skipbuildeditor -iostore -nodebuginfo "
+
+          # put them together in one line and execute
+          $full = $cmd -join ' '
+          Write-Host "Running: $full"
+          cmd /c $full 
+
+      ################################################################
+  release:
+    if: ${{ inputs.SHOULD_CREATE_RELEASE }}
+    needs: [init, build]
+    runs-on: self-hosted
+    env:
+      RUNNER_REPO_DIR: ${{ needs.init.outputs.repo_dir }}
+      RUNNER_PROJECT_DIR: ${{ needs.init.outputs.project_dir }}
+      RUNNER_ARCHIVE_DIR: ${{ needs.init.outputs.archive_dir }}    
+
+    defaults:
+      run:
+        shell: pwsh
+        working-directory: ${{ needs.init.outputs.project_dir }}
+
+    steps:
+      - name: Archive Source folder
+        run: |
+          $zipPath = "${{ env.RUNNER_ARCHIVE_DIR }}\..\Source.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath }
+          Compress-Archive -Path "${{ env.RUNNER_PROJECT_DIR }}\Source\*" -DestinationPath $zipPath
+
+          if (Test-Path $zipPath) {  
+            Write-Host "The archive was created: $zipPath" 
+          } else { 
+            Write-Host "The archive wasn't created" 
+          }
+               
+
+      - name: Read version from file
+        id: ver
+        run: |
+          $version = Get-Content "${{ env.RUNNER_REPO_DIR }}\VERSION.txt" -Raw
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.ver.outputs.version }}
+          name: "Release ${{  steps.ver.outputs.version }}"
+          body: |
+            ## New shipping build
+            - The link with the game: [Yandex Drive](https://disk.yandex.ru/d/Xo95C3vPKROMVw)
+            - The archive below contains the project source files.
+          draft: false
+          prerelease: false
+          files: |
+             ${{ env.RUNNER_PROJECT_DIR }}\Source.zip
+

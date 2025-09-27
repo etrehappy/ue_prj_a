@@ -55,7 +55,7 @@ public:
 #if WITH_DEV_AUTOMATION_TESTS
 public:
 	const TArray<const UInputAction*> AutoTestGetInputActions() const;
-	const TArray<FInputMappingContextWithPriority> AutoTestGetInputMappingContext() const;
+	const TArray<FInputMappingContextWithPriority>& AutoTestGetInputMappingContext() const;
 #endif // WITH_DEV_AUTOMATION_TESTS
 
 protected:

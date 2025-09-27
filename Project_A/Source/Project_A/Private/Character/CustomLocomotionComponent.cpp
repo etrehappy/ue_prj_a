@@ -148,7 +148,7 @@ const TArray<const UInputAction*> UCustomLocomotionComponent::AutoTestGetInputAc
     return Actions;
 }
 
-const TArray<FInputMappingContextWithPriority> UCustomLocomotionComponent::AutoTestGetInputMappingContext() const
-{
+const TArray<FInputMappingContextWithPriority>& UCustomLocomotionComponent::AutoTestGetInputMappingContext() const
+{    
     return InputMappingContext;
 }

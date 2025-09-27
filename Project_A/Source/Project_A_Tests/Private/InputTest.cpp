@@ -16,7 +16,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FInputActionsAreSetTest, "ProjectA.Character.In
 bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
 {
     //1. Arrange
-    const FString MapPath = SetsForTests::TestMapThirdPersonPath;
+    const FString MapPath = SetsForTests::TestMapThirdPersonPath;    
 
    
     ADD_LATENT_AUTOMATION_COMMAND(FEditorLoadMap(MapPath));
@@ -26,7 +26,9 @@ bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
 
     ADD_LATENT_AUTOMATION_COMMAND(FDelayedFunctionLatentCommand([this]() -> bool
     {
+        int counter = 0;
         UWorld* World = GEditor->GetPIEWorldContext()->World();
+
         if (!TestNotNull(TEXT("World is valid after PIE start"), World))
         {
             return true;
@@ -49,30 +51,43 @@ bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
         UCustomLocomotionComponent* Locomotion = TestActor->FindComponentByClass<UCustomLocomotionComponent>();
         if (!Locomotion)
         {
-            AddError(TEXT("CustomLocomotionComponent not found on BP actor!"));
+            AddError(FString::Printf(TEXT("CustomLocomotionComponent not found on BP actor! %s "), SetsForTests::BpClassPath));
             return true;
         }
 
-        //3. Assert
-        int counter = 0;
+        //3. Assert        
         for (const UInputAction* i : Locomotion->AutoTestGetInputActions())
         {
             if (!i)
             {
-                AddError(FString::Printf(TEXT("InputActionMove is not set in CustomLocomotionComponent! Index = %d"), counter));
+                AddError(FString::Printf(TEXT("InputActionMove is not set in CustomLocomotionComponent! Index = %d ; %s "), counter, SetsForTests::BpClassPath));
                 return true;
             }
             counter++;
         }
         counter = 0;
 
-        if (Locomotion->AutoTestGetInputMappingContext().IsEmpty())
-        {
-            AddError(TEXT("InputMappingContext is not set in CustomLocomotionComponent"));
-            return true;
-        }
+        //if (Locomotion->AutoTestGetInputMappingContext().IsEmpty())
+        //{
+        //    AddError(TEXT("InputMappingContext is not set in CustomLocomotionComponent"));
+        //    return true;
+        //}
 
-        TestTrue(TEXT("InputActionMove and InputMappingContext are set in CustomLocomotionComponent"), true);
+        const auto& ImcArray = Locomotion->AutoTestGetInputMappingContext();
+        TestTrue(FString::Printf(TEXT("InputMappingContext is set in CustomLocomotionComponent. %s"), SetsForTests::BpClassPath), !ImcArray.IsEmpty());
+
+        for (const FInputMappingContextWithPriority& i : Locomotion->AutoTestGetInputMappingContext())
+        {
+            if (!i.MappingContext)
+            {
+                AddError(FString::Printf(TEXT("InputMappingContext has empty cell in CustomLocomotionComponent! Index = %d; %s "), counter, SetsForTests::BpClassPath));
+                return true;
+            }
+            counter++;
+        }
+        counter = 0;
+
+        TestTrue(FString::Printf(TEXT("InputActionMove and InputMappingContext are set in CustomLocomotionComponent; %s "), SetsForTests::BpClassPath), true);
         return true;
     }));
 

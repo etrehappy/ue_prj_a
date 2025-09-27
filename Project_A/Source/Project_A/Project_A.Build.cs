@@ -29,9 +29,7 @@ public class Project_A : ModuleRules
 			"Project_A/Variant_Combat/AI",
 			"Project_A/Variant_SideScrolling",
 			"Project_A/Variant_SideScrolling/Gameplay",
-			"Project_A/Variant_SideScrolling/AI",
-            "Project_A/Tests/"
-
+			"Project_A/Variant_SideScrolling/AI"
         });
 
         if (Target.bBuildEditor)

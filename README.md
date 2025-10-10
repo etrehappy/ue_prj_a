@@ -62,7 +62,7 @@
 - [x]  Разобран синтаксис Spec-тестов
 - [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлено несколько тестов для практики.
     <div style="text-align: center;">
-        <img src="./img_for_readme/training_test_results.jpg" alt="Окружение" width="500" height="85
+        <img src="https://github.com/etrehappy/ue_prj_a/blob/hw2/img_for_readme/training_test_results.jpg" alt="Окружение" width="500" height="85
         ">   
     </div>
 
@@ -93,7 +93,7 @@
 1. Управление
     - В [CustomLocomotionComponent.h](./Project_A/Source/Project_A/Public/Character/CustomLocomotionComponent.h) добавлены массив <i>InputMappingContexs</i> и указатель <i>InputActionMove</i>, которые заполняются в настройках BP-класса. В методе <i>UCustomLocomotionComponent :: Initialize()</i> связываются <i>InputActionMove</i> с обработчиком движения <i>UCustomLocomotionComponent :: HandleMove()</i>.   Было бы легче всё настроить через BP, но такой подход выбран намеренно для практики в C++ и баланса между BP\C++. 
         <div style="text-align: center;">
-            <img src="./img_for_readme/locomotion_bp_move.jpg" alt="Движение" width="500" height="115">   
+            <img src="https://github.com/etrehappy/ue_prj_a/blob/hw4/img_for_readme/locomotion_bp_move.jpg" alt="Движение" width="500" height="115">   
         </div>
     
 
@@ -112,14 +112,14 @@
     - crouch (кл. LCtrl)
     - idle (stand и crouch)
 
-![В И Д Е О](https://drive.google.com/file/d/1NT0hmf1TbyDaenUUwnwRgEzPyXzf4z-6/view) демонстрация
+[![ВИДЕО](https://drive.google.com/file/d/1NT0hmf1TbyDaenUUwnwRgEzPyXzf4z-6/view)] демонстрация
 
 <div style="text-align: center;">
-            <img src="./img_for_readme/animation_abp_animgraph.jpg" alt="AnimGraph" width="500" height="229"> 
+            <img src="https://github.com/etrehappy/ue_prj_a/blob/hw5/img_for_readme/animation_abp_animgraph.jpg" alt="AnimGraph" width="500" height="229"> 
         <br>
-            <img src="./img_for_readme/animation_abp_eventgraph.jpg" alt="EventGraph" width="500" height="259">   
+            <img src="https://github.com/etrehappy/ue_prj_a/blob/hw5/img_for_readme/animation_abp_eventgraph.jpg" alt="EventGraph" width="500" height="259">   
         <br><br>
-            <img src="./img_for_readme/animation_chooser_table.jpg" alt="ChooserTable" width="500" height="116">   
+            <img src="https://github.com/etrehappy/ue_prj_a/blob/hw5/img_for_readme/animation_chooser_table.jpg" alt="ChooserTable" width="500" height="116">   
 </div>
 
 **Как сделано**:

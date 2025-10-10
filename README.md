@@ -112,7 +112,7 @@
     - crouch (кл. LCtrl)
     - idle (stand и crouch)
 
-[![ВИДЕО](https://drive.google.com/file/d/1NT0hmf1TbyDaenUUwnwRgEzPyXzf4z-6/view)] демонстрация
+[ВИДЕО](https://drive.google.com/file/d/1NT0hmf1TbyDaenUUwnwRgEzPyXzf4z-6/view) демонстрация
 
 <div style="text-align: center;">
             <img src="https://github.com/etrehappy/ue_prj_a/blob/hw5/img_for_readme/animation_abp_animgraph.jpg" alt="AnimGraph" width="500" height="229"> 

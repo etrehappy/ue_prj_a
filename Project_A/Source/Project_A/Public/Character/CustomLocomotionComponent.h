@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "Character/BaseCharacter.h"
 #include "Character/CustomPlayerController.h"
+#include "CharacterStateEnums.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -16,6 +17,8 @@
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogMyGame, Log, All);
+
+////////////////////////////////////////////////////////////////////////////////
 
 class UInputAction;
 
@@ -31,6 +34,43 @@ struct FInputMappingContextWithPriority
 	int32 Priority = 0;
 };
 
+USTRUCT(BlueprintType)
+struct FInputStruct
+{
+	GENERATED_BODY()
+
+	/**
+	 * @brief Which keys or axes trigger which actions.
+	 * @note This field must be set before running the game.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite/*, Category = "Input", meta = (AllowPrivateAccess = "true")*/)
+	TArray<FInputMappingContextWithPriority> InputMappingContext{};
+
+	/**
+	 * @brief Which action will be processed by this component (and which function).
+	 * @note This field must be set before running the game.
+	 */
+	UPROPERTY(EditDefaultsOnly/*, Category = "Input", meta = (AllowPrivateAccess = "true")*/)
+	UInputAction* InputActionMove{};
+
+	UPROPERTY(EditDefaultsOnly/*, Category = "Input", meta = (AllowPrivateAccess = "true")*/)
+	UInputAction* InputActionLook{};
+
+	UPROPERTY(EditDefaultsOnly/*, Category = "Input", meta = (AllowPrivateAccess = "true")*/)
+	UInputAction* InputActionSprint{};
+
+	UPROPERTY(EditDefaultsOnly/*, Category = "Input", meta = (AllowPrivateAccess = "true")*/)
+	UInputAction* InputActionJump{};
+
+	UPROPERTY(EditDefaultsOnly/*, Category = "Input", meta = (AllowPrivateAccess = "true")*/)
+	UInputAction* InputActionCrouch{};
+
+};
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+
 /**
 * @brief Collection of Input Mapping Contexts required for character movement.
 */
@@ -44,13 +84,9 @@ public:
 	UCustomLocomotionComponent();
 
 	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;	
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, 
+		FActorComponentTickFunction* ThisTickFunction) override;	
 
-	UFUNCTION()
-	void HandleMove(const FInputActionValue& Value);
-
-	UFUNCTION()
-	void HandleLook(const FInputActionValue& Value);
 
 #if WITH_DEV_AUTOMATION_TESTS
 public:
@@ -62,26 +98,29 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 	
-
-	/** 
-	 * @brief Which keys or axes trigger which actions. 
-	 * @note This field must be set before running the game.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	TArray<FInputMappingContextWithPriority> InputMappingContext{};
-
-	/**
-	 * @brief Which action will be processed by this component (and which function).
-	 * @note This field must be set before running the game.
-	 */
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* InputActionMove{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	UInputAction* InputActionLook{};
+	FInputStruct Inputs{};	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-	float MoveInputScale{};
+	float MoveInputScale;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+	FCharacterMovementStruct CharacterMovementStruct{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+	float BackwordSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+	float RunSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
+	float SprintSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+	float FallDuration{};
+
+	UPROPERTY(BlueprintReadOnly)
+	double CurrentSpeed2D{};
 
 private:
 	/**
@@ -90,11 +129,34 @@ private:
 	* Those contexts are what actually translate key presses to InputActions.
 	*/
 	void Initialize();
-	ACharacter* GetOwnerCharacter() const;
 	ACustomPlayerController* GetCustomPlayerController() const;
 	bool IsVectorInputValid(ACharacter* const, const FVector2D&) const;
+	void BindActions(UEnhancedInputComponent* EIC);
+	void UpdateFallDuration();
+	void UnCrouch();
 
-	AActor* Owner{};
-	ACustomPlayerController* CustomPC{};		
+	UFUNCTION()
+	void StartMove(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void HandleLook(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void ModifyMove(const FInputActionInstance& Instance);
+
+	UFUNCTION()
+	void Jump(const FInputActionValue& Value);
+
+	UFUNCTION()
+	void OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode,
+		uint8 PreviousCustomMode);
+
+	ABaseCharacter* Owner{};	
+	ACustomPlayerController* CustomPC{};
+	UCharacterMovementComponent* CharacterMovementComponent{};
+
+	FTimerHandle FallTimerHandle{};
+	const float InFallRate{0.01f};
+
 	
 };

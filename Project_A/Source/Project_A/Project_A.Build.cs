@@ -17,8 +17,12 @@ public class Project_A : ModuleRules
 			"AIModule",
 			"StateTreeModule",
 			"GameplayStateTreeModule",
-			"UMG"
-		});
+			"UMG",
+			"UnrealEd"//,
+            //"EditorStyle",
+            //"Slate",
+            //"SlateCore"
+        });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
@@ -29,8 +33,10 @@ public class Project_A : ModuleRules
 			"Project_A/Variant_Combat/AI",
 			"Project_A/Variant_SideScrolling",
 			"Project_A/Variant_SideScrolling/Gameplay",
-			"Project_A/Variant_SideScrolling/AI"
-		});
+			"Project_A/Variant_SideScrolling/AI",
+            "Project_A/Tests/Test_0"
+
+        });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });

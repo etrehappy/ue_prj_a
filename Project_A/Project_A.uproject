@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{9BE04EA3-421D-F89D-E5BF-A68442A1DDA9}",
+	"EngineAssociation": "{D9333AF1-41C4-2596-ACC2-71AE2CD19A84}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -73,6 +73,10 @@
 		},
 		{
 			"Name": "AnimationLocomotionLibrary",
+			"Enabled": true
+		},
+		{
+			"Name": "WeaponSystemPlugin",
 			"Enabled": true
 		}
 	],

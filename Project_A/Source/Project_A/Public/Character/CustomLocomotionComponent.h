@@ -74,7 +74,7 @@ struct FInputStruct
 /**
 * @brief Collection of Input Mapping Contexts required for character movement.
 */
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS( ClassGroup=(Moving), meta=(BlueprintSpawnableComponent) )
 class PROJECT_A_API UCustomLocomotionComponent : public UActorComponent
 {
 	GENERATED_BODY()

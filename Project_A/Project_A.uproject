@@ -1,24 +1,27 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{7DEAFD72-433D-38D1-B124-D3B0709B4C95}",
+	"EngineAssociation": "{D9333AF1-41C4-2596-ACC2-71AE2CD19A84}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
 		{
 			"Name": "Project_A",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "Project_A_Tests",
-			"Type": "DeveloperTool",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine",
+				"AIModule",
+				"UMG"
+			]
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
-			"Enabled": true
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
 		},
 		{
 			"Name": "StateTree",
@@ -42,37 +45,6 @@
 		},
 		{
 			"Name": "Landmass",
-			"Enabled": true
-		},
-		{
-			"Name": "VisualStudioTools",
-			"Enabled": true,
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
-		},
-		{
-			"Name": "MotionTrajectory",
-			"Enabled": true
-		},
-		{
-			"Name": "PoseSearch",
-			"Enabled": true
-		},
-		{
-			"Name": "MotionWarping",
-			"Enabled": true
-		},
-		{
-			"Name": "AnimationWarping",
-			"Enabled": true
-		},
-		{
-			"Name": "Chooser",
-			"Enabled": true
-		},
-		{
-			"Name": "AnimationLocomotionLibrary",
 			"Enabled": true
 		}
 	],

@@ -1,5 +1,4 @@
 # Visual Studio 2015 user specific files
-.vs/
 Project_A/.vs/
 
 # Compiled Object files
@@ -85,6 +84,3 @@ Project_A/Source/Project_A/Variant_Combat
 Project_A/Source/Project_A/Variant_Platforming
 Project_A/Source/Project_A/Variant_SideScrolling
 
-Project_A/PrjPackages
-Project_A/TestReports
-Project_A/Plugins

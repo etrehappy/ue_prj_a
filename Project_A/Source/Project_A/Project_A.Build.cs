@@ -17,12 +17,8 @@ public class Project_A : ModuleRules
 			"AIModule",
 			"StateTreeModule",
 			"GameplayStateTreeModule",
-			"UMG",
-			"UnrealEd"//,
-            //"EditorStyle",
-            //"Slate",
-            //"SlateCore"
-        });
+			"UMG" 
+    });
 
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
@@ -33,17 +29,21 @@ public class Project_A : ModuleRules
 			"Project_A/Variant_Combat/AI",
 			"Project_A/Variant_SideScrolling",
 			"Project_A/Variant_SideScrolling/Gameplay",
-			"Project_A/Variant_SideScrolling/AI",
-            "Project_A/Tests/Test_0"
-
+			"Project_A/Variant_SideScrolling/AI"
         });
 
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+        if (Target.bBuildEditor)
+        {
+            PrivateDependencyModuleNames.Add("UnrealEd");
+        }
 
-		// Uncomment if you are using online features
-		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
 
-		// To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
-	}
+        // Uncomment if you are using Slate UI
+        // PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+
+        // Uncomment if you are using online features
+        // PrivateDependencyModuleNames.Add("OnlineSubsystem");
+
+        // To include OnlineSubsystemSteam, add it to the plugins section in your uproject file with the Enabled attribute set to true
+    }
 }

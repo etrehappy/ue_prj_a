@@ -1,0 +1,175 @@
+# This is a basic workflow to help you get started with Actions
+
+name: TESTS
+
+on:
+  workflow_dispatch:
+    inputs:
+      SHOULD_BUILD:
+        type: boolean
+        default: false
+      SHOULD_TAST:
+        type: boolean
+        default: true
+
+env:
+  BUILD_CONFIG: Development #Shipping
+  BUILD_TARGET_NAME: Project_AEditor #CiCdProject CiCdProjectClient CiCdProjectServer
+  BUILD_PLATFORM: Win64  
+  PROJECT_NAME: Project_A
+  TEST_NAMES_RAW: ""
+
+
+
+jobs: 
+  build:
+    if: ${{ inputs.SHOULD_TAST || inputs.SHOULD_BUILD }}
+    runs-on: self-hosted
+    
+    defaults:
+      run:
+        shell: pwsh
+        # working-directory: ${{ env.RUNNER_PROJECT_DIR }} /*! It will declaration on the next step*/
+
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      #- uses: actions/checkout@v4
+
+      - name: Set multiple env variables        
+        run: |
+          $baseGitHubFolder = "$env:UE_Projects\ue_prj_a"          
+
+          $vars = @{
+            RUNNER_REPO_DIR = $baseGitHubFolder
+            RUNNER_PROJECT_DIR = "$baseGitHubFolder\$env:PROJECT_NAME"
+            RUNNER_BUILD_BAT = "$env:UE_git_5_6\Build\BatchFiles\Build.bat"            
+            RUNNER_UPROJECT_PATH = "$baseGitHubFolder\$env:PROJECT_NAME\$env:PROJECT_NAME.uproject"
+            RUNNER_REPORT_DIR = "$baseGitHubFolder\$env:PROJECT_NAME\TestReports"            
+            RUNNER_UE_CMD_PATH = "$env:UE_git_5_6\Binaries\Win64\UnrealEditor-Cmd.exe"            
+          }
+
+          foreach ($key in $vars.Keys) {
+            "$key=$($vars[$key])" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          } 
+ 
+      - name: Check if project files changed
+        id: changes
+        working-directory: ${{ env.RUNNER_PROJECT_DIR }} 
+        run: |             
+          # sets branch name for check
+          $branch = if ($env:GITHUB_EVENT_NAME -eq 'pull_request') {
+                      $env:GITHUB_BASE_REF
+                  } else {
+                      $env:GITHUB_REF -replace '^refs/heads/', ''
+                  }
+
+          Write-Host "Event: $env:GITHUB_EVENT_NAME, Branch: $branch"
+
+          git fetch origin $branch --depth=1
+
+          $changedFiles = git diff --name-only HEAD^..HEAD
+
+          Write-Host "Changed files:"
+          $changedFiles | ForEach-Object { Write-Host "  $_" }
+
+          $found = $false
+          foreach ($f in $changedFiles) {
+            if ($f -match '(^|/)(Source|Config)/') {
+              Write-Host "Matched: $f"
+              $found = $true
+              break
+            }
+          }
+
+          if ($found) {
+            echo "changed=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "changed=false" >> $env:GITHUB_OUTPUT
+          }
+
+
+      - name: Build Development Editor (Win64)
+        if: ${{ steps.changes.outputs.changed == 'true' && inputs.SHOULD_BUILD == 'true'}}
+        working-directory: ${{ env.RUNNER_PROJECT_DIR }} 
+        run: | 
+          & $env:RUNNER_BUILD_BAT `
+            $env:BUILD_TARGET_NAME `
+            $env:BUILD_PLATFORM `
+            $env:BUILD_CONFIG `
+            "$env:RUNNER_PROJECT_DIR\$env:PROJECT_NAME.uproject" `
+            -waitmutex -NoHotReload
+
+
+
+      - name: Run Automation Tests
+        working-directory: ${{ env.RUNNER_PROJECT_DIR }} 
+        run: |
+          & "$env:RUNNER_UE_CMD_PATH" `
+            "$env:RUNNER_UPROJECT_PATH" `
+            -NoSplash -Unattended -NullRHI `
+            -ExecCmds="Automation RunTest $env:TEST_NAMES_RAW; Quit" `
+            -ReportExportPath="$env:RUNNER_REPORT_DIR" `
+            -log
+
+      - name: Copy report with timestamp
+        working-directory: ${{ env.RUNNER_PROJECT_DIR }} 
+        run: |
+          $timestamp = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+          $destDir = Join-Path "$env:RUNNER_REPORT_DIR\copy_test" $timestamp
+          New-Item -ItemType Directory -Force -Path $destDir | Out-Null
+          Copy-Item -Path "$env:RUNNER_REPORT_DIR\*.json" -Destination $destDir -Force
+
+
+
+      - name: Check test reports (fail on test fail)
+        working-directory: ${{ env.RUNNER_PROJECT_DIR }} 
+        run: |       
+          $jsonFiles = Get-ChildItem -Path (Join-Path $env:RUNNER_REPORT_DIR '*.json')
+
+          if (-not $jsonFiles) {
+            Write-Error "No JSON report files found"
+            exit 1
+          }
+
+          $failedTotal = 0
+
+          foreach ($file in $jsonFiles) {
+              try {
+                  $data = Get-Content $file.FullName -Raw | ConvertFrom-Json -ErrorAction Stop
+              }
+              catch {
+                  Write-Error "Unable to parse JSON in file $($file.FullName): $_"
+                  exit 1
+              }
+
+              # Log the time the report was generated (if necessary)
+              if ($data.reportCreatedOn) {
+                  Write-Host "Report: $($file.Name) | Created: $($data.reportCreatedOn)"
+              }
+
+              # Checking the aggregate meter
+              if ($null -ne $data.failed -and $data.failed -gt 0) {
+                  Write-Host "Test run failed: $($data.failed) tests failed."
+                  $failedTotal += $data.failed
+              }
+
+              # Review the tests, if any.
+              foreach ($test in @($data.tests)) {
+                  if ($null -eq $test) { continue }
+                  if ($test.state -ne "Success") {
+                      Write-Host "Test '$($test.fullTestPath)' failed with state: $($test.state)"
+                      $failedTotal++
+                  }
+              }
+          }
+
+          if ($failedTotal -gt 0) {
+              Write-Error "$failedTotal tests failed."
+              exit 1
+          }
+          else {
+              Write-Host "All tests passed."
+          }
+
+
+

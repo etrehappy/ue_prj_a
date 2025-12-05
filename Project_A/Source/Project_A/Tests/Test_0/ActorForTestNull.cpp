@@ -28,12 +28,3 @@ FVector AActorForTestNull::GetTargetActorLocation() const
 	
 	return AnyActor->GetActorLocation();
 }
-
-
-//// Called every frame
-//void AActorForTestNull::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//
-//}
-

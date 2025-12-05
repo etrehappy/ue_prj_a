@@ -15,7 +15,14 @@ void AProject_APlayerController::SetupInputComponent()
 	{
 		for (UInputMappingContext* CurrentContext : DefaultMappingContexts)
 		{
-			Subsystem->AddMappingContext(CurrentContext, 0);
+			if (CurrentContext)
+			{
+				Subsystem->AddMappingContext(CurrentContext, 0);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("DefaultMappingContexts contains a null entry!"));
+			}
 		}
 	}
 }

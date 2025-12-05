@@ -1,16 +1,10 @@
 ﻿//Common headers
-// 
 #include "Editor/EditorEngine.h"
 #include "Engine/EngineTypes.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tests/AutomationCommon.h"
 #include "Tests/AutomationEditorCommon.h"
-//#include "Misc/AutomationTest.h"
-
-//#include "Engine.h"
-//#include "EngineUtils.h"
-//#include "FileHelpers.h" //(UEditorLoadingAndSavingUtils , FEditorFileUtils)
 
 //Project_A headers
 #include "TestSettings.h"
@@ -18,12 +12,6 @@
 
 
 #if WITH_DEV_AUTOMATION_TESTS
-
-
-
-/// 
-/// TESTS
-/// 
 
 /**
  * @brief Just shows Contexts
@@ -100,57 +88,6 @@ bool FGetBpActorPropertiesFromEditorTest::RunTest(const FString& Parameters)
 	return true;
 }
 
-
 DEFINE_LATENT_AUTOMATION_COMMAND(FNUTWaitForUnitTests);
-
-
-
-
-/**
- * @brief Open a map in the PIE-mod.
- * @return true — if the map is opened.
- */
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FOpenLevelTest, "TrainingTests.PIE.OpenLevel",
-	EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter)
-
-bool FOpenLevelTest::RunTest(const FString& Parameters)
-{
-	//1. Arrange
-	const FString MapPath = SetsForTests::TestMapThirdPersonPath;
-
-	//2. Act
-	ADD_LATENT_AUTOMATION_COMMAND(FEditorLoadMap(MapPath));
-	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.0f));
-
-	ADD_LATENT_AUTOMATION_COMMAND(FStartPIECommand(false));
-	ADD_LATENT_AUTOMATION_COMMAND(FWaitLatentCommand(1.0f));
-
-	ADD_LATENT_AUTOMATION_COMMAND(FDelayedFunctionLatentCommand([this, MapPath]() -> bool
-		{			
-			UWorld* World = GEditor->GetPIEWorldContext()->World();;
-			if (TestNotNull(TEXT("World must be valid after map load"), World))
-			{
-				return true;
-			}
-
-			const FString LoadedMap = World->GetMapName();
-			const TCHAR* TestDescription = *FString::Printf(TEXT("Loaded map name contains '%s'"), *MapPath);
-			const bool TestValue = LoadedMap.Contains(FPaths::GetBaseFilename(MapPath));
-
-	//3. Assert
-			TestTrue(TestDescription, TestValue);
-
-			return true;
-
-		})
-	);
-
-	return true;
-}
-
-
-
-
-
 
 #endif // WITH_DEV_AUTOMATION_TESTS

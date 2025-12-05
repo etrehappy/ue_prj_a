@@ -73,7 +73,6 @@ namespace AddForTests
 			return;
 		}
 
-		//const TIndirectArray<FWorldContext>& Contexts = GEngine->GetWorldContexts();
 		const TIndirectArray<FWorldContext>& Contexts = GEditor->GetWorldContexts();
 		UE_LOG(LogTemp, Log, TEXT("=== Found %d world contexts ==="), Contexts.Num());
 
@@ -88,8 +87,7 @@ namespace AddForTests
 			UE_LOG(LogTemp, Log, TEXT("  World pointer: %p"), World);
 			UE_LOG(LogTemp, Log, TEXT("  World name: %s"), *WorldName);
 			LogWorldType(World);
-			/*	UE_LOG(LogTemp, Log, TEXT("  WorldType (%d): %s"),
-					TypeInt, *UEnum::GetValueAsString(Ctx.WorldType));*/
+
 			UE_LOG(LogTemp, Log, TEXT("-----------------------------------"));
 		}
 	}

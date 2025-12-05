@@ -5,6 +5,8 @@
 4. Build Project_A
 5. Открыть проект в UE
 
+Важно: на github загружен только минимум, в Project_A.Build.cs можно закомментировать лишние пути, а в Project_A.uproject — отлкючить лишние плагины.
+
 # Что и как сделано
 <details><summary>Задание 1. Создание проекта<p></p></summary>
 
@@ -50,15 +52,14 @@
 <b>Основное</b>
 
 - [x]  Разобраны автотесты.
-- [x]  В файле [TrainingTest.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.cpp) есть 4 теста: 
-    - открытие карты — FOpenLevelTest — с использованием Latent-команд;
+- [x]  В файле [TrainingTest.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.cpp) есть 3 теста: 
     - проверка позиции ассета — FGetBpActorPropertiesFromEditorTest — по заданию;
-    - проверка контекста текущего мира — FShowWorldTypeTest (просто для практики, смысловой нагрузки нет)
-    - отображение в логах всех контекстов — FShowWorldContextsTest (просто для практики, смысловой нагрузки нет)
+    - проверка контекста текущего мира — FShowWorldTypeTest (просто для практики)
+    - отображение в логах всех контекстов — FShowWorldContextsTest (просто для практики)
 
 <b> Дополнительно </b>
 - [x]  Разобран синтаксис Spec-тестов
-- [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлено несколько тестов для практики.
+- [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлен 1 тест для практики.
     <div style="text-align: center;">
         <img src="./img_for_readme/training_test_results.jpg" alt="Окружение" width="500" height="85
         ">   

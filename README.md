@@ -1,5 +1,5 @@
 # Сборка
-1. git clone -b 'v_2' --single-branch https://github.com/etrehappy/ue_prj_a.git
+1. git clone -b 'hw2' --single-branch https://github.com/etrehappy/ue_prj_a.git
 2. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 3. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 4. Build Project_A

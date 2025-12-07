@@ -124,7 +124,7 @@ jobs:
         working-directory: ${{ env.RUNNER_PROJECT_DIR }}
         shell: pwsh
         run: |          
-          $dir = Split-Path ${{ env.SCRIPT_PATH }}
+          $dir = Split-Path "${{ env.SCRIPT_PATH }}"
           New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
           @'

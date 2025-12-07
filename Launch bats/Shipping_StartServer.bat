@@ -1,0 +1,1 @@
+start "Project_A Server" "%~dp0..\Project_A\Archive\Shipping\WindowsServer\Project_AServer.exe" -log -unattended -stdout -port=7777

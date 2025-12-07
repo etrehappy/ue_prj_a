@@ -88,3 +88,8 @@ Project_A/Source/Project_A/Variant_SideScrolling
 Project_A/PrjPackages
 Project_A/TestReports
 Project_A/Plugins
+
+Launch bats/Editor_StartGame.bat
+Launch bats/Editor_StartServer.bat
+
+Project_A/Archive/

@@ -1,15 +1,20 @@
-﻿#include "Editor/EditorEngine.h"
+﻿#if WITH_EDITOR
+#include "Editor/EditorEngine.h"
+#include "Tests/AutomationCommon.h"
+#include "Tests/AutomationEditorCommon.h"
+
+
 //#include "Engine/EngineTypes.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
-#include "Tests/AutomationCommon.h"
-#include "Tests/AutomationEditorCommon.h"
 
 #include "TestSettings.h"
 #include "Character/CustomLocomotionComponent.h"
 #include "Character/PlayerCharacter.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
+
+
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FInputActionsAreSetTest, "ProjectA.Character.Input.ActionsAreSet", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
@@ -142,3 +147,6 @@ bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
 //
 //	return true;
 //}
+
+
+#endif // WITH_EDITOR

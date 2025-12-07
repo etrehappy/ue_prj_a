@@ -261,6 +261,8 @@ void UCustomLocomotionComponent::OnMovementModeChanged(ACharacter* Character, EM
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests
 
+#if WITH_DEV_AUTOMATION_TESTS
+
 const TArray<const UInputAction*> UCustomLocomotionComponent::AutoTestGetInputActions() const
 {
     TArray<const UInputAction*> Actions{};
@@ -274,3 +276,5 @@ const TArray<FInputMappingContextWithPriority>& UCustomLocomotionComponent::Auto
 {    
     return Inputs.InputMappingContext;
 }
+
+#endif //WITH_DEV_AUTOMATION_TESTS

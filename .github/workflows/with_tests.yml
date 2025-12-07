@@ -42,10 +42,10 @@ jobs:
           $vars = @{
             RUNNER_REPO_DIR = $baseGitHubFolder
             RUNNER_PROJECT_DIR = "$baseGitHubFolder\$env:PROJECT_NAME"
-            RUNNER_BUILD_BAT = "$env:UE_git_5_6\Build\BatchFiles\Build.bat"            
+            RUNNER_BUILD_BAT = "$env:UE_git_5_7\Build\BatchFiles\Build.bat"            
             RUNNER_UPROJECT_PATH = "$baseGitHubFolder\$env:PROJECT_NAME\$env:PROJECT_NAME.uproject"
             RUNNER_REPORT_DIR = "$baseGitHubFolder\$env:PROJECT_NAME\TestReports"            
-            RUNNER_UE_CMD_PATH = "$env:UE_git_5_6\Binaries\Win64\UnrealEditor-Cmd.exe"            
+            RUNNER_UE_CMD_PATH = "$env:UE_git_5_7\Binaries\Win64\UnrealEditor-Cmd.exe"            
           }
 
           foreach ($key in $vars.Keys) {

@@ -1,0 +1,1 @@
+start "Project_A Client" "%~dp0..\Project_A\Archive\Shipping\Windows\Project_A.exe" 127.0.0.1:7777 -WINDOWED -ResX=800 -ResY=450

@@ -87,10 +87,6 @@ jobs:
 
       - name: Ensure archive dir exists
         run: |
-          New-Item -ItemType Directory -Force -Path "${{ steps.setenv.outputs.runner_archive_dir }}" | Out-Null
-
-      - name: Ensure archive dir exists
-        run: |
           $base_dir = "${{ steps.setenv.outputs.runner_archive_dir }}"
           New-Item -ItemType Directory -Force -Path $base_dir | Out-Null
           New-Item -ItemType Directory -Force -Path (Join-Path $base_dir "Client") | Out-Null
@@ -192,14 +188,14 @@ jobs:
         working-directory: ${{ env.RUNNER_PROJECT_DIR }}
         shell: pwsh
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$false -Target:$env:PROJECT_NAME -ArchiveSubDir "${{ env.ARCHIVE_TARGET_DIR }}\Client"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$false -Target:$env:PROJECT_NAME -ArchiveSubDir "Client"
         
       - name: RunUAT.bat Server
         if: ${{ inputs.SHOULD_BUILD_SERVER && (inputs.SHOULD_COOK || inputs.SHOULD_STAGE || inputs.SHOULD_PACK || inputs.SHOULD_ARCHIVE) }}
         working-directory: ${{ env.RUNNER_PROJECT_DIR }}
         shell: pwsh
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$true -Target "${{ env.PROJECT_NAME }}Server" -ArchiveSubDir "${{ env.ARCHIVE_TARGET_DIR }}\Server"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$true -Target "${{ env.PROJECT_NAME }}Server" -ArchiveSubDir "Server"
        
     
       ################################################################

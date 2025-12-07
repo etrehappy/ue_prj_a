@@ -30,12 +30,10 @@ on:
 
 env:
   BUILD_CONFIG: Shipping   #  Development
-  #BUILD_SERVER_CONFIG: ShippingServer # DevelopmentServer
   ARCHIVE_TARGET_DIR: ShippingWithLog # Shipping # Development
   BUILD_PLATFORM: Win64
-  # BUILD_TARGET_NAME: Project_A # 
   PROJECT_NAME: Project_A
-  #COOK_MAPS: "/Game/TestMap+/Game/SecondTestMap"
+  #COOK_MAPS: "Lvl_ThirdPerson+ClientDefaultMap+StartServerMap"
 
   SHOULD_BUILD:         ${{ inputs.SHOULD_BUILD }}
   SHOULD_BUILD_SERVER:  ${{ inputs.SHOULD_BUILD_SERVER }}
@@ -97,8 +95,6 @@ jobs:
     runs-on: self-hosted
     env:
       RUNNER_REPO_DIR: ${{ needs.init.outputs.repo_dir }}
-      # RUNNER_REPORT_DIR: ${{ needs.init.outputs.report_dir }}
-      # RUNNER_UE_CMD_PATH: ${{ needs.init.outputs.ue_cmd_path }}
       RUNNER_PROJECT_DIR: ${{ needs.init.outputs.project_dir }}
       RUNNER_UAT_PATH: ${{ needs.init.outputs.uat_path }}    
       RUNNER_UPROJECT_PATH: ${{ needs.init.outputs.uproject_path }}        
@@ -113,7 +109,7 @@ jobs:
       # - name: Checkout repository
       #   uses: actions/checkout@v4 
 
-      - name: empty # for next job
+      - name: empty # for next job, creates env
         run: ""       
 
       - name: Write Build script
@@ -148,9 +144,7 @@ jobs:
             } else {
                 $cmd += "-platform=$env:BUILD_PLATFORM"
                 $cmd += "-clientconfig=$env:BUILD_CONFIG"                
-            }
-            
-            
+            }         
 
             ############# BUILD ############
             if ($env:SHOULD_BUILD -eq 'true' -or $env:SHOULD_BUILD_SERVER -eq 'true') {

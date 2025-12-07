@@ -56,6 +56,7 @@ jobs:
       report_dir: ${{ steps.setenv.outputs.runner_report_dir }}
       archive_dir: ${{ steps.setenv.outputs.runner_archive_dir }}     
       ue_cmd_path: ${{ steps.setenv.outputs.runner_ue_cmd_path }}
+      script_path: ${{ steps.setenv.outputs.script_path }}
 
 
     defaults:
@@ -75,7 +76,7 @@ jobs:
             runner_uat_path     = "$env:UE_git_5_7\Build\BatchFiles\RunUAT.bat"
             runner_uproject_path= "$baseGitFolder\$env:PROJECT_NAME\$env:PROJECT_NAME.uproject"
             runner_report_dir   = "$baseGitFolder\$env:PROJECT_NAME\TestReports"
-            runner_archive_dir  = "$baseGitFolder\$env:PROJECT_NAME\PrjPackages\Archive"
+            runner_archive_dir  = "$baseGitFolder\$env:PROJECT_NAME\Archive"
             runner_ue_cmd_path  = "$env:UE_git_5_7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe"
             script_path         = "$baseGitFolder\.github\build_scripts\build_instance.ps1"
           }

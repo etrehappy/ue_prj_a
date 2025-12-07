@@ -93,3 +93,4 @@ Launch bats/Editor_StartGame.bat
 Launch bats/Editor_StartServer.bat
 
 Project_A/Archive/
+.github/build_scripts/

@@ -31,7 +31,7 @@ on:
 env:
   BUILD_CONFIG: Shipping   #  Development
   #BUILD_SERVER_CONFIG: ShippingServer # DevelopmentServer
-  ARCHIVE_DIR_NAME: ShippingWithLog # Shipping # Development
+  ARCHIVE_TARGET_DIR: ShippingWithLog # Shipping # Development
   BUILD_PLATFORM: Win64
   # BUILD_TARGET_NAME: Project_A # 
   PROJECT_NAME: Project_A
@@ -76,7 +76,7 @@ jobs:
             runner_uat_path     = "$env:UE_git_5_7\Build\BatchFiles\RunUAT.bat"
             runner_uproject_path= "$baseGitFolder\$env:PROJECT_NAME\$env:PROJECT_NAME.uproject"
             runner_report_dir   = "$baseGitFolder\$env:PROJECT_NAME\TestReports"
-            runner_archive_dir  = "$baseGitFolder\$env:PROJECT_NAME\Archive"
+            runner_archive_dir  = "$baseGitFolder\$env:PROJECT_NAME\Archive\$env:ARCHIVE_TARGET_DIR"
             runner_ue_cmd_path  = "$env:UE_git_5_7\Engine\Binaries\Win64\UnrealEditor-Cmd.exe"
             script_path         = "$baseGitFolder\.github\build_scripts\build_instance.ps1"
           }
@@ -147,16 +147,17 @@ jobs:
                 $cmd += "-server"
                 $cmd += "-serverplatform=$env:BUILD_PLATFORM"
                 $cmd += "-noclient"
+                $cmd += "-serverconfig=$env:BUILD_CONFIG"
                 
             } else {
                 $cmd += "-platform=$env:BUILD_PLATFORM"
-                
+                $cmd += "-clientconfig=$env:BUILD_CONFIG"                
             }
-            $cmd += "-serverconfig=$env:BUILD_CONFIG"
-            $cmd += "-clientconfig=$env:BUILD_CONFIG"
+            
+            
 
             ############# BUILD ############
-            if ($env:SHOULD_BUILD -eq 'true') {
+            if ($env:SHOULD_BUILD -eq 'true' -or $env:SHOULD_BUILD_SERVER -eq 'true') {
               $cmd += "-build"
             } else {
               $cmd += "-noBuild"
@@ -178,7 +179,7 @@ jobs:
             }
 
             ############ Additional ############
-            $cmd += "-unattended -utf8output -nocompileeditor -skipbuildeditor -iostore -nodebuginfo "
+            $cmd += "-unversionedcookedcontent -unattended -utf8output -nocompileeditor -skipbuildeditor -iostore -nodebuginfo "
 
             # put them together in one line and execute
             $full = $cmd -join ' '
@@ -187,18 +188,18 @@ jobs:
           '@ | Out-File -FilePath ${{ env.SCRIPT_PATH }} -Encoding utf8
 
       - name: RunUAT.bat Client
-        if: ${{ inputs.SHOULD_BUILD || inputs.SHOULD_COOK || inputs.SHOULD_STAGE || inputs.SHOULD_PACK || inputs.SHOULD_ARCHIVE }}
+        if: ${{ inputs.SHOULD_BUILD && (inputs.SHOULD_COOK || inputs.SHOULD_STAGE || inputs.SHOULD_PACK || inputs.SHOULD_ARCHIVE )}}
         working-directory: ${{ env.RUNNER_PROJECT_DIR }}
         shell: pwsh
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$false -Target:$env:PROJECT_NAME -ArchiveSubDir "${{ env.ARCHIVE_DIR_NAME }}\Client"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$false -Target:$env:PROJECT_NAME -ArchiveSubDir "${{ env.ARCHIVE_TARGET_DIR }}\Client"
         
       - name: RunUAT.bat Server
-        if: ${{ inputs.SHOULD_BUILD_SERVER && (inputs.SHOULD_BUILD || inputs.SHOULD_COOK || inputs.SHOULD_STAGE || inputs.SHOULD_PACK || inputs.SHOULD_ARCHIVE) }}
+        if: ${{ inputs.SHOULD_BUILD_SERVER && (inputs.SHOULD_COOK || inputs.SHOULD_STAGE || inputs.SHOULD_PACK || inputs.SHOULD_ARCHIVE) }}
         working-directory: ${{ env.RUNNER_PROJECT_DIR }}
         shell: pwsh
         run: |
-          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$true -Target "${{ env.PROJECT_NAME }}Server" -ArchiveSubDir "${{ env.ARCHIVE_DIR_NAME }}\Server"
+          pwsh -NoProfile -ExecutionPolicy Bypass -File ${{ env.SCRIPT_PATH }} -IsServer:$true -Target "${{ env.PROJECT_NAME }}Server" -ArchiveSubDir "${{ env.ARCHIVE_TARGET_DIR }}\Server"
        
     
       ################################################################

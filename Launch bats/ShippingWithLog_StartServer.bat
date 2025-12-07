@@ -1,1 +1,2 @@
-start "Project_A Server" "%~dp0..\Project_A\Archive\ShippingWithLog\WindowsServer\Project_AServer.exe" -log -port=7777
+start "Project_A Server" "%~dp0..\Project_A\Archive\ShippingWithLog\Server\WindowsServer\Project_AServer.exe" -log -port=7777 ^
+-abslog="%~dp0..\Project_A\Archive\ShippingWithLog\Server\WindowsServer"

@@ -1,11 +1,20 @@
 # Сборка
-1. git clone -b 'hw_4' --single-branch https://github.com/etrehappy/ue_prj_a.git
+1. git clone -b 'hw4' --single-branch https://github.com/etrehappy/ue_prj_a.git
 2. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 3. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 4. Build Project_A
-5. Открыть проект в UE
 
-Важно: на github загружен только минимум, в [Project_A.Build.cs](./Project_A/Source/Project_A/Project_A.Build.cs) можно закомментировать лишние пути, а в [Project_A.uproject](./Project_A/Project_A.uproject) — отлкючить лишние плагины.
+Важно: на github загружен только минимум, в Project_A.Build.cs можно закомментировать лишние пути, а в Project_A.uproject — отлкючить лишние плагины.
+
+# Запуск проекта
+Проект разделён на клиент и сервер, поэтому есть bat-файлы для запуска.
+1. В файлах Editor_StartGame и Editor_StartTwoServers исправить пути до UnrealEditor.exe
+2. Запустить серверы через Editor_StartTwoServers.bat
+3. Запустить клиент через Editor_StartGame.bat
+
+[Здесь](./img_for_readme/start_game.jpg) можно посмотреть скриншоты того, как должно запускаться. 
+<br> Анимация персонажа не настроена.
+<br> [ВИДЕО](https://drive.google.com/file/d/1J1mpeU7HeQCFdDL3ApcI94eRGixlNGR9/view?usp=sharing)
 
 # Что и как сделано
 <details><summary>Задание 1. Создание проекта<p></p></summary>
@@ -52,17 +61,16 @@
 <b>Основное</b>
 
 - [x]  Разобраны автотесты.
-- [x]  В файле [TrainingTest.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.cpp) есть 4 теста: 
-    - открытие карты — FOpenLevelTest — с использованием Latent-команд;
+- [x]  В файле [TrainingTest.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.cpp) есть 3 теста: 
     - проверка позиции ассета — FGetBpActorPropertiesFromEditorTest — по заданию;
-    - проверка контекста текущего мира — FShowWorldTypeTest (просто для практики, смысловой нагрузки нет)
-    - отображение в логах всех контекстов — FShowWorldContextsTest (просто для практики, смысловой нагрузки нет)
+    - проверка контекста текущего мира — FShowWorldTypeTest (просто для практики)
+    - отображение в логах всех контекстов — FShowWorldContextsTest (просто для практики)
 
 <b> Дополнительно </b>
 - [x]  Разобран синтаксис Spec-тестов
-- [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлено несколько тестов для практики.
+- [x] В [TrainingTest.spec.cpp](https://github.com/etrehappy/ue_prj_a/blob/hw2/Project_A/Source/Project_A/Tests/Test_0/TrainingTest.spec.cpp) добавлен 1 тест для практики.
     <div style="text-align: center;">
-        <img src="./img_for_readme/training_test_results.jpg" alt="Окружение" width="500" height="85
+        <img src="https://github.com/etrehappy/ue_prj_a/blob/hw2/img_for_readme/training_test_results.jpg" alt="Окружение" width="500" height="85
         ">   
     </div>
 
@@ -75,25 +83,36 @@
 <b>Основное</b>
 
 - [x] Создан базовый класс персонажа ([BaseCharacter.h](./Project_A/Source/Project_A/Public/Character/BaseCharacter.h), [BaseCharacter.cpp](./Project_A/Source/Project_A/Private/Character/BaseCharacter.cpp)) на основе ACharacter, чтобы не продумывать самостоятельно физику движения (например, падение, когда нет поверхности).
-- [x] Создан класс персонажа игрока на основе базового класса ([PlayerCharacter.h](./Project_A/Source/Project_A/Public/Character/PlayerCharacter.h), [PlayerCharacter.cpp](./Project_A/Source/Project_A/Private/Character/PlayerCharacter.cpp))
+- [x] Создан класс персонажа игрока на основе базового класса ([NetPlayerCharacter.h](./Project_A/Source/Project_A/Public/Character/NetPlayerCharacter.h), [NetPlayerCharacter.cpp](./Project_A/Source/Project_A/Private/Character/NetPlayerCharacter.cpp))
 - [x] Настроена система управления персонажем ([CustomLocomotionComponent.h](./Project_A/Source/Project_A/Public/Character/CustomLocomotionComponent.h), [CustomLocomotionComponent.cpp](./Project_A/Source/Project_A/Private/Character/CustomLocomotionComponent.cpp)):
     - движение вперёд\назад\влево\вправо
-    - вращение камерой
-        [![Видео превью](https://drive.google.com/drive-viewer/AKGpihbudHO09CYJGqhP6e8ljxNxv-SnuUwiv2WmZ4Zxp1RVBrQ46OJ7_btCmHvqr81Eop3l2-yqvXz9m-mNZLh2aZYe_-7l8ME1Dw=w1920-h1080-k-rw-v1-pd)](https://drive.google.com/file/d/1J1mpeU7HeQCFdDL3ApcI94eRGixlNGR9/view?usp=sharing)
+    - вращение камерой      
 
 
 <b> Дополнительно</b>
-- [x]  Добавлены собственные базовые элементы ([CustomPlayerController.h](./Project_A/Source/Project_A/Public/Character/CustomPlayerController.h), [GeneralGameMode.h](./Project_A/Source/Project_A/Public/Character/GeneralGameMode.h), [PlayerCameraComponent.h](./Project_A/Source/Project_A/Public/Character/PlayerCameraComponent.h))
+- [x]  Добавлены собственные классы Gameplay Framework:
+    - [GameInstanceBase.h](./Project_A/Source/Project_A/Public/GameInstanceBase.h),
+    - [CustomPlayerController.h](./Project_A/Source/Project_A/Public/Character/CustomPlayerController.h),
+    - [GeneralGameMode.h](./Project_A/Source/Project_A/Public/GeneralGameMode.h), который является родителем для [HubGameMode.h](./Project_A/Source/Project_A/Public/HubGameMode.h) (на сервере для входа в мир) и [WorldGameMode.h](./Project_A/Source/Project_A/Public/WorldGameMode.h) (на сервере для основного игрового мира).
+    
+    
+- [x] Добавлен [PlayerCameraComponent.h](./Project_A/Source/Project_A/Public/Character/PlayerCameraComponent.h)
 - [x] Создан базовый класс Pawn, который может понадобиться в дальнейшем для NPC ([BasePawn.h](./Project_A/Source/Project_A/Public/BasePawn.h), [BasePawn.cpp](./Project_A/Source/Project_A/Private/BasePawn.cpp))
 - [x] Для управления настроены InputActions ([IA_MoveDefault, IA_LookDefault](./Project_A/Content/Project_A_Root/Character/Input/Actions)) и InputMappingContext ([IMC_DefaultInput](./Project_A/Content/Project_A_Root/Character/Input))
-- [x] Создан BP-класс персонажа [BP_PlayerCharacter](./Project_A/Content/Project_A_Root/Character/Player/BP_PlayerCharacter.uasset), унаследованный от [PlayerCharacter.h](./Project_A/Source/Project_A/Public/Character/PlayerCharacter.h)
-- [x] Добавлен simple-тест [FInputActionsAreSetTest](./Project_A/Source/Project_A_Tests/Private/InputTest.cpp) для проверки класса [BP_PlayerCharacter](./Project_A/Content/Project_A_Root/Character/Player/BP_PlayerCharacter.uasset) на наличие установленных InputAction и InputMappingContext.
+- [x] Создан BP-класс персонажа [BP_PlayerCharacter](./Project_A/Content/Project_A_Root/Character/Player/BP_PlayerCharacter.uasset), унаследованный от [NetPlayerCharacter.h](./Project_A/Source/Project_A/Public/Character/NetPlayerCharacter.h)
+- [x] Для практики добавлен simple-тест [FInputActionsAreSetTest](./Project_A/Source/Project_A_Tests/Private/InputTest.cpp), чтобы проверить наличие установленных InputAction и InputMappingContext.
 
 **Как сделано**:
-1. Управление
-    - В [CustomLocomotionComponent.h](./Project_A/Source/Project_A/Public/Character/CustomLocomotionComponent.h) добавлены массив <i>InputMappingContexs</i> и указатель <i>InputActionMove</i>, которые заполняются в настройках BP-класса. В методе <i>UCustomLocomotionComponent :: Initialize()</i> связываются <i>InputActionMove</i> с обработчиком движения <i>UCustomLocomotionComponent :: HandleMove()</i>.   Было бы легче всё настроить через BP, но такой подход выбран намеренно для практики в C++ и баланса между BP\C++. 
+1. Управление сделано через C++ по схеме шаблона ThirdPerson
+    - В [CustomPlayerController.h](./Project_A/Source/Project_A/Public/Character/CustomPlayerController.h) добавляется MappingContext черезе интерфейс редактора. 
+    - В персонаже [BP_PlayerCharacter](./Project_A/Content/Project_A_Root/Character/Player/BP_PlayerCharacter.uasset) добавляются Actions, на которые нужно реагировать. 
+    - Вся логика, связанная с движением (X\Y\прыжки\спринт\приседание) вынесена в [CustomLocomotionComponent.h](./Project_A/Source/Project_A/Public/Character/CustomLocomotionComponent.h)
         <div style="text-align: center;">
-            <img src="./img_for_readme/locomotion_bp_move.jpg" alt="Окружение" width="500" height="115">   
+            <img src="./img_for_readme/locomotion_bp_move.jpg" alt="Inputs" width="500" height="211">   
+        </div>
+        <br>
+        <div style="text-align: center;">
+            <img src="./img_for_readme/locomotion_bp_playercontroller.jpg" alt="IMC" width="500" height="154">   
         </div>
     
 

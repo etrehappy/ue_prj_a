@@ -1,35 +1,33 @@
 #pragma once
 
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Character/BaseCharacter.h"
 #include "Character/CustomLocomotionComponent.h"
 #include "Character/CustomPlayerController.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "CoreMinimal.h"
 
-#include "PlayerCharacter.generated.h"
+#include "NetPlayerCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 class UArrowComponent;
 
 UCLASS()
-class PROJECT_A_API APlayerCharacter : public ABaseCharacter
+class PROJECT_A_API ANetPlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
-	APlayerCharacter();
-
-	// Called every frame
+	ANetPlayerCharacter();
+	virtual ~ANetPlayerCharacter() override = default;
 	virtual void Tick(float DeltaTime) override;
 
-
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	/** Initialize input action bindings */
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	USpringArmComponent* CameraBoom{};
 
@@ -43,6 +41,6 @@ protected:
 	UCustomLocomotionComponent* LocomotionComponent{};
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
-	ACustomPlayerController* PlayerController{};
+	ACustomPlayerController* PlayerController{};	
 
 };

@@ -10,13 +10,14 @@
 
 #include "TestSettings.h"
 #include "Character/CustomLocomotionComponent.h"
-#include "Character/PlayerCharacter.h"
+#include "Character/CustomPlayerController.h"
+#include "Character/NetPlayerCharacter.h"
 
 #if WITH_DEV_AUTOMATION_TESTS
 
 
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FInputActionsAreSetTest, "ProjectA.Character.Input.ActionsAreSet", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FInputActionsAreSetTest, "Project_A.Character.Input.ActionsAreSet", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
 {
@@ -34,24 +35,15 @@ bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
         int counter = 0;
         UWorld* World = GEditor->GetPIEWorldContext()->World();
 
-        if (!TestNotNull(TEXT("World is valid after PIE start"), World))
-        {
-            return true;
-        }
+        if (!TestNotNull(TEXT("World is valid after PIE start"), World)) { return true; }
 
-        TSubclassOf<AActor> BpClass = StaticLoadClass(APlayerCharacter::StaticClass(), nullptr, SetsForTests::BpClassPath);
-        if (!TestNotNull(TEXT("BP class loaded"), *BpClass))
-        {
-            return true;
-        }
+        TSubclassOf<AActor> BpClass = StaticLoadClass(ANetPlayerCharacter::StaticClass(), nullptr, SetsForTests::BpClassPath);
+        if (!TestNotNull(TEXT("BP class loaded"), *BpClass)) { return true; }
 
         //2. Act
         const auto FoundActor = UGameplayStatics::GetActorOfClass(World, BpClass);
-        const APlayerCharacter* const TestActor = Cast<APlayerCharacter>(FoundActor);
-        if (!TestNotNull(TEXT("TestActor is found"), TestActor))
-        {
-            return true;
-        }
+        const ANetPlayerCharacter* const TestActor = Cast<ANetPlayerCharacter>(FoundActor);
+        if (!TestNotNull(TEXT("TestActor is found"), TestActor)) { return true; }
 
         UCustomLocomotionComponent* Locomotion = TestActor->FindComponentByClass<UCustomLocomotionComponent>();
         if (!Locomotion)
@@ -72,28 +64,31 @@ bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
         }
         counter = 0;
 
-        //if (Locomotion->AutoTestGetInputMappingContext().IsEmpty())
-        //{
-        //    AddError(TEXT("InputMappingContext is not set in CustomLocomotionComponent"));
-        //    return true;
-        //}
+        ACustomPlayerController* PlayerControllerP = Cast<ACustomPlayerController>(TestActor->GetController());
 
-        const auto& ImcArray = Locomotion->AutoTestGetInputMappingContext();
+        if (!PlayerControllerP)
+        {
+            AddError(FString::Printf(TEXT("PlayerController is not of type ACustomPlayerController! %s "), SetsForTests::BpClassPath));
+            return true;
+        }
+
+        const auto& ImcArray = PlayerControllerP->AutoTestGetInputMappingContext();
         TestTrue(FString::Printf(TEXT("InputMappingContext is set in CustomLocomotionComponent. %s"), SetsForTests::BpClassPath), !ImcArray.IsEmpty());
 
-        for (const FInputMappingContextWithPriority& i : Locomotion->AutoTestGetInputMappingContext())
+        for (const FInputMappingContextWithPriority& i : PlayerControllerP->AutoTestGetInputMappingContext())
         {
             if (!i.MappingContext)
             {
-                AddError(FString::Printf(TEXT("InputMappingContext has empty cell in CustomLocomotionComponent! Index = %d; %s "), counter, SetsForTests::BpClassPath));
+                AddError(FString::Printf(TEXT("InputMappingContext has empty cell in PlayerControllerP! Index = %d; %s "), counter, SetsForTests::BpClassPath));
                 return true;
             }
             counter++;
         }
         counter = 0;
 
-        TestTrue(FString::Printf(TEXT("InputActionMove and InputMappingContext are set in CustomLocomotionComponent; %s "), SetsForTests::BpClassPath), true);
+        TestTrue(FString::Printf(TEXT("InputActionMove and InputMappingContext are set; %s "), SetsForTests::BpClassPath), true);
         return true;
+
     }));
 
     return true;
@@ -103,7 +98,16 @@ bool FInputActionsAreSetTest::RunTest(const FString& Parameters)
 
 
 /*
-    #PlayerCharacter.h #PlayerCharacter.cpp #CustomLocomotionComponent.h #CustomLocomotionComponent.cpp #InputTest.cpp #TestSettings.h
+    #GameInstanceBase.h #GameInstanceBase.cpp
+    #GeneralGameMode.h #GeneralGameMode.cpp
+    #HubGameMode.h #HubGameMode.cpp
+    #WorldGameMode.h #WorldGameMode.cpp
+
+    #CustomPlayerController.h #CustomPlayerController.cpp
+    #CustomLocomotionComponent.h #CustomLocomotionComponent.cpp
+    #NetPlayerCharacter.h #NetPlayerCharacter.cpp 
+        
+    #InputTest.cpp #TestSettings.h
 */
 
 /**

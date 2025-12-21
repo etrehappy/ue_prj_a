@@ -23,13 +23,14 @@ public class Project_A : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[] { });
 
 		PublicIncludePaths.AddRange(new string[] {
-			"Project_A",
-			"Project_A/Variant_Platforming",
-			"Project_A/Variant_Combat",
-			"Project_A/Variant_Combat/AI",
-			"Project_A/Variant_SideScrolling",
-			"Project_A/Variant_SideScrolling/Gameplay",
-			"Project_A/Variant_SideScrolling/AI"
+			"Project_A"
+			//,
+			//"Project_A/Variant_Platforming",
+			//"Project_A/Variant_Combat",
+			//"Project_A/Variant_Combat/AI",
+			//"Project_A/Variant_SideScrolling",
+			//"Project_A/Variant_SideScrolling/Gameplay",
+			//"Project_A/Variant_SideScrolling/AI"
         });
 
         if (Target.bBuildEditor)

@@ -91,6 +91,10 @@ Project_A/Plugins
 
 Launch bats/Editor_StartGame.bat
 Launch bats/Editor_StartServer.bat
+Launch bats/Editor_StartHubServer.bat
+Launch bats/Editor_StartWorldServer.bat
 
 Project_A/Archive/
 .github/build_scripts/
+
+Logs/

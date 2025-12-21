@@ -1,15 +1,16 @@
-﻿#include "Character/PlayerCharacter.h"
+﻿#include "Character/NetPlayerCharacter.h"
+
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "Components/ArrowComponent.h"
-#include "GameFramework/FloatingPawnMovement.h"
+#include "ProjectALog.h"
 
-// Sets default values
-APlayerCharacter::APlayerCharacter()
+ANetPlayerCharacter::ANetPlayerCharacter()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
+
+    bReplicates = true;
+    SetReplicateMovement(true);
 
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
@@ -24,15 +25,26 @@ APlayerCharacter::APlayerCharacter()
     LocomotionComponent->SetComponentTickEnabled(false);
 }
 
-// Called when the game starts or when spawned
-void APlayerCharacter::BeginPlay()
+void ANetPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
-void APlayerCharacter::Tick(float DeltaTime)
+void ANetPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+
+        LocomotionComponent->BindActions(EnhancedInputComponent);
+	}
+	else
+	{
+        UE_LOGFMT(LogProjectA, Error, "{0} —  Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file.", *GetNameSafe(this));		
+	}
+    
+}
+
+void ANetPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

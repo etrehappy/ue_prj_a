@@ -140,6 +140,7 @@ jobs:
                 $cmd += "-serverplatform=$env:BUILD_PLATFORM"
                 $cmd += "-noclient"
                 $cmd += "-serverconfig=$env:BUILD_CONFIG"
+                $cmd += "-force_steamclient_link"
                 
             } else {
                 $cmd += "-platform=$env:BUILD_PLATFORM"

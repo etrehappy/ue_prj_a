@@ -1,113 +1,46 @@
 ﻿#include "Character/CustomLocomotionComponent.h"
-#include "Components/CapsuleComponent.h"
+#include "Character/NetPlayerCharacter.h"
 #include "Engine/World.h"
-#include "DrawDebugHelpers.h"
-#include "CommonSettings.h"
 #include "GameFramework/CharacterMovementComponent.h" 
-
-DEFINE_LOG_CATEGORY(LogMyGame);
+#include "Net/UnrealNetwork.h"
+#include "ProjectALog.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
 
-// Sets default values for this component's properties
 UCustomLocomotionComponent::UCustomLocomotionComponent()
-    :MoveInputScale{1.f}, BackwordSpeed{200.f}, RunSpeed{350.f}, SprintSpeed{500.f}
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	// ...
+    SetIsReplicatedByDefault(true);	
 }
 
-
-// Called when the game starts
-void UCustomLocomotionComponent::BeginPlay()
+void UCustomLocomotionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Super::BeginPlay();
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    Initialize();
-
-	// ...
-	
+    DOREPLIFETIME(UCustomLocomotionComponent, CharacterMovementStruct);
 }
 
-
-// Called every frame
 void UCustomLocomotionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     CurrentSpeed2D = Owner->GetVelocity().Length();
 }
 
-void UCustomLocomotionComponent::Initialize()
-{   
-    Owner = Cast<ABaseCharacter>(GetOwner() );
-    CustomPC = GetCustomPlayerController();
-    CharacterMovementComponent = Owner->GetCharacterMovement();
-
-    if (!Owner || !CustomPC)
+void UCustomLocomotionComponent::BindActions(UEnhancedInputComponent* EIC)
+{
+    if (IsRunningDedicatedServer())
     {
-        UE_LOGFMT(LogTemp, Warning, "{0} Owner or CustomPC = nullptr", FString(__FUNCTION__));
+        UE_LOGFMT(LogProjectA, Warning, "{0} — Running Dedicated Server, skipping this", FString(__FUNCTION__));
         return;
     }
 
-    for (const FInputMappingContextWithPriority& Item : Inputs.InputMappingContext)
-    {
-        if (Item.MappingContext)
-        {
-            CustomPC->AddInputMappingContext(Item.MappingContext, Item.Priority);            
-        }
-    }
-
-    if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(CustomPC->InputComponent))
-    {
-        this->BindActions(EIC);
-    }
-    
-    if (CharacterMovementComponent)
-    {
-        Owner->MovementModeChangedDelegate.AddDynamic(this, &UCustomLocomotionComponent::OnMovementModeChanged);
-    }
-    else
-    {
-        UE_LOGFMT(LogTemp, Warning, "{0} CharacterMovementComponent = nullptr", FString(__FUNCTION__));
-    }
-   
-}
-
-ACustomPlayerController* UCustomLocomotionComponent::GetCustomPlayerController() const
-{
-    if (Owner)
-    {
-        return Cast<ACustomPlayerController>(Owner->GetController());
-    }
-    return nullptr;
-}
-
-bool UCustomLocomotionComponent::IsVectorInputValid(ACharacter* const OwnerCharacter, const FVector2D& Input) const
-{
-    if (!Owner)
-    {
-        UE_LOGFMT(LogTemp, Warning, "{0} OwnerCharacter = nullptr", FString(__FUNCTION__));
-        return false;
-    }
-
-    if (Input.IsNearlyZero())
-    {
-        return false;
-    }
-
-    return true;
-}
-
-void UCustomLocomotionComponent::BindActions(UEnhancedInputComponent* EIC)
-{
     if (Inputs.InputActionMove)
     {
-        EIC->BindAction(Inputs.InputActionMove, ETriggerEvent::Triggered, this, &UCustomLocomotionComponent::StartMove);
+        EIC->BindAction(Inputs.InputActionMove, ETriggerEvent::Triggered, this, &UCustomLocomotionComponent::StartMoveLocal);
     }
+
     if (Inputs.InputActionLook)
     {
         EIC->BindAction(Inputs.InputActionLook, ETriggerEvent::Triggered, this, &UCustomLocomotionComponent::HandleLook);
@@ -121,14 +54,48 @@ void UCustomLocomotionComponent::BindActions(UEnhancedInputComponent* EIC)
 
     if (Inputs.InputActionSprint)
     {
-        EIC->BindAction(Inputs.InputActionSprint, ETriggerEvent::Started, this, &UCustomLocomotionComponent::ModifyMove);
-        EIC->BindAction(Inputs.InputActionSprint, ETriggerEvent::Completed, this, &UCustomLocomotionComponent::ModifyMove);
+        EIC->BindAction(Inputs.InputActionSprint, ETriggerEvent::Started, this, &UCustomLocomotionComponent::ModifyMoveLocal);
+        EIC->BindAction(Inputs.InputActionSprint, ETriggerEvent::Completed, this, &UCustomLocomotionComponent::ModifyMoveLocal);
     }
 
     if (Inputs.InputActionCrouch)
     {
-        EIC->BindAction(Inputs.InputActionCrouch, ETriggerEvent::Started, this, &UCustomLocomotionComponent::ModifyMove);
+        EIC->BindAction(Inputs.InputActionCrouch, ETriggerEvent::Started, this, &UCustomLocomotionComponent::ModifyMoveLocal);
     }
+}
+
+void UCustomLocomotionComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+    Initialize();	
+}
+
+void UCustomLocomotionComponent::Initialize()
+{       
+    Owner = Cast<ANetPlayerCharacter>(GetOwner() );
+    CharacterMovementComponent = Owner->GetCharacterMovement();
+
+    if (!Owner || !CharacterMovementComponent)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} — Owner or CharacterMovementComponent = nullptr", FString(__FUNCTION__));
+        return;
+    }
+
+    Owner->MovementModeChangedDelegate.AddDynamic(this, &UCustomLocomotionComponent::OnMovementModeChanged);   
+}
+
+bool UCustomLocomotionComponent::IsVectorInputValid(ACharacter* const OwnerCharacter, const FVector2D& Input) const
+{
+    if (!OwnerCharacter)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} — OwnerCharacter = nullptr", FString(__FUNCTION__));
+        return false;
+    }
+
+    if (Input.IsNearlyZero()) { return false; }
+
+    return true;
 }
 
 void UCustomLocomotionComponent::UpdateFallDuration()
@@ -136,25 +103,8 @@ void UCustomLocomotionComponent::UpdateFallDuration()
     FallDuration += GetWorld()->GetDeltaSeconds();
 }
 
-void UCustomLocomotionComponent::UnCrouch()
+void UCustomLocomotionComponent::UpdateMove(const FVector2D& MoveInput)
 {
-    Owner->UnCrouch();
-    CharacterMovementStruct.MovementStance = E_CharacterMovementStance::Stand;
-    CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Run;
-    return;
-}
-
-
-void UCustomLocomotionComponent::StartMove(const FInputActionValue& Value)
-{
-    const FVector2D MoveInput = Value.Get<FVector2D>();
-
-    if (!IsVectorInputValid(Owner, MoveInput))  
-    {
-        UE_LOGFMT(LogTemp, Warning, "{0} IsVectorInputValid(Owner, MoveInput) = false", FString(__FUNCTION__));
-        return;
-    } 
-        
     if (MoveInput.Y < 0)
     {
         CharacterMovementComponent->MaxWalkSpeed = BackwordSpeed;
@@ -169,16 +119,73 @@ void UCustomLocomotionComponent::StartMove(const FInputActionValue& Value)
     }
 
     Owner->AddMovementInput(Owner->GetActorRightVector(), MoveInput.X * MoveInputScale);
-    Owner->AddMovementInput(Owner->GetActorForwardVector(), MoveInput.Y * MoveInputScale);  
+    Owner->AddMovementInput(Owner->GetActorForwardVector(), MoveInput.Y * MoveInputScale);
+}
+
+void UCustomLocomotionComponent::StartMoveLocal(const FInputActionValue& Value)
+{
+    const FVector2D MoveInput = Value.Get<FVector2D>();
+
+    if (!IsVectorInputValid(Owner, MoveInput))
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} — IsVectorInputValid(Owner, MoveInput) = false", FString(__FUNCTION__));
+        return;
+    }
+
+    // client-side movement prediction
+    UpdateMove(MoveInput);
+
+    if (!Owner->HasAuthority())
+    {
+        Server_StartMove(MoveInput);
+    }
+}
+
+void UCustomLocomotionComponent::ModifyMoveLocal(const FInputActionInstance& Instance)
+{
+    if (!Owner) return;
+
+    if (Instance.GetSourceAction() == Inputs.InputActionCrouch)
+    {
+        Crouch();
+        return;
+    }
+
+    uint8 ActionId = static_cast<uint8>(EInputActionId::None);
+    if (Instance.GetSourceAction() == Inputs.InputActionSprint)
+    {
+        ActionId = static_cast<uint8>(EInputActionId::Sprint);
+    }
+    Server_ModifyMove(Instance.GetTriggerEvent(), ActionId);
+}
+
+void UCustomLocomotionComponent::Crouch()
+{
+    if (Owner->IsCrouched())
+    {
+        UnCrouch();
+        return;
+    }
+
+    Owner->Crouch(); // Owner has movement component, so this will autoreplicate to server
+    Server_CrouchState();
+    return;
+}
+
+void UCustomLocomotionComponent::UnCrouch()
+{
+    Owner->UnCrouch();
+    Server_UnCrouchState();
 }
 
 void UCustomLocomotionComponent::HandleLook(const FInputActionValue& Value)
-{ 
+{
     const FVector2D LookInput = Value.Get<FVector2D>();
 
     if (!IsVectorInputValid(Owner, LookInput)
         || !Owner->GetController())
     {
+        UE_LOGFMT(LogProjectA, Warning, "{0} — IsVectorInputValid(Owner, LookInput) = false || !Owner->GetController()", FString(__FUNCTION__));
         return;
     }
 
@@ -186,10 +193,48 @@ void UCustomLocomotionComponent::HandleLook(const FInputActionValue& Value)
     Owner->AddControllerPitchInput(LookInput.Y);
 }
 
-void UCustomLocomotionComponent::ModifyMove(const FInputActionInstance& Instance)
+void UCustomLocomotionComponent::Jump(const FInputActionValue& Value)
+{
+    if (!Owner->CanJump())
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} — !Owner->CanJump()", FString(__FUNCTION__));
+        return;
+    }
+
+    Owner->Jump();
+}
+
+void UCustomLocomotionComponent::OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
 {
 
-    if (Instance.GetSourceAction() == Inputs.InputActionSprint)
+    if (CharacterMovementComponent->IsFalling())
+    {
+        CharacterMovementStruct.MovementMode = E_CharacterMovementMode::InAir;
+        FallDuration = 0.0f;
+        GetWorld()->GetTimerManager().SetTimer(FallTimerHandle, this, &UCustomLocomotionComponent::UpdateFallDuration, InFallRate, true);
+    }
+    else if (PrevMovementMode == MOVE_Falling && CharacterMovementComponent->IsMovingOnGround())
+    {
+        CharacterMovementStruct.MovementMode = E_CharacterMovementMode::OnGround;
+        FallDuration = 0.0f;
+        GetWorld()->GetTimerManager().ClearTimer(FallTimerHandle);
+    }
+}
+
+void UCustomLocomotionComponent::Server_StartMove_Implementation(FVector2D MoveInput)
+{
+    if (!IsVectorInputValid(Owner, MoveInput)) { return; }
+
+    UpdateMove(MoveInput);
+}
+
+void UCustomLocomotionComponent::Server_ModifyMove_Implementation(ETriggerEvent Trigger, uint8 ActionId)
+{
+    if (!Owner) return;
+
+    const EInputActionId Id = static_cast<EInputActionId>(ActionId);
+
+    if (Id == EInputActionId::Sprint)
     {
         if (Owner->IsCrouched())
         {
@@ -197,8 +242,8 @@ void UCustomLocomotionComponent::ModifyMove(const FInputActionInstance& Instance
             return;
         }
 
-        switch (Instance.GetTriggerEvent())
-        { 
+        switch (Trigger)
+        {
         case ETriggerEvent::Started:
             CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Sprint;
             CharacterMovementComponent->MaxWalkSpeed = SprintSpeed;
@@ -213,68 +258,35 @@ void UCustomLocomotionComponent::ModifyMove(const FInputActionInstance& Instance
 
         return;
     }
-
-
-    if (Instance.GetSourceAction() == Inputs.InputActionCrouch)
-    {       
-
-        if (Owner->IsCrouched())
-        {
-            UnCrouch();
-            return;
-        }
-       
-        Owner->Crouch();        
-        CharacterMovementStruct.MovementStance = E_CharacterMovementStance::Crouch;
-        CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Walk;
-        return;
-    }
 }
 
-void UCustomLocomotionComponent::Jump(const FInputActionValue& Value)
+void UCustomLocomotionComponent::Server_CrouchState_Implementation()
+{    
+    CharacterMovementStruct.MovementStance = E_CharacterMovementStance::Crouch;
+    CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Walk;
+}
+
+void UCustomLocomotionComponent::Server_UnCrouchState_Implementation()
 {
-    if (!Owner->CanJump()) { return; }
-
-    Owner->Jump();
+    CharacterMovementStruct.MovementStance = E_CharacterMovementStance::Stand;
+    CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Run;    
 }
-
-void UCustomLocomotionComponent::OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
-{
-    
-    if (CharacterMovementComponent->IsFalling())
-    {
-        CharacterMovementStruct.MovementMode = E_CharacterMovementMode::InAir;
-        FallDuration = 0.0f;     
-        GetWorld()->GetTimerManager().SetTimer(FallTimerHandle, this, &UCustomLocomotionComponent::UpdateFallDuration, InFallRate, true);
-    }
-    else if (PrevMovementMode == MOVE_Falling && CharacterMovementComponent->IsMovingOnGround())
-    {
-        CharacterMovementStruct.MovementMode = E_CharacterMovementMode::OnGround;
-        FallDuration = 0.0f;
-        GetWorld()->GetTimerManager().ClearTimer(FallTimerHandle);      
-    }
-}
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests
 
 #if WITH_DEV_AUTOMATION_TESTS
 
-const TArray<const UInputAction*> UCustomLocomotionComponent::AutoTestGetInputActions() const
+    const TArray<const UInputAction*> UCustomLocomotionComponent::AutoTestGetInputActions() const
 {
     TArray<const UInputAction*> Actions{};
     Actions.Add(Inputs.InputActionMove);
     Actions.Add(Inputs.InputActionLook);
+    Actions.Add(Inputs.InputActionSprint);
+    Actions.Add(Inputs.InputActionJump);
+    Actions.Add(Inputs.InputActionCrouch);    
 
     return Actions;
-}
-
-const TArray<FInputMappingContextWithPriority>& UCustomLocomotionComponent::AutoTestGetInputMappingContext() const
-{    
-    return Inputs.InputMappingContext;
 }
 
 #endif //WITH_DEV_AUTOMATION_TESTS

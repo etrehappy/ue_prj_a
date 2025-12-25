@@ -12,7 +12,7 @@
 2. Запустить серверы через Editor_StartTwoServers.bat
 3. Запустить клиент через Editor_StartGame.bat
 
-[Здесь](./img_for_readme/start_game.jpg) можно посмотреть скриншоты того, как должно запускаться. 
+[Здесь](https://github.com/etrehappy/ue_prj_a/blob/hw4/img_for_readme/start_game.jpg) можно посмотреть скриншоты того, как должно запускаться. 
 <br> [ВИДЕО](https://drive.google.com/file/d/1NT0hmf1TbyDaenUUwnwRgEzPyXzf4z-6/view)
 
 

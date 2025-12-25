@@ -82,8 +82,10 @@ private:
 	bool IsVectorInputValid(ACharacter* const, const FVector2D&) const;
 	void UpdateFallDuration();	
 	void UpdateMove(const FVector2D& MoveInput);
+	void UpdateDirection();
 	void StartMoveLocal(const FInputActionValue& Value);
 	void ModifyMoveLocal(const FInputActionInstance& Instance);
+    bool IsSprintAvailable() const;
 
 	/*!
 	* @brief Owner has character movement component, so this will autoreplicate to server
@@ -99,37 +101,17 @@ private:
 	UCharacterMovementComponent* CharacterMovementComponent{};
 	FTimerHandle FallTimerHandle{};
 	const float InFallRate{0.01f};
+	const float Tolerance{0.0001f};
+	const float MinDotProductRange{-0.1f};
+	const float MaxDotProductRange{0.1f};
 
 public:
 	//
-
-protected:	
-	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-	FInputStruct Inputs{};
-
-	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	FCharacterMovementStruct CharacterMovementStruct{};
-
-	UPROPERTY(BlueprintReadOnly, Category = "Movement")
-	float FallDuration{};
-
-	UPROPERTY(BlueprintReadOnly)
-	double CurrentSpeed2D{};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", 
-		meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0"))
-	float MoveInputScale{1.f};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float BackwordSpeed{200.f};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float RunSpeed{350.f};
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement")
-	float SprintSpeed{500.f};
+	UFUNCTION()
+	FCharacterMovementStruct GetCharacterMovementStruct() const;
 
 private:
+
 	UFUNCTION()
 	void HandleLook(const FInputActionValue& Value);
 
@@ -138,15 +120,15 @@ private:
 
 	UFUNCTION()
 	void OnMovementModeChanged(ACharacter* Character, EMovementMode PrevMovementMode, uint8 PreviousCustomMode);
-	
+
 	UFUNCTION(Server, Reliable)
-	void Server_StartMove(FVector2D MoveInput);	
+	void Server_StartMove(FVector2D MoveInput);
 
 	UFUNCTION(Server, Reliable)
 	void Server_ModifyMove(ETriggerEvent Trigger, uint8 ActionId);
 
 	/*!
-    * @brief Server function just update Enums. 
+	* @brief Server function just update Enums.
 	*/
 	UFUNCTION(Server, Reliable)
 	void Server_CrouchState();
@@ -157,6 +139,31 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_UnCrouchState();
 
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	FInputStruct Inputs{};
+
+	UPROPERTY(Replicated, EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	FCharacterMovementStruct CharacterMovementStruct{};
+
+	UPROPERTY(BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float FallDuration{};
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	double CurrentSpeed2D{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", 
+		meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", AllowPrivateAccess = "true"))
+	float MoveInputScale{1.f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float BackwordSpeed{200.f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float RunSpeed{350.f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float SprintSpeed{500.f};
+	
 
 
 #if WITH_DEV_AUTOMATION_TESTS

@@ -26,6 +26,7 @@ void UCustomLocomotionComponent::TickComponent(float DeltaTime, ELevelTick TickT
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
     CurrentSpeed2D = Owner->GetVelocity().Length();
+    UpdateDirection();
 }
 
 void UCustomLocomotionComponent::BindActions(UEnhancedInputComponent* EIC)
@@ -104,12 +105,12 @@ void UCustomLocomotionComponent::UpdateFallDuration()
 }
 
 void UCustomLocomotionComponent::UpdateMove(const FVector2D& MoveInput)
-{
+{   
     if (MoveInput.Y < 0)
     {
         CharacterMovementComponent->MaxWalkSpeed = BackwordSpeed;
     }
-    else if (CharacterMovementStruct.MovementGait == E_CharacterMovementGait::Sprint)
+    else if (CharacterMovementStruct.Gait == E_CharacterMovementGait::Sprint)
     {
         CharacterMovementComponent->MaxWalkSpeed = SprintSpeed;
     }
@@ -120,6 +121,46 @@ void UCustomLocomotionComponent::UpdateMove(const FVector2D& MoveInput)
 
     Owner->AddMovementInput(Owner->GetActorRightVector(), MoveInput.X * MoveInputScale);
     Owner->AddMovementInput(Owner->GetActorForwardVector(), MoveInput.Y * MoveInputScale);
+}
+
+void UCustomLocomotionComponent::UpdateDirection()
+{
+    if (FMath::IsNearlyZero(CurrentSpeed2D, 1.0) == true)
+    {
+        CharacterMovementStruct.State = E_CharacterMovementState::Idle;
+        return;
+    }
+
+    CharacterMovementStruct.State = E_CharacterMovementState::Moving;
+
+    const FVector Velocity = Owner->GetVelocity().GetSafeNormal(Tolerance);
+    const FVector Forward = Owner->GetActorForwardVector();
+
+    const float ForwardDotProduct = FVector::DotProduct(Forward, Velocity);
+
+    if (ForwardDotProduct >= MaxDotProductRange)
+    {
+        CharacterMovementStruct.Direction = E_CharacterMovementDirection::Forward;        
+    }
+    else if (ForwardDotProduct > MinDotProductRange && ForwardDotProduct < MaxDotProductRange)
+    {  
+        const FVector Right = Owner->GetActorRightVector();
+        const float RightDotProduct = FVector::DotProduct(Right, Velocity);
+        if (RightDotProduct >= 0)
+        {            
+            CharacterMovementStruct.Direction = E_CharacterMovementDirection::Right;
+        }
+        else
+        {           
+            CharacterMovementStruct.Direction = E_CharacterMovementDirection::Left;
+        }       
+    }
+    else
+    {
+        CharacterMovementStruct.Direction = E_CharacterMovementDirection::Backward;
+    }
+
+    return;
 }
 
 void UCustomLocomotionComponent::StartMoveLocal(const FInputActionValue& Value)
@@ -154,9 +195,28 @@ void UCustomLocomotionComponent::ModifyMoveLocal(const FInputActionInstance& Ins
     uint8 ActionId = static_cast<uint8>(EInputActionId::None);
     if (Instance.GetSourceAction() == Inputs.InputActionSprint)
     {
+        if (!IsSprintAvailable() )
+        {
+            return;
+        }
+
         ActionId = static_cast<uint8>(EInputActionId::Sprint);
     }
+
     Server_ModifyMove(Instance.GetTriggerEvent(), ActionId);
+}
+
+bool UCustomLocomotionComponent::IsSprintAvailable() const
+{
+    if (CharacterMovementStruct.Direction == E_CharacterMovementDirection::Forward
+        && Owner->IsCrouched() == false
+        && CharacterMovementStruct.Mode == E_CharacterMovementMode::OnGround )
+    {
+        return true;
+    }
+
+    UE_LOGFMT(LogProjectA, Log, "{0} — Sprint isn't available", FString(__FUNCTION__));
+    return false;
 }
 
 void UCustomLocomotionComponent::Crouch()
@@ -209,16 +269,21 @@ void UCustomLocomotionComponent::OnMovementModeChanged(ACharacter* Character, EM
 
     if (CharacterMovementComponent->IsFalling())
     {
-        CharacterMovementStruct.MovementMode = E_CharacterMovementMode::InAir;
+        CharacterMovementStruct.Mode = E_CharacterMovementMode::InAir;
         FallDuration = 0.0f;
         GetWorld()->GetTimerManager().SetTimer(FallTimerHandle, this, &UCustomLocomotionComponent::UpdateFallDuration, InFallRate, true);
     }
     else if (PrevMovementMode == MOVE_Falling && CharacterMovementComponent->IsMovingOnGround())
     {
-        CharacterMovementStruct.MovementMode = E_CharacterMovementMode::OnGround;
+        CharacterMovementStruct.Mode = E_CharacterMovementMode::OnGround;
         FallDuration = 0.0f;
         GetWorld()->GetTimerManager().ClearTimer(FallTimerHandle);
     }
+}
+
+FCharacterMovementStruct UCustomLocomotionComponent::GetCharacterMovementStruct() const
+{
+    return CharacterMovementStruct;
 }
 
 void UCustomLocomotionComponent::Server_StartMove_Implementation(FVector2D MoveInput)
@@ -245,11 +310,11 @@ void UCustomLocomotionComponent::Server_ModifyMove_Implementation(ETriggerEvent 
         switch (Trigger)
         {
         case ETriggerEvent::Started:
-            CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Sprint;
+            CharacterMovementStruct.Gait = E_CharacterMovementGait::Sprint;
             CharacterMovementComponent->MaxWalkSpeed = SprintSpeed;
             break;
         case ETriggerEvent::Completed:
-            CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Run;
+            CharacterMovementStruct.Gait = E_CharacterMovementGait::Run;
             CharacterMovementComponent->MaxWalkSpeed = RunSpeed;
             break;
         default:
@@ -262,14 +327,14 @@ void UCustomLocomotionComponent::Server_ModifyMove_Implementation(ETriggerEvent 
 
 void UCustomLocomotionComponent::Server_CrouchState_Implementation()
 {    
-    CharacterMovementStruct.MovementStance = E_CharacterMovementStance::Crouch;
-    CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Walk;
+    CharacterMovementStruct.Stance = E_CharacterMovementStance::Crouch;
+    CharacterMovementStruct.Gait = E_CharacterMovementGait::Walk;
 }
 
 void UCustomLocomotionComponent::Server_UnCrouchState_Implementation()
 {
-    CharacterMovementStruct.MovementStance = E_CharacterMovementStance::Stand;
-    CharacterMovementStruct.MovementGait = E_CharacterMovementGait::Run;    
+    CharacterMovementStruct.Stance = E_CharacterMovementStance::Stand;
+    CharacterMovementStruct.Gait = E_CharacterMovementGait::Run;    
 }
 
 ///////////////////////////////////////////////////////////////////////////////

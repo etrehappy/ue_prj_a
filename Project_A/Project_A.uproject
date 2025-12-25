@@ -46,7 +46,7 @@
 		},
 		{
 			"Name": "VisualStudioTools",
-			"Enabled": true,
+			"Enabled": false,
 			"SupportedTargetPlatforms": [
 				"Win64"
 			]
@@ -77,7 +77,7 @@
 		},
 		{
 			"Name": "WeaponSystemPlugin",
-			"Enabled": true
+			"Enabled": false
 		},
 		{
 			"Name": "OnlineSubsystemUtils",

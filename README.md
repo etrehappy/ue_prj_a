@@ -165,7 +165,7 @@
 </details>
 
 
-<details><summary>Задание 6. Компоненты <p></p></summary>
+<details><summary>Задание 6. Создание модуля и плагина <p></p></summary>
 
 **Что сделано**:
 
@@ -193,7 +193,7 @@
     - [Плагин оружия](./Project_A/Plugins/WeaponSystemPlugin/WeaponSystemPlugin.uplugin) добавляет PrimaryAssetType в [WeaponSystemPlugin.cpp](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Private/WeaponSystemPlugin.cpp)
 
 2. Призыв врага
-    - [DataTable](.Project_A/Content/Project_A_Root/Character/Npc/Enemy/EnemyDataTable.uasset) заполняется в редакторе по структуре [FEnemyRow](./Project_A/Source/Enemy/Public/EnemyRow.h).    
+    - [DataTable](./Project_A/Content/Project_A_Root/Character/Npc/Enemy/EnemyDataTable.uasset) заполняется в редакторе по структуре [FEnemyRow](./Project_A/Source/Enemy/Public/EnemyRow.h).    
     - В [BP_PlayerCharacterController](./Project_A/Content/Project_A_Root/Character/Player/BP_PlayerCharacterController.uasset) через Debug-клавишу Q вызывается Server_SpawnEnemyInFront (это DevelopmentOnly-метод).
     - Server_SpawnEnemyInFront создаёт временную [EnemyFactory](./Project_A/Source/Enemy/Public/EnemyFactory.h) и вызывает её метод SpawnEnemyByTag. Теги добавляются в  [EnemyTags.ini](./Project_A/Config/Tags/EnemyTags.ini)
 </details>

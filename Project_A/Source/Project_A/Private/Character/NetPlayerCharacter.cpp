@@ -2,6 +2,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Character/BattleComponent.h"
 #include "ProjectALog.h"
 
 ANetPlayerCharacter::ANetPlayerCharacter()
@@ -23,6 +24,11 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 
     LocomotionComponent = CreateDefaultSubobject<UCustomLocomotionComponent>(TEXT("LocomotionComponent"));   
     LocomotionComponent->SetComponentTickEnabled(false);
+
+    BattleComponent = CreateDefaultSubobject<UBattleComponent>(TEXT("BattleComponent"));
+    BattleComponent->SetComponentTickEnabled(false);
+
+    WeaponComponent = CreateDefaultSubobject<UWeaponComponent>(TEXT("WeaponComponent"));
 }
 
 void ANetPlayerCharacter::BeginPlay()
@@ -36,12 +42,26 @@ void ANetPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 
         LocomotionComponent->BindActions(EnhancedInputComponent);
+        BattleComponent->BindActions(EnhancedInputComponent);
 	}
 	else
 	{
         UE_LOGFMT(LogProjectA, Error, "{0} —  Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file.", *GetNameSafe(this));		
 	}
     
+}
+
+void ANetPlayerCharacter::Destroyed()
+{
+    Super::Destroyed();
+
+    if (IsRunningDedicatedServer())
+    {
+        if (WeaponComponent && WeaponComponent->IsWeaponCurrentlyEquiped())
+        {
+            WeaponComponent->Server_UnequipWeapon();
+        }
+    }
 }
 
 void ANetPlayerCharacter::Tick(float DeltaTime)

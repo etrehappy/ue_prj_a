@@ -76,7 +76,18 @@ Project_A/Plugins/**/Intermediate/*
 Project_A/DerivedDataCache/*
 
 Project_A/Content/*
-!Project_A/Content/Project_A_Root
+!Project_A/Content/Project_A_Root/
+
+Project_A/Content/Project_A_Root/Character/Npc/*
+!Project_A/Content/Project_A_Root/Character/Npc/Enemy/
+
+Project_A/Content/Project_A_Root/Character/Npc/Enemy/Goblin/*
+!Project_A/Content/Project_A_Root/Character/Npc/Enemy/Goblin/BP_LeadGoblin.uasset
+!Project_A/Content/Project_A_Root/Character/Npc/Enemy/Goblin/Animation/ABP_LeadGoblin.uasset
+
+Project_A/Content/Project_A_Root/Character/Player/Animation
+!Project_A/Content/Project_A_Root/Character/Player/Animation/*.uasset
+
 !Project_A/Content/ThirdPerson
 !Project_A/Content/__ExternalObjects__
 !Project_A/Content/__ExternalActors__
@@ -87,7 +98,15 @@ Project_A/Source/Project_A/Variant_SideScrolling
 
 Project_A/PrjPackages
 Project_A/TestReports
-Project_A/Plugins
+
+Project_A/Plugins/*
+!Project_A/Plugins/WeaponSystemPlugin/
+Project_A/Plugins/WeaponSystemPlugin/Binaries/
+Project_A/Plugins/WeaponSystemPlugin/Intermediate/
+Project_A/Plugins/WeaponSystemPlugin/Resources/
+!Project_A/Plugins/WeaponSystemPlugin/Config/*
+!Project_A/Plugins/WeaponSystemPlugin/Source/*
+!Project_A/Plugins/WeaponSystemPlugin/WeaponSystemPlugin.uplugin
 
 Launch bats/Editor_StartGame.bat
 Launch bats/Editor_StartServer.bat

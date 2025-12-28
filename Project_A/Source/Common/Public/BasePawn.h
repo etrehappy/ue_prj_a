@@ -9,7 +9,7 @@
 #include "BasePawn.generated.h"
 
 UCLASS()
-class PROJECT_A_API ABasePawn : public APawn
+class COMMON_API ABasePawn : public APawn
 {
 	GENERATED_BODY()
 	

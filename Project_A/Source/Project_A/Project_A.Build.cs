@@ -17,10 +17,17 @@ public class Project_A : ModuleRules
 			"AIModule",
 			"StateTreeModule",
 			"GameplayStateTreeModule",
-			"UMG" 
+			"UMG",
+            "GameplayTags",
+			"WeaponSystemPlugin"
     });
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		PrivateDependencyModuleNames.AddRange(new string[] {
+            "Logger"
+			, "Enemy"
+			, "Common"
+           
+        });
 
 		PublicIncludePaths.AddRange(new string[] {
 			"Project_A"

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "GeneralGameMode.h"
+#include "GameplayTagContainer.h"
 
 #include "CustomPlayerController.generated.h"
 
@@ -45,7 +46,14 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_OnConnected(EServerWorldType World);
 
+	UFUNCTION(Server, Reliable, BlueprintCallable, meta = (DevelopmentOnly))
+	void Server_SpawnEnemyInFront(UDataTable* EnemyDataTable, FGameplayTag EnemyTag);
+
 protected:
+	// Client RPC to draw debug visualization locally on the owning client
+	UFUNCTION(Client, Reliable, meta = (DevelopmentOnly))
+	void Client_DrawEnemySpawnDebug(FVector Location, FRotator Rotation);
+
 
 	/**
 	 * @brief Which keys or axes trigger which actions.
@@ -53,8 +61,6 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TArray<FInputMappingContextWithPriority> InputMappingContext{};
-
-
 
 #if WITH_DEV_AUTOMATION_TESTS
 public:

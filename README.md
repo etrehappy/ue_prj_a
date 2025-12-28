@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw6' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив (249 MB)](https://drive.google.com/file/d/1jqInCOkrUjLgV-TSPY3i7e7eu1KmhRHx/view?usp=sharing) и распаковать в .\ue_prj_a\ 
+2. Скачать [архив (249 MB)](https://drive.google.com/file/d/1jqInCOkrUjLgV-TSPY3i7e7eu1KmhRHx/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A

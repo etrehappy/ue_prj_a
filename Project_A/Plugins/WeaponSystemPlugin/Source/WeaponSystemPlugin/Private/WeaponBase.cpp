@@ -1,4 +1,4 @@
-﻿
+
 #include "WeaponBase.h"
 #include "WeaponDataAsset.h"
 #include "Net/UnrealNetwork.h"
@@ -8,12 +8,16 @@
 AWeaponBase::AWeaponBase()
 { 	
 	PrimaryActorTick.bCanEverTick = false;
-    bReplicates = true;
+	bReplicates = true;
 
-    Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMesh"));
-    SetRootComponent(Mesh);
-    Mesh->SetCollisionProfileName(TEXT("BlockAll"));
-    Mesh->SetIsReplicated(true);
+	RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	SetRootComponent(RootSceneComponent);
+
+	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticComponent"));
+	StaticMeshComponent->SetupAttachment(RootSceneComponent);
+
+	SkeletalMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalComponent"));
+	SkeletalMeshComponent->SetupAttachment(RootSceneComponent);
 }
 
 void AWeaponBase::BeginPlay()
@@ -21,8 +25,6 @@ void AWeaponBase::BeginPlay()
 	Super::BeginPlay();
 	
 }
-
-
 
 void AWeaponBase::Tick(float DeltaTime)
 {
@@ -32,79 +34,229 @@ void AWeaponBase::Tick(float DeltaTime)
 
 void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-    DOREPLIFETIME(AWeaponBase, WeaponTag);
-    DOREPLIFETIME(AWeaponBase, Damage);
+	DOREPLIFETIME(AWeaponBase, WeaponTag);
+	DOREPLIFETIME(AWeaponBase, Damage);
+	DOREPLIFETIME(AWeaponBase, MeshComponent);
+	DOREPLIFETIME(AWeaponBase, ProjectileClass);
+	DOREPLIFETIME(AWeaponBase, OwningCharacter);
+	DOREPLIFETIME(AWeaponBase, AttackRange);
+	DOREPLIFETIME(AWeaponBase, IndicatorClass);
+	DOREPLIFETIME(AWeaponBase, bIsWeaponAttacking);
 }
 
-void AWeaponBase::InitializeFromData(UWeaponDataAsset* Data)
+bool AWeaponBase::InitialiseMeshComponent(UStreamableRenderAsset* NewMesh)
 {
-    if (!Data) 
-    {
-        UE_LOGFMT(LogWeaponPlugin, Warning, "{0} — WeaponDataAsset is null", FString(__FUNCTION__));
-        return;
-    }
+	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
 
-    if (!Mesh) 
-    {
-        UE_LOGFMT(LogWeaponPlugin, Warning, "{0} — Mesh component is null", FString(__FUNCTION__));
-        return;
-    }
+	if (!NewMesh)
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - NewMesh is null", FString(__FUNCTION__));
+		return false;
+	}
 
-    if (!HasAuthority())
-    {   
-        UE_LOGFMT(LogWeaponPlugin, Warning, "{0} — No authority to initialize weapon from data", FString(__FUNCTION__));
-        return;
-    }
+	if (auto* NewStaticMesh = Cast<UStaticMesh>(NewMesh))
+	{		
+		StaticMeshComponent->SetStaticMesh(NewStaticMesh);
+		SkeletalMeshComponent->DestroyComponent();
+		MeshComponent = StaticMeshComponent;
 
-    WeaponTag = Data->WeaponTag;
-    Damage = Data->Damage;
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - StaticMesh was set", FString(__FUNCTION__));
+	}
+	else if (auto* NewSkeletalMesh = Cast<USkeletalMesh>(NewMesh))
+	{		
+		SkeletalMeshComponent->SetSkeletalMesh(NewSkeletalMesh);
+		StaticMeshComponent->DestroyComponent();
+		MeshComponent = SkeletalMeshComponent;
 
-    if (!Data->StaticMesh)
-    {        
-        UE_LOGFMT(LogWeaponPlugin, Warning, "{0} — StaticMesh in WeaponDataAsset is null", FString(__FUNCTION__));
-    }
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - SkeletalMesh was set", FString(__FUNCTION__));
+	}
 
-    Multicast_SetStaticMesh(Data->StaticMesh);
+	if (!MeshComponent)
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Failed to create MeshComponent", FString(__FUNCTION__));
+		return false;
+	}
+		
+	MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	MeshComponent->SetIsReplicated(true);
 
-    //AttackAnimation = Data->AttackAnimation;
-    //HitEffect = Data->HitEffect;
-    //SwingSound = Data->SwingSound;
-
-    UE_LOGFMT(LogWeaponPlugin, Log, "{0} — Weapon initialized from data: {1}", FString(__FUNCTION__), *Data->GetName());
+	return true;
 }
 
-void AWeaponBase::Multicast_SetCollision_Implementation(ECollisionEnabled::Type CollisionEnabled, ECollisionResponse CollisionResponse)
+void AWeaponBase::InitialiseFromData(UWeaponDataAsset* Data)
 {
-    if (!Mesh)
-    {
-        UE_LOGFMT(LogWeaponPlugin, Warning, "{0} — Mesh component is null", FString(__FUNCTION__));
-        return;
-    }
+	if (!Data)
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - WeaponDataAsset is null", FString(__FUNCTION__));
+		return;
+	}
 
-    Mesh->SetCollisionEnabled(CollisionEnabled);
-    Mesh->SetCollisionResponseToAllChannels(CollisionResponse);
+	if (!HasAuthority())
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - No authority to initialize weapon from data", FString(__FUNCTION__));
+		return;
+	}
+
+	OwningCharacter = GetOwner<ACharacter>();
+	if (!OwningCharacter)
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Owning character is null", FString(__FUNCTION__));
+	}
+
+	WeaponTag = Data->GetWeaponTag();
+	Damage = Data->GetDamage();
+	AttackRange = Data->GetAttackRange();
+
+	if (Data->GetProjectileClass())
+	{
+		ProjectileClass = Data->GetProjectileClass();
+	}
+	else if (Data->GetHasProjectile())
+	{
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - ProjectileClass in WeaponDataAsset is null in a {1}", FString(__FUNCTION__), Data->GetName());
+	}
+
+
+	if (Data->GetIndicatorClass())
+	{
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Setting IndicatorClass from WeaponDataAsset", FString(__FUNCTION__));
+		IndicatorClass = Data->GetIndicatorClass();
+	}
+	else if (Data->GetDoesSupportAiming())
+	{
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - IndicatorClass in WeaponDataAsset is null in a {1}", FString(__FUNCTION__), Data->GetName());
+	}
+
+	if (Data->GetMesh())
+	{
+		InitialiseMeshComponent(Data->GetMesh());
+	}
+	else
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Mesh in WeaponDataAsset is null in a {1}", FString(__FUNCTION__), Data->GetName());
+	}
+
+	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Weapon initialized from data: {1}", FString(__FUNCTION__), *Data->GetName());
+}
+
+void AWeaponBase::StartAttack()
+{
+	Client_StartAttack();
+}
+
+void AWeaponBase::StopAttack()
+{
+	Client_StopAttack();
 }
 
 const FGameplayTag& AWeaponBase::GetWeaponTag() const
 {
-    return WeaponTag;
+	return WeaponTag;
 }
+
+bool AWeaponBase::IsWeaponAttacking() const
+{
+	return bIsWeaponAttacking;
+}
+
+void AWeaponBase::SetIsWeaponAttacking(bool bNewIsWeaponAttacking)
+{
+	Server_SetIsWeaponAttacking(bNewIsWeaponAttacking);
+}
+
+void AWeaponBase::SetCollision(ECollisionEnabled::Type CollisionEnabled, ECollisionResponse CollisionResponse)
+{
+	if (!IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - This function should only be called on the server", FString(__FUNCTION__));
+		return;
+	}
+
+	Multicast_SetCollision(CollisionEnabled, CollisionResponse);
+}
+
+void AWeaponBase::Multicast_SetCollision_Implementation(ECollisionEnabled::Type CollisionEnabled, ECollisionResponse CollisionResponse)
+{
+	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
+		
+	if (!MeshComponent)
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Mesh component is null", FString(__FUNCTION__));
+		return;
+	}
+
+	MeshComponent->SetCollisionEnabled(CollisionEnabled);
+	MeshComponent->SetCollisionResponseToAllChannels(CollisionResponse);
+}
+
+void AWeaponBase::Client_StartAttack_Implementation()
+{
+	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
+}
+
+void AWeaponBase::Client_StopAttack_Implementation()
+{
+	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
+}
+
+
+void AWeaponBase::Server_SetIsWeaponAttacking_Implementation(bool bNewIsWeaponAttacking)
+{
+	bIsWeaponAttacking = bNewIsWeaponAttacking;
+}
+
+
+
 
 //void AWeaponBase::Server_InitializeFromData_Implementation(UWeaponDataAsset* Data)
 //{
 //
 //}
 
-void AWeaponBase::Multicast_SetStaticMesh_Implementation(UStaticMesh* NewMesh)
-{
-    if (!Mesh || !NewMesh)
-    {
-        UE_LOGFMT(LogWeaponPlugin, Warning, "{0} — Mesh component or NewMesh is null", FString(__FUNCTION__));
-        return;
-    }
+//void AWeaponBase::Multicast_SetMesh_Implementation(UStreamableRenderAsset* NewMesh)
+//{
+//	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
+//
+//	if (!IsRunningDedicatedServer())
+//	{
+//		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called on a client, skipping", FString(__FUNCTION__));
+//		return;
+//	}
+//
+//	if (!NewMesh)
+//	{
+//		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Mesh component or NewMesh is null", FString(__FUNCTION__));
+//		return;
+//	}
+//
+//	if (!NewMesh)
+//	{
+//		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - NewMesh is null", FString(__FUNCTION__));
+//		return;
+//	}
+//
+//	if (auto* SM = Cast<UStaticMesh>(NewMesh))
+//	{
+//		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Setting Static Mesh", FString(__FUNCTION__));
+//		StaticMeshComponent->SetStaticMesh(SM);
+//		SkeletalMeshComponent->DestroyComponent();
+//		MeshComponent = StaticMeshComponent;
+//	}
+//	else if (auto* SK = Cast<USkeletalMesh>(NewMesh))
+//	{
+//		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Setting Skeletal Mesh", FString(__FUNCTION__));
+//
+//		SkeletalMeshComponent->SetSkeletalMesh(SK);
+//		MeshComponent = SkeletalMeshComponent;
+//	}
+//
+//	if (!MeshComponent)
+//	{
+//		UE_LOGFMT(LogWeaponPlugin, Error, "{0} - Failed to create MeshComponent", FString(__FUNCTION__));
+//		return;
+//	}
+//}
 
-    Mesh->SetStaticMesh(NewMesh);    
-}
 

@@ -92,9 +92,16 @@ Project_A/Content/Project_A_Root/Character/Player/Animation
 !Project_A/Content/__ExternalObjects__
 !Project_A/Content/__ExternalActors__
 
+Project_A/Content/__ExternalActors__/ComboSystem/
+Project_A/Content/__ExternalActors__/Demo/
+Project_A/Content/__ExternalActors__/FreeMeleeWeaps/
+Project_A/Content/__ExternalObjects__/ComboSystem/
+Project_A/Content/__ExternalObjects__/FreeMeleeWeaps/
+
 Project_A/Source/Project_A/Variant_Combat
 Project_A/Source/Project_A/Variant_Platforming
 Project_A/Source/Project_A/Variant_SideScrolling
+
 
 Project_A/PrjPackages
 Project_A/TestReports
@@ -108,10 +115,16 @@ Project_A/Plugins/WeaponSystemPlugin/Resources/
 !Project_A/Plugins/WeaponSystemPlugin/Source/*
 !Project_A/Plugins/WeaponSystemPlugin/WeaponSystemPlugin.uplugin
 
+Project_A/Content/Project_A_Root/Weapons/Magic/
+Project_A/Content/Project_A_Root/Weapons/Sword/
+Project_A/Content/Project_A_Root/Weapons/Throwable/
+Project_A/Content/Project_A_Root/Ability/
+
 Launch bats/Editor_StartGame.bat
 Launch bats/Editor_StartServer.bat
 Launch bats/Editor_StartHubServer.bat
 Launch bats/Editor_StartWorldServer.bat
+Launch bats/Log/
 
 Project_A/Archive/
 .github/build_scripts/

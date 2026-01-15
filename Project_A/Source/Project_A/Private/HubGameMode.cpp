@@ -1,4 +1,4 @@
-
+ï»¿
 #include "HubGameMode.h"
 #include "Character/CustomPlayerController.h"
 
@@ -7,26 +7,26 @@
 
 AHubGameMode::AHubGameMode()
 {
-    PlayerControllerClass = ACustomPlayerController::StaticClass();
-    //DefaultPawnClass = AMyCharacter::StaticClass(); 
-    // HUDClass = AMyHUD::StaticClass();    
-    // GameStateClass = AMyGameState::StaticClass();        
-    // PlayerStateClass = AMyPlayerState::StaticClass();
-    // SpectatorClass = AMySpectatorPawn::StaticClass();
+	PlayerControllerClass = ACustomPlayerController::StaticClass();
+	//DefaultPawnClass = AMyCharacter::StaticClass(); 
+	// HUDClass = AMyHUD::StaticClass();    
+	// GameStateClass = AMyGameState::StaticClass();        
+	// PlayerStateClass = AMyPlayerState::StaticClass();
+	// SpectatorClass = AMySpectatorPawn::StaticClass();
 }
 
 void AHubGameMode::EnterToWorld(APlayerController* PlayerControllerP)
 {
-    if (!PlayerControllerP)
-    {
-        UE_LOGFMT(LogProjectA, Warning, "{0} — PlayerController is empty", FString(__FUNCTION__));   
-        return;
-    }
+	if (!PlayerControllerP)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController is empty", FString(__FUNCTION__));   
+		return;
+	}
 
-    PlayerControllerP->ClientTravel(NetSet::MainWorldServerAddress, ETravelType::TRAVEL_Absolute);
+	PlayerControllerP->ClientTravel(NetSet::MainWorldServerAddress, ETravelType::TRAVEL_Absolute);
 }
 
 EServerWorldType AHubGameMode::GetMapIdentifier() const
 {
-    return EServerWorldType::Hub;
+	return EServerWorldType::Hub;
 }

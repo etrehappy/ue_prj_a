@@ -10,13 +10,13 @@ AEnemyBase* UEnemyFactory::SpawnEnemyByTag(UWorld* World, UDataTable* EnemyDataT
 {
     if (!World || !EnemyDataTable)
     {        
-        UE_LOGFMT(LogProjectA, Warning, "{0} — Invalid World or DataTable", FString(__FUNCTION__));
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid World or DataTable", FString(__FUNCTION__));
         return nullptr;
     }
 
     if(World->GetNetMode() == NM_Client)
     {
-        UE_LOGFMT(LogProjectA, Warning, "{0} — SpawnEnemyByTag called on client; spawning must be done on server", FString(__FUNCTION__));
+        UE_LOGFMT(LogProjectA, Warning, "{0} - SpawnEnemyByTag called on client; spawning must be done on server", FString(__FUNCTION__));
         return nullptr;
     }
 
@@ -42,6 +42,6 @@ AEnemyBase* UEnemyFactory::SpawnEnemyByTag(UWorld* World, UDataTable* EnemyDataT
         }
     }
 
-    UE_LOGFMT(LogProjectA, Warning, "{0} — Enemy not found for tag {1}", FString(__FUNCTION__), *EnemyTag.ToString() );
+    UE_LOGFMT(LogProjectA, Warning, "{0} - Enemy not found for tag {1}", FString(__FUNCTION__), *EnemyTag.ToString() );
     return nullptr;
 }

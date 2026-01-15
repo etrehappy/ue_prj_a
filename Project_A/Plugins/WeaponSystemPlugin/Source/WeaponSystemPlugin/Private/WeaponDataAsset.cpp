@@ -1,4 +1,6 @@
-#include "WeaponDataAsset.h"
+﻿#include "WeaponDataAsset.h"
+#include "WeaponPluginLog.h"
+
 
 FPrimaryAssetId UWeaponDataAsset::GetPrimaryAssetId() const
 {

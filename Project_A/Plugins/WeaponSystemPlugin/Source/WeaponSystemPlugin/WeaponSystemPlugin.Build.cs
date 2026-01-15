@@ -12,7 +12,7 @@ public class WeaponSystemPlugin : ModuleRules
 			new string[] {
 				// ... add public include paths required here ...
 			}
-			);
+            );
 				
 		
 		PrivateIncludePaths.AddRange(
@@ -38,7 +38,8 @@ public class WeaponSystemPlugin : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"GameplayTags"
+				"GameplayTags",
+                "EnhancedInput"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

@@ -31,7 +31,7 @@ void AEnemyBase::InitializeFromTableData(const FEnemyRow& Data)
 {
     if (!HasAuthority())
     {
-        UE_LOGFMT(LogProjectA, Warning, "{0} — InitializeFromTableData should be called only on server", FString(__FUNCTION__));
+        UE_LOGFMT(LogProjectA, Warning, "{0} - InitializeFromTableData should be called only on server", FString(__FUNCTION__));
         return;
     }
 

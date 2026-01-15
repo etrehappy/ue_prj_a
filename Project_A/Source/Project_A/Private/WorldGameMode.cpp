@@ -1,4 +1,4 @@
-
+﻿
 
 
 #include "WorldGameMode.h"
@@ -6,10 +6,10 @@
 
 AWorldGameMode::AWorldGameMode()
 {
-    PlayerControllerClass = ACustomPlayerController::StaticClass();
+	PlayerControllerClass = ACustomPlayerController::StaticClass();
 }
 
 EServerWorldType AWorldGameMode::GetMapIdentifier() const
 {
-    return EServerWorldType::MainWorld;
+	return EServerWorldType::MainWorld;
 }

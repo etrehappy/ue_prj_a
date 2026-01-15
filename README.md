@@ -225,6 +225,7 @@
 - [AnimAttackNotifies](./Project_A/Source/Project_A/Public/Animation/AnimAttackNotifies.h) — добавлены собственные уведомления для работы с анимацией атаки
 - [CombatMontageTable](./Project_A/Source/Project_A/Public/Animation/CombatMontageTable.h) — в C++ используется montage для слияния атаки с Locomotion
 - [CharacterAnimInterface](./Project_A/Source/Project_A/Public/Animation/CharacterAnimInterface.h) — для передачи информации из C++ в ABP.
+- начата работа с [документацией](https://etrehappy.github.io/ue_prj_a/annotated.html)
 
 **Личная цель задания**:
 Рассмотреть разные варианты работы с оружием в RPG играх. 

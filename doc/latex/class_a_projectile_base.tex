@@ -1,0 +1,130 @@
+\doxysection{AProjectile\+Base Class Reference}
+\hypertarget{class_a_projectile_base}{}\label{class_a_projectile_base}\index{AProjectileBase@{AProjectileBase}}
+
+
+{\ttfamily \#include $<$Projectile\+Base.\+h$>$}
+
+Inheritance diagram for AProjectile\+Base\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_a_projectile_base}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_a_projectile_base_a3ed718af7af9cc16a898547c3b89e34b}{AProjectile\+Base}} ()
+\item 
+\Hypertarget{class_a_projectile_base_a4e964a02da941ff479ee539e90764353}\label{class_a_projectile_base_a4e964a02da941ff479ee539e90764353} 
+virtual void {\bfseries Tick} (float Delta\+Time) override
+\item 
+\Hypertarget{class_a_projectile_base_a3ec1dc57300161c3cdff51973d89e27c}\label{class_a_projectile_base_a3ec1dc57300161c3cdff51973d89e27c} 
+void {\bfseries Get\+Lifetime\+Replicated\+Props} (TArray$<$ FLifetime\+Property $>$ \&Out\+Lifetime\+Props) const
+\item 
+\Hypertarget{class_a_projectile_base_a4f0d97b66e4d3afc6fc3f10c2419456e}\label{class_a_projectile_base_a4f0d97b66e4d3afc6fc3f10c2419456e} 
+USphere\+Component \texorpdfstring{$\ast$}{*} {\bfseries Get\+Collision\+Component} () const
+\item 
+\Hypertarget{class_a_projectile_base_a1c145b1e1397e8000cf6e216ede2e774}\label{class_a_projectile_base_a1c145b1e1397e8000cf6e216ede2e774} 
+UProjectile\+Movement\+Component \texorpdfstring{$\ast$}{*} {\bfseries Get\+Movement\+Component} () const
+\item 
+\Hypertarget{class_a_projectile_base_a20d72a646a98512b0b2652207530aeaa}\label{class_a_projectile_base_a20d72a646a98512b0b2652207530aeaa} 
+virtual void {\bfseries Notify\+Hit} (class UPrimitive\+Component \texorpdfstring{$\ast$}{*}My\+Comp, AActor \texorpdfstring{$\ast$}{*}Other, class UPrimitive\+Component \texorpdfstring{$\ast$}{*}Other\+Comp, bool b\+Self\+Moved, FVector Hit\+Location, FVector Hit\+Normal, FVector Normal\+Impulse, const FHit\+Result \&Hit) override
+\item 
+void \mbox{\hyperlink{class_a_projectile_base_a96de7d3048e15b97d3b7b6c4133864be}{Initialize\+From\+Launch}} (const FVector \&Launch\+Velocity, float Gravity\+ZOverride=0.\+0f)
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_a_projectile_base_a072e2686c32d64cf550f03d12d52dde0}{On\+Projectile\+Impact}} (const FHit\+Result \&Hit)
+\begin{DoxyCompactList}\small\item\em Can be used in Blueprints to implement custom behavior upon projectile impact. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_a_projectile_base_a025778aacf1f8b69de87cbf55e89d35d}\label{class_a_projectile_base_a025778aacf1f8b69de87cbf55e89d35d} 
+virtual void {\bfseries Begin\+Play} () override
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+TObject\+Ptr$<$ USphere\+Component $>$ \mbox{\hyperlink{class_a_projectile_base_acb436f41f301f94ea3265c89a5b1714d}{Collision}} \{\}
+\item 
+\Hypertarget{class_a_projectile_base_a96ac5fcd59a5a45fd2e2c5481714c333}\label{class_a_projectile_base_a96ac5fcd59a5a45fd2e2c5481714c333} 
+float {\bfseries Damage} \{20.f\}
+\item 
+\Hypertarget{class_a_projectile_base_a63e2d260801b217d3046587c6bf730ef}\label{class_a_projectile_base_a63e2d260801b217d3046587c6bf730ef} 
+TObject\+Ptr$<$ UProjectile\+Movement\+Component $>$ {\bfseries Movement} \{\}
+\item 
+\Hypertarget{class_a_projectile_base_a70a18579098e3261c00a7f5f824fa90c}\label{class_a_projectile_base_a70a18579098e3261c00a7f5f824fa90c} 
+TSubclass\+Of$<$ \mbox{\hyperlink{class_a_area_explosion}{AArea\+Explosion}} $>$ {\bfseries Explosion\+Class} \{\}
+\item 
+\Hypertarget{class_a_projectile_base_a22f5a88be41660faa7ac06a288d37866}\label{class_a_projectile_base_a22f5a88be41660faa7ac06a288d37866} 
+float {\bfseries Explosion\+Radius} \{300.f\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_a_area_explosion}{AArea\+Explosion} 
+
+\doxylink{class_a_weapon_throwable}{AWeapon\+Throwable} \doxylink{class_a_weapon_magic}{AWeapon\+Magic} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_a_projectile_base_a3ed718af7af9cc16a898547c3b89e34b}\index{AProjectileBase@{AProjectileBase}!AProjectileBase@{AProjectileBase}}
+\index{AProjectileBase@{AProjectileBase}!AProjectileBase@{AProjectileBase}}
+\doxysubsubsection{\texorpdfstring{AProjectileBase()}{AProjectileBase()}}
+{\footnotesize\ttfamily \label{class_a_projectile_base_a3ed718af7af9cc16a898547c3b89e34b} 
+AProjectile\+Base\+::\+AProjectile\+Base (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+=== C++ member functions === 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_a_projectile_base_a96de7d3048e15b97d3b7b6c4133864be}\index{AProjectileBase@{AProjectileBase}!InitializeFromLaunch@{InitializeFromLaunch}}
+\index{InitializeFromLaunch@{InitializeFromLaunch}!AProjectileBase@{AProjectileBase}}
+\doxysubsubsection{\texorpdfstring{InitializeFromLaunch()}{InitializeFromLaunch()}}
+{\footnotesize\ttfamily \label{class_a_projectile_base_a96de7d3048e15b97d3b7b6c4133864be} 
+void AProjectile\+Base\+::\+Initialize\+From\+Launch (\begin{DoxyParamCaption}\item[{const FVector \&}]{Launch\+Velocity}{, }\item[{float}]{Gravity\+ZOverride}{ = {\ttfamily 0.0f}}\end{DoxyParamCaption})}
+
+
+
+Server function. 
+
+Initialize projectile movement and physics parameters after spawn. In the current implementation, it is called only in the \doxylink{class_a_weapon_throwable}{AWeapon\+Throwable}. 
+\begin{DoxyParams}{Parameters}
+{\em Launch\+Velocity} & World-\/space initial velocity for the projectile. \\
+\hline
+{\em Gravity\+ZOverride} & Gravity (world units) to be used for this projectile (can be negative). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000012}{Todo}}]Should this be a general mechanism for all projectiles? \end{DoxyRefDesc}
+\Hypertarget{class_a_projectile_base_a072e2686c32d64cf550f03d12d52dde0}\index{AProjectileBase@{AProjectileBase}!OnProjectileImpact@{OnProjectileImpact}}
+\index{OnProjectileImpact@{OnProjectileImpact}!AProjectileBase@{AProjectileBase}}
+\doxysubsubsection{\texorpdfstring{OnProjectileImpact()}{OnProjectileImpact()}}
+{\footnotesize\ttfamily \label{class_a_projectile_base_a072e2686c32d64cf550f03d12d52dde0} 
+void AProjectile\+Base\+::\+On\+Projectile\+Impact (\begin{DoxyParamCaption}\item[{const FHit\+Result \&}]{Hit}{}\end{DoxyParamCaption})}
+
+
+
+Can be used in Blueprints to implement custom behavior upon projectile impact. 
+
+=== Unreal Engine UFUNCTION === 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in,out}}  & {\em Hit} & \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_a_projectile_base_acb436f41f301f94ea3265c89a5b1714d}\index{AProjectileBase@{AProjectileBase}!Collision@{Collision}}
+\index{Collision@{Collision}!AProjectileBase@{AProjectileBase}}
+\doxysubsubsection{\texorpdfstring{Collision}{Collision}}
+{\footnotesize\ttfamily \label{class_a_projectile_base_acb436f41f301f94ea3265c89a5b1714d} 
+TObject\+Ptr$<$USphere\+Component$>$ AProjectile\+Base\+::\+Collision \{\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+=== Unreal Engine UPROPERTY === 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Public/\mbox{\hyperlink{_projectile_base_8h}{Projectile\+Base.\+h}}\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Private/Projectile\+Base.\+cpp\end{DoxyCompactItemize}

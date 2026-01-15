@@ -1,0 +1,55 @@
+\doxysection{Weapon\+Ranged.\+h}
+\hypertarget{_weapon_ranged_8h_source}{}\label{_weapon_ranged_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/WeaponRanged.h@{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/WeaponRanged.h}}
+\mbox{\hyperlink{_weapon_ranged_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*****************************************************************/}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}GameFramework/Actor.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_weapon_base_8h}{WeaponBase.h}}"{}}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}WeaponRanged.generated.h"{}}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00016\ }
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{comment}{/*}}
+\DoxyCodeLine{00019\ \textcolor{comment}{*\ @brief:\ This\ class\ isn't\ ready\ and\ should\ not\ be\ used.}}
+\DoxyCodeLine{00020\ \textcolor{comment}{*/}}
+\DoxyCodeLine{00021\ UCLASS()}
+\DoxyCodeLine{00022\ class\ WEAPONSYSTEMPLUGIN\_API\ \mbox{\hyperlink{class_a_weapon_ranged}{AWeaponRanged}}\ :\ public\ \mbox{\hyperlink{class_a_weapon_base}{AWeaponBase}}}
+\DoxyCodeLine{00023\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00025\ \ \ \ \ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{public}:\ }
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{comment}{//\ Sets\ default\ values\ for\ this\ actor's\ properties}}
+\DoxyCodeLine{00028\ \ \ \ \ \mbox{\hyperlink{class_a_weapon_ranged}{AWeaponRanged}}();}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ InitialiseFromData(\textcolor{keyword}{class}\ \mbox{\hyperlink{class_u_weapon_data_asset}{UWeaponDataAsset}}*\ Data)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{comment}{//\ Called\ when\ the\ game\ starts\ or\ when\ spawned}}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ BeginPlay()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00035\ \ \ \ \ \textcolor{comment}{//UFUNCTION(Client,\ Reliable)}}
+\DoxyCodeLine{00036\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Client\_StartAttack\_Implementation()\ \textcolor{keyword}{override};\textcolor{comment}{/*TODO\ Check\ Net*/}}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{comment}{//UFUNCTION(Client,\ Reliable)}}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Client\_StopAttack\_Implementation()\ \textcolor{keyword}{override};\textcolor{comment}{/*TODO\ Check\ Net*/}}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00041\ \ \ \ \ \textcolor{comment}{//UFUNCTION(Client,\ Reliable)}}
+\DoxyCodeLine{00042\ \ \ \ \ \textcolor{comment}{//void\ Client\_LinkAnimClassLayers(TSubclassOf<UAnimInstance>\ InWeaponAnimBPClass);/*TODO\ Check\ Net*/}}
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \textcolor{keyword}{public}:\ }
+\DoxyCodeLine{00045\ \ \ \ \ \textcolor{comment}{//\ Called\ every\ frame}}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Tick(\textcolor{keywordtype}{float}\ DeltaTime)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00048\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00049\ \ \ \ \ UPROPERTY()}
+\DoxyCodeLine{00050\ \ \ \ \ TObjectPtr<USkeletalMeshComponent>\ SkeletalMeshComponent\{\};}
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00052\ }
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ }
+\DoxyCodeLine{00055\ \};}
+
+\end{DoxyCode}

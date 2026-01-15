@@ -1,0 +1,197 @@
+\doxysection{UWeapon\+Data\+Asset Class Reference}
+\hypertarget{class_u_weapon_data_asset}{}\label{class_u_weapon_data_asset}\index{UWeaponDataAsset@{UWeaponDataAsset}}
+
+
+It used by weapon factory to spawn weapons with specific properties. The mechanic is based on Data-\/\+Driven Design. Used in Blueprints to set up different types of weapons with unique attributes and behaviors.  
+
+
+
+
+{\ttfamily \#include $<$Weapon\+Data\+Asset.\+h$>$}
+
+Inheritance diagram for UWeapon\+Data\+Asset\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_u_weapon_data_asset}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_u_weapon_data_asset_abf73ca5a1935a36d4ee5bad001b7e0ac}{UWeapon\+Data\+Asset}} ()=default
+\item 
+\Hypertarget{class_u_weapon_data_asset_adb3bb2ad4ec727b9b1b1f859bc41636e}\label{class_u_weapon_data_asset_adb3bb2ad4ec727b9b1b1f859bc41636e} 
+virtual FPrimary\+Asset\+Id {\bfseries Get\+Primary\+Asset\+Id} () const override
+\item 
+const bool \mbox{\hyperlink{class_u_weapon_data_asset_ac13f2fe7200469c52b389189dbed0352}{Get\+Does\+Support\+Aiming}} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a07afa4cfeca88b23b8775cdd7a88e951}\label{class_u_weapon_data_asset_a07afa4cfeca88b23b8775cdd7a88e951} 
+const bool {\bfseries Get\+Has\+Projectile} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a51d77d8153c442bf6797bc5c7b539ffd}\label{class_u_weapon_data_asset_a51d77d8153c442bf6797bc5c7b539ffd} 
+const bool {\bfseries Get\+Has\+Mesh} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a3350ae6d9f7a303a9117a2f5d7e49db3}\label{class_u_weapon_data_asset_a3350ae6d9f7a303a9117a2f5d7e49db3} 
+const FGameplay\+Tag \& {\bfseries Get\+Weapon\+Tag} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a65846530d7cbb3fc530c02e0e775d07d}\label{class_u_weapon_data_asset_a65846530d7cbb3fc530c02e0e775d07d} 
+const TSubclass\+Of$<$ \mbox{\hyperlink{class_a_weapon_base}{AWeapon\+Base}} $>$ {\bfseries Get\+Weapon\+Class} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a37b4d36ba9a5098ea39ad011b440252a}\label{class_u_weapon_data_asset_a37b4d36ba9a5098ea39ad011b440252a} 
+const TObject\+Ptr$<$ UStreamable\+Render\+Asset $>$ {\bfseries Get\+Mesh} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a05297cf120587291e4248c4ec3d9ba04}\label{class_u_weapon_data_asset_a05297cf120587291e4248c4ec3d9ba04} 
+const TSubclass\+Of$<$ \mbox{\hyperlink{class_a_projectile_base}{AProjectile\+Base}} $>$ {\bfseries Get\+Projectile\+Class} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a27d972701b3c0dec7443e1f6bd974497}\label{class_u_weapon_data_asset_a27d972701b3c0dec7443e1f6bd974497} 
+const TSubclass\+Of$<$ \mbox{\hyperlink{class_a_target_indicator}{ATarget\+Indicator}} $>$ {\bfseries Get\+Indicator\+Class} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a5d006314606d5b97c2231b9c5d346532}\label{class_u_weapon_data_asset_a5d006314606d5b97c2231b9c5d346532} 
+const float {\bfseries Get\+Damage} () const
+\item 
+\Hypertarget{class_u_weapon_data_asset_a967ae536fd769b4d1b0a0ba014eb8175}\label{class_u_weapon_data_asset_a967ae536fd769b4d1b0a0ba014eb8175} 
+const float {\bfseries Get\+Attack\+Range} () const
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_u_weapon_data_asset_af3a7cd87da26df2c696dc709d403962f}\label{class_u_weapon_data_asset_af3a7cd87da26df2c696dc709d403962f} 
+{\bfseries UPROPERTY} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Weapon\+Tag (required for all)"{})) FGameplay\+Tag Weapon\+Tag
+\begin{DoxyCompactList}\small\item\em A unique tag that identifies the weapon type. Throwable items are also considered weapons. \end{DoxyCompactList}\item 
+\Hypertarget{class_u_weapon_data_asset_a65144635dc65848755bd904fce113d57}\label{class_u_weapon_data_asset_a65144635dc65848755bd904fce113d57} 
+{\bfseries UPROPERTY} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Weapon\+Class (required for all)"{})) TSubclass\+Of$<$ \mbox{\hyperlink{class_a_weapon_base}{AWeapon\+Base}} $>$ Weapon\+Class
+\begin{DoxyCompactList}\small\item\em The class type of the weapon. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_u_weapon_data_asset_a9bb1ddad382146522684a4f709523942}{UPROPERTY}} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Mesh (required)"{}, Edit\+Condition="{}b\+Has\+Mesh"{}, Edit\+Condition\+Hides)) TObject\+Ptr$<$ UStreamable\+Render\+Asset $>$ Mesh
+\begin{DoxyCompactList}\small\item\em Can be Static or Skeletal mesh. The Weapon\+Base will create a Mesh\+Component of the appropriate type at runtime. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_u_weapon_data_asset_a58e790068ff4226a62f2ec232dcbe3bb}{UPROPERTY}} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Projectile\+Class (required for grimoire or any weapon that supports aiming)"{}, Edit\+Condition="{}b\+Has\+Projectile \texorpdfstring{$\vert$}{|}\texorpdfstring{$\vert$}{|} b\+Does\+Support\+Aiming"{}, Edit\+Condition\+Hides)) TSubclass\+Of$<$ \mbox{\hyperlink{class_a_projectile_base}{AProjectile\+Base}} $>$ Projectile\+Class
+\begin{DoxyCompactList}\small\item\em The class type of the projectile. Required for weapons that shoot projectiles or support aiming. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_u_weapon_data_asset_a0054fc89def0016ca81059c8d3b493ab}{UPROPERTY}} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Indicator\+Class (required)"{}, Edit\+Condition="{}b\+Does\+Support\+Aiming"{}, Edit\+Condition\+Hides)) TSubclass\+Of$<$ \mbox{\hyperlink{class_a_target_indicator}{ATarget\+Indicator}} $>$ Indicator\+Class
+\begin{DoxyCompactList}\small\item\em The class type of the indicator. Required for weapons that support aiming. \end{DoxyCompactList}\item 
+\Hypertarget{class_u_weapon_data_asset_a8dd5df8aa2d5c4955501a93514379ab6}\label{class_u_weapon_data_asset_a8dd5df8aa2d5c4955501a93514379ab6} 
+{\bfseries UPROPERTY} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Damage (required for all)"{})) float Damage
+\begin{DoxyCompactList}\small\item\em The amount of damage this weapon deals. Required for all weapons. Current implementation dosen\textquotesingle{}t use this property. \end{DoxyCompactList}\item 
+\Hypertarget{class_u_weapon_data_asset_a7bf0295d4e337e2f680e5db3b5551377}\label{class_u_weapon_data_asset_a7bf0295d4e337e2f680e5db3b5551377} 
+{\bfseries UPROPERTY} (Edit\+Defaults\+Only, Blueprint\+Read\+Only, Category="{}Weapon"{}, meta=(Display\+Name="{}Attack\+Range (required for all)"{})) float Attack\+Range
+\begin{DoxyCompactList}\small\item\em The maximum range at which this weapon can effectively attack. Required for all weapons. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{class_u_weapon_data_asset_af88fc311c1431d7640bc59d4799b3ad3}{b\+Has\+Mesh}} \{true\}
+\begin{DoxyCompactList}\small\item\em Only for Editor. If true, then Mesh property will be shown. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_u_weapon_data_asset_a5bb1179ec71d6ce977aeb48f9a4818c5}{b\+Has\+Projectile}} \{false\}
+\begin{DoxyCompactList}\small\item\em Only for Editor. If true, then Projectile\+Class property will be shown. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_u_weapon_data_asset_af25665d05bf8f97760260e10e6551832}{b\+Does\+Support\+Aiming}} \{false\}
+\begin{DoxyCompactList}\small\item\em Only for Editor. If true, then Indicator\+Class and Projectile\+Class properties will be shown. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+It used by weapon factory to spawn weapons with specific properties. The mechanic is based on Data-\/\+Driven Design. Used in Blueprints to set up different types of weapons with unique attributes and behaviors. 
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_u_weapon_factory}{UWeapon\+Factory} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_u_weapon_data_asset_abf73ca5a1935a36d4ee5bad001b7e0ac}\index{UWeaponDataAsset@{UWeaponDataAsset}!UWeaponDataAsset@{UWeaponDataAsset}}
+\index{UWeaponDataAsset@{UWeaponDataAsset}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{UWeaponDataAsset()}{UWeaponDataAsset()}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_abf73ca5a1935a36d4ee5bad001b7e0ac} 
+UWeapon\+Data\+Asset\+::\+UWeapon\+Data\+Asset (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+=== C++ member functions === 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_u_weapon_data_asset_ac13f2fe7200469c52b389189dbed0352}\index{UWeaponDataAsset@{UWeaponDataAsset}!GetDoesSupportAiming@{GetDoesSupportAiming}}
+\index{GetDoesSupportAiming@{GetDoesSupportAiming}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{GetDoesSupportAiming()}{GetDoesSupportAiming()}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_ac13f2fe7200469c52b389189dbed0352} 
+const bool UWeapon\+Data\+Asset\+::\+Get\+Does\+Support\+Aiming (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+============================= Getters ============================= \Hypertarget{class_u_weapon_data_asset_a0054fc89def0016ca81059c8d3b493ab}\index{UWeaponDataAsset@{UWeaponDataAsset}!UPROPERTY@{UPROPERTY}}
+\index{UPROPERTY@{UPROPERTY}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{UPROPERTY()}{UPROPERTY()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_a0054fc89def0016ca81059c8d3b493ab} 
+UWeapon\+Data\+Asset\+::\+UPROPERTY (\begin{DoxyParamCaption}\item[{Edit\+Defaults\+Only}]{}{, }\item[{Blueprint\+Read\+Only}]{}{, }\item[{Category}]{}{ = {\ttfamily "{}Weapon"{}}, }\item[{meta}]{}{ = {\ttfamily (DisplayName="{}IndicatorClass~(required)"{},~EditCondition="{}bDoesSupportAiming"{},~EditConditionHides)}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The class type of the indicator. Required for weapons that support aiming. 
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_a_target_indicator}{ATarget\+Indicator} 
+\end{DoxySeeAlso}
+\Hypertarget{class_u_weapon_data_asset_a9bb1ddad382146522684a4f709523942}\index{UWeaponDataAsset@{UWeaponDataAsset}!UPROPERTY@{UPROPERTY}}
+\index{UPROPERTY@{UPROPERTY}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{UPROPERTY()}{UPROPERTY()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_a9bb1ddad382146522684a4f709523942} 
+UWeapon\+Data\+Asset\+::\+UPROPERTY (\begin{DoxyParamCaption}\item[{Edit\+Defaults\+Only}]{}{, }\item[{Blueprint\+Read\+Only}]{}{, }\item[{Category}]{}{ = {\ttfamily "{}Weapon"{}}, }\item[{meta}]{}{ = {\ttfamily (DisplayName~=~"{}Mesh~(required)"{},  EditCondition~=~"{}bHasMesh"{},~EditConditionHides)}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+
+
+Can be Static or Skeletal mesh. The Weapon\+Base will create a Mesh\+Component of the appropriate type at runtime. 
+
+\begin{DoxySeeAlso}{See also}
+Weapon\+Base\+::\+Mesh\+Component 
+\end{DoxySeeAlso}
+\Hypertarget{class_u_weapon_data_asset_a58e790068ff4226a62f2ec232dcbe3bb}\index{UWeaponDataAsset@{UWeaponDataAsset}!UPROPERTY@{UPROPERTY}}
+\index{UPROPERTY@{UPROPERTY}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{UPROPERTY()}{UPROPERTY()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_a58e790068ff4226a62f2ec232dcbe3bb} 
+UWeapon\+Data\+Asset\+::\+UPROPERTY (\begin{DoxyParamCaption}\item[{Edit\+Defaults\+Only}]{}{, }\item[{Blueprint\+Read\+Only}]{}{, }\item[{Category}]{}{ = {\ttfamily "{}Weapon"{}}, }\item[{meta}]{}{ = {\ttfamily (  DisplayName~=~"{}ProjectileClass~(required~for~grimoire~or~any~weapon~that~supports~aiming)"{}  ,~EditCondition~=~"{}bHasProjectile~\texorpdfstring{$\vert$}{|}\texorpdfstring{$\vert$}{|}~bDoesSupportAiming"{},~EditConditionHides)}}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [protected]}}
+
+
+
+The class type of the projectile. Required for weapons that shoot projectiles or support aiming. 
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_a_projectile_base}{AProjectile\+Base} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_u_weapon_data_asset_af25665d05bf8f97760260e10e6551832}\index{UWeaponDataAsset@{UWeaponDataAsset}!bDoesSupportAiming@{bDoesSupportAiming}}
+\index{bDoesSupportAiming@{bDoesSupportAiming}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{bDoesSupportAiming}{bDoesSupportAiming}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_af25665d05bf8f97760260e10e6551832} 
+bool UWeapon\+Data\+Asset\+::b\+Does\+Support\+Aiming \{false\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Only for Editor. If true, then Indicator\+Class and Projectile\+Class properties will be shown. 
+
+\begin{DoxySeeAlso}{See also}
+Indicator\+Class Projectile\+Class 
+\end{DoxySeeAlso}
+\Hypertarget{class_u_weapon_data_asset_af88fc311c1431d7640bc59d4799b3ad3}\index{UWeaponDataAsset@{UWeaponDataAsset}!bHasMesh@{bHasMesh}}
+\index{bHasMesh@{bHasMesh}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{bHasMesh}{bHasMesh}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_af88fc311c1431d7640bc59d4799b3ad3} 
+bool UWeapon\+Data\+Asset\+::b\+Has\+Mesh \{true\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Only for Editor. If true, then Mesh property will be shown. 
+
+==================================================================== === Unreal Engine UPROPERTY === \begin{DoxySeeAlso}{See also}
+Mesh 
+\end{DoxySeeAlso}
+\Hypertarget{class_u_weapon_data_asset_a5bb1179ec71d6ce977aeb48f9a4818c5}\index{UWeaponDataAsset@{UWeaponDataAsset}!bHasProjectile@{bHasProjectile}}
+\index{bHasProjectile@{bHasProjectile}!UWeaponDataAsset@{UWeaponDataAsset}}
+\doxysubsubsection{\texorpdfstring{bHasProjectile}{bHasProjectile}}
+{\footnotesize\ttfamily \label{class_u_weapon_data_asset_a5bb1179ec71d6ce977aeb48f9a4818c5} 
+bool UWeapon\+Data\+Asset\+::b\+Has\+Projectile \{false\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Only for Editor. If true, then Projectile\+Class property will be shown. 
+
+\begin{DoxySeeAlso}{See also}
+Projectile\+Class 
+\end{DoxySeeAlso}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Public/\mbox{\hyperlink{_weapon_data_asset_8h}{Weapon\+Data\+Asset.\+h}}\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Private/Weapon\+Data\+Asset.\+cpp\end{DoxyCompactItemize}

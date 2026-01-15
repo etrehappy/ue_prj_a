@@ -1,0 +1,50 @@
+\doxysection{Area\+Explosion.\+h}
+\hypertarget{_area_explosion_8h_source}{}\label{_area_explosion_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/AreaExplosion.h@{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/AreaExplosion.h}}
+\mbox{\hyperlink{_area_explosion_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*****************************************************************/}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}GameFramework/Actor.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}AreaExplosion.generated.h"{}}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00018\ UCLASS()}
+\DoxyCodeLine{00019\ class\ WEAPONSYSTEMPLUGIN\_API\ \mbox{\hyperlink{class_a_area_explosion}{AAreaExplosion}}\ :\ public\ AActor}
+\DoxyCodeLine{00020\ \{}
+\DoxyCodeLine{00021\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00024\ \textcolor{keyword}{public}:\ }
+\DoxyCodeLine{00025\ \ \ \ \ \mbox{\hyperlink{class_a_area_explosion}{AAreaExplosion}}();}
+\DoxyCodeLine{00026\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_a_area_explosion}{\string~AAreaExplosion}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00027\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Tick(\textcolor{keywordtype}{float}\ DeltaTime)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keywordtype}{void}\ Initialize(\textcolor{keywordtype}{float}\ InRadius);}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keywordtype}{void}\ Explode();}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00032\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00033\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ BeginPlay()\ \textcolor{keyword}{override};\ \ }
+\DoxyCodeLine{00034\ }
+\DoxyCodeLine{00036\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00037\ \ \ \ \ UFUNCTION(NetMulticast,\ Reliable)}
+\DoxyCodeLine{00038\ \ \ \ \ void\ Multicast\_PlayEffects();}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00041\ protected:}
+\DoxyCodeLine{00042\ \ \ \ \ UPROPERTY(VisibleAnywhere)}
+\DoxyCodeLine{00043\ \ \ \ \ UParticleSystemComponent*\ ParticleComponent;}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \ \ \ \ UPROPERTY(EditAnywhere,\ Category\ =\ "{}Explosion"{})}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{keywordtype}{float}\ Damage\{150.f\};}
+\DoxyCodeLine{00047\ }
+\DoxyCodeLine{00051\ \ \ \ \ UPROPERTY(EditAnywhere,\ Category\ =\ \textcolor{stringliteral}{"{}Explosion"{}})}
+\DoxyCodeLine{00052\ \ \ \ \ float\ Radius\{\};}
+\DoxyCodeLine{00053\ }
+\DoxyCodeLine{00054\ \ \ \ \ UPROPERTY(EditAnywhere,\ Category\ =\ \textcolor{stringliteral}{"{}Explosion"{}})}
+\DoxyCodeLine{00055\ \ \ \ \ TSubclassOf<UDamageType>\ DamageType;}
+\DoxyCodeLine{00056\ }
+\DoxyCodeLine{00057\ \ \ \ \ }
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \};}
+
+\end{DoxyCode}

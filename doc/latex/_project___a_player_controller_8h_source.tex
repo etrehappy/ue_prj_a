@@ -1,0 +1,29 @@
+\doxysection{Project\+\_\+\+APlayer\+Controller.\+h}
+\hypertarget{_project___a_player_controller_8h_source}{}\label{_project___a_player_controller_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Project\_APlayerController.h@{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Project\_APlayerController.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{//\ Copyright\ Epic\ Games,\ Inc.\ All\ Rights\ Reserved.}}
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}GameFramework/PlayerController.h"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}Project\_APlayerController.generated.h"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{keyword}{class\ }UInputMappingContext;}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00015\ UCLASS(abstract)}
+\DoxyCodeLine{00016\ class\ \mbox{\hyperlink{class_a_project___a_player_controller}{AProject\_APlayerController}}\ :\ public\ APlayerController}
+\DoxyCodeLine{00017\ \{}
+\DoxyCodeLine{00018\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00019\ \ \ \ \ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00021\ }
+\DoxyCodeLine{00023\ \ \ \ \ UPROPERTY(EditAnywhere,\ BlueprintReadOnly,\ Category\ =\textcolor{stringliteral}{"{}Input"{}},\ meta\ =\ (AllowPrivateAccess\ =\ \textcolor{stringliteral}{"{}true"{}}))}
+\DoxyCodeLine{00024\ \ \ \ \ TArray<TObjectPtr<UInputMappingContext>>\ DefaultMappingContexts;}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00027\ \ \ \ \ virtual\ \textcolor{keywordtype}{void}\ SetupInputComponent()\ override;}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \};}
+
+\end{DoxyCode}

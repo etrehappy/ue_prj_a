@@ -1,0 +1,73 @@
+\doxysection{Target\+Indicator.\+h}
+\hypertarget{_target_indicator_8h_source}{}\label{_target_indicator_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/TargetIndicator.h@{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/TargetIndicator.h}}
+\mbox{\hyperlink{_target_indicator_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*****************************************************************/}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}GameFramework/Actor.h"{}}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}Components/SplineComponent.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}Components/SplineMeshComponent.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}Components/DecalComponent.h"{}}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}TargetIndicator.generated.h"{}}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00021\ UCLASS()}
+\DoxyCodeLine{00022\ class\ WEAPONSYSTEMPLUGIN\_API\ \mbox{\hyperlink{class_a_target_indicator}{ATargetIndicator}}\ :\ public\ AActor}
+\DoxyCodeLine{00023\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00028\ \ \ \ \ \mbox{\hyperlink{class_a_target_indicator}{ATargetIndicator}}();}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_a_target_indicator}{\string~ATargetIndicator}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Tick(\textcolor{keywordtype}{float}\ DeltaTime)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00031\ }
+\DoxyCodeLine{00038\ \ \ \ \ \textcolor{keywordtype}{void}\ UpdateIndicator(\textcolor{keyword}{const}\ FVector\&\ StartLocation,\ \textcolor{keyword}{const}\ FVector\&\ InitialVelocity,\ }
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ GravityZ,\ \textcolor{keywordtype}{float}\ ExplosionRadius,\ int32\ MaxSteps\ =\ 50,\ \textcolor{keywordtype}{float}\ TimeStep\ =\ 0.1f);}
+\DoxyCodeLine{00040\ }
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{void}\ Show();}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{void}\ Hide();}
+\DoxyCodeLine{00050\ }
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keyword}{const}\ FVector\&\ \mbox{\hyperlink{class_a_target_indicator_a4c88cd661c53f1195e884d7561ba9598}{GetFinalHitLocation}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ FinalHitLocation;\ \}}
+\DoxyCodeLine{00055\ }
+\DoxyCodeLine{00059\ \ \ \ \ \textcolor{keyword}{const}\ FVector\&\ \mbox{\hyperlink{class_a_target_indicator_aa980e4ba02f34fdbdadb00ab7f0d471f}{GetFinalHitNormal}}()\textcolor{keyword}{\ const\ }\{\ \textcolor{keywordflow}{return}\ FinalHitNormal;\ \}}
+\DoxyCodeLine{00060\ }
+\DoxyCodeLine{00061\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00062\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ BeginPlay()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00063\ }
+\DoxyCodeLine{00064\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00070\ \ \ \ \ \textcolor{keywordtype}{void}\ ComputeArc(\textcolor{keyword}{const}\ FVector\&\ StartLocation,\ \textcolor{keyword}{const}\ FVector\&\ InitialVelocity,}
+\DoxyCodeLine{00071\ \ \ \ \ \ \ \ \ \textcolor{keywordtype}{float}\ GravityZ,\ int32\ MaxSteps,\ \textcolor{keywordtype}{float}\ TimeStep);}
+\DoxyCodeLine{00072\ }
+\DoxyCodeLine{00078\ \ \ \ \ \textcolor{keywordtype}{void}\ UpdateSplineMeshes();}
+\DoxyCodeLine{00079\ }
+\DoxyCodeLine{00083\ \ \ \ \ \textcolor{keywordtype}{void}\ UpdateExplosionDecal(\textcolor{keywordtype}{float}\ ExplosionRadius);}
+\DoxyCodeLine{00084\ }
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00087\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00088\ \ \ \ \ TArray<FVector>\ ArcPoints\{\};}
+\DoxyCodeLine{00089\ \ \ \ \ FVector\ FinalHitLocation\{\};}
+\DoxyCodeLine{00090\ \ \ \ \ FVector\ FinalHitNormal\{\};}
+\DoxyCodeLine{00091\ }
+\DoxyCodeLine{00092\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00093\ \ \ \ \ UPROPERTY(VisibleAnywhere)}
+\DoxyCodeLine{00094\ \ \ \ \ USplineComponent*\ ArcSpline\{\};}
+\DoxyCodeLine{00095\ }
+\DoxyCodeLine{00096\ \ \ \ \ UPROPERTY()}
+\DoxyCodeLine{00097\ \ \ \ \ TArray<USplineMeshComponent*>\ ArcMeshes\{\};}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ UPROPERTY(EditAnywhere,\ BlueprintReadWrite,\ Category\ =\ \textcolor{stringliteral}{"{}Indicator"{}})}
+\DoxyCodeLine{00100\ \ \ \ \ UStaticMesh*\ SplineMesh\{\};}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ UPROPERTY(EditAnywhere,\ BlueprintReadWrite,\ Category\ =\ \textcolor{stringliteral}{"{}Indicator"{}})}
+\DoxyCodeLine{00103\ \ \ \ \ UMaterialInterface*\ SplineMaterial\{\};}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00105\ \ \ \ \ UPROPERTY(EditAnywhere,\ BlueprintReadWrite,\ Category\ =\ \textcolor{stringliteral}{"{}Indicator"{}})}
+\DoxyCodeLine{00106\ \ \ \ \ UDecalComponent*\ ExplosionDecal\{\};}
+\DoxyCodeLine{00107\ }
+\DoxyCodeLine{00108\ }
+\DoxyCodeLine{00109\ \};}
+
+\end{DoxyCode}

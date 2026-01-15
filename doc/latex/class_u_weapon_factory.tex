@@ -1,0 +1,83 @@
+\doxysection{UWeapon\+Factory Class Reference}
+\hypertarget{class_u_weapon_factory}{}\label{class_u_weapon_factory}\index{UWeaponFactory@{UWeaponFactory}}
+
+
+Factory spawns weapon instances based on gameplay tags. Specific weapon properties are defined in \doxylink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset}. Enables weapons to be spawned independently of their class.  
+
+
+
+
+{\ttfamily \#include $<$Weapon\+Factory.\+h$>$}
+
+Inheritance diagram for UWeapon\+Factory\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_u_weapon_factory}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_u_weapon_factory_ace66b47a555698722e65f64f01b676ae}{UWeapon\+Factory}} ()=default
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{class_a_weapon_base}{AWeapon\+Base}} \texorpdfstring{$\ast$}{*} \mbox{\hyperlink{class_u_weapon_factory_a2ea4ea3bef4ccb8d15b3b024355e2626}{Spawn\+Weapon\+By\+Tag}} (UWorld \texorpdfstring{$\ast$}{*}World, const FGameplay\+Tag Weapon\+Tag, const FActor\+Spawn\+Parameters \&Spawn\+Params, const FTransform \&Spawn\+Transform)
+\begin{DoxyCompactList}\small\item\em Spawns a weapon instance in the game world based on the provided gameplay tag. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Factory spawns weapon instances based on gameplay tags. Specific weapon properties are defined in \doxylink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset}. Enables weapons to be spawned independently of their class. 
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset} 
+
+\doxylink{class_a_weapon_base}{AWeapon\+Base} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_u_weapon_factory_ace66b47a555698722e65f64f01b676ae}\index{UWeaponFactory@{UWeaponFactory}!UWeaponFactory@{UWeaponFactory}}
+\index{UWeaponFactory@{UWeaponFactory}!UWeaponFactory@{UWeaponFactory}}
+\doxysubsubsection{\texorpdfstring{UWeaponFactory()}{UWeaponFactory()}}
+{\footnotesize\ttfamily \label{class_u_weapon_factory_ace66b47a555698722e65f64f01b676ae} 
+UWeapon\+Factory\+::\+UWeapon\+Factory (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+=== C++ member functions === 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_u_weapon_factory_a2ea4ea3bef4ccb8d15b3b024355e2626}\index{UWeaponFactory@{UWeaponFactory}!SpawnWeaponByTag@{SpawnWeaponByTag}}
+\index{SpawnWeaponByTag@{SpawnWeaponByTag}!UWeaponFactory@{UWeaponFactory}}
+\doxysubsubsection{\texorpdfstring{SpawnWeaponByTag()}{SpawnWeaponByTag()}}
+{\footnotesize\ttfamily \label{class_u_weapon_factory_a2ea4ea3bef4ccb8d15b3b024355e2626} 
+\mbox{\hyperlink{class_a_weapon_base}{AWeapon\+Base}} \texorpdfstring{$\ast$}{*} UWeapon\+Factory\+::\+Spawn\+Weapon\+By\+Tag (\begin{DoxyParamCaption}\item[{UWorld \texorpdfstring{$\ast$}{*}}]{World}{, }\item[{const FGameplay\+Tag}]{Weapon\+Tag}{, }\item[{const FActor\+Spawn\+Parameters \&}]{Spawn\+Params}{, }\item[{const FTransform \&}]{Spawn\+Transform}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+Spawns a weapon instance in the game world based on the provided gameplay tag. 
+
+Current calling sequence\+:
+\begin{DoxyItemize}
+\item After input, the Character calls UWeapon\+Component\+::\+Equip\+Weapon\+By\+Tag
+\item UWeapon\+Component\+::\+Equip\+Weapon\+By\+Tag calls \doxylink{class_u_weapon_factory_a2ea4ea3bef4ccb8d15b3b024355e2626}{UWeapon\+Factory\+::\+Spawn\+Weapon\+By\+Tag}
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em Weapon\+Tag} & The gameplay tag identifies the type of weapon that is to be spawned. ~\newline
+ \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A pointer to the spawned weapon instance, or nullptr if spawning failed. 
+\end{DoxyReturn}
+\begin{DoxySeeAlso}{See also}
+UWeapon\+Component\+::\+Server\+\_\+\+Equip\+Weapon\+By\+Tag\+\_\+\+Implementation 
+\end{DoxySeeAlso}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Public/\mbox{\hyperlink{_weapon_factory_8h}{Weapon\+Factory.\+h}}\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Private/Weapon\+Factory.\+cpp\end{DoxyCompactItemize}

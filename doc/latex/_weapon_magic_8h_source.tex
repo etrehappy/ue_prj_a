@@ -1,0 +1,43 @@
+\doxysection{Weapon\+Magic.\+h}
+\hypertarget{_weapon_magic_8h_source}{}\label{_weapon_magic_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/WeaponMagic.h@{F:/Download/test/ue\_prj\_a/Project\_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/WeaponMagic.h}}
+\mbox{\hyperlink{_weapon_magic_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*****************************************************************/}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}GameFramework/Actor.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_weapon_base_8h}{WeaponBase.h}}"{}}}
+\DoxyCodeLine{00013\ }
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}WeaponMagic.generated.h"{}}}
+\DoxyCodeLine{00015\ }
+\DoxyCodeLine{00021\ UCLASS()}
+\DoxyCodeLine{00022\ class\ WEAPONSYSTEMPLUGIN\_API\ \mbox{\hyperlink{class_a_weapon_magic}{AWeaponMagic}}\ :\ public\ \mbox{\hyperlink{class_a_weapon_base}{AWeaponBase}}}
+\DoxyCodeLine{00023\ \{}
+\DoxyCodeLine{00024\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00025\ }
+\DoxyCodeLine{00026\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00027\ \ \ \ \ \mbox{\hyperlink{class_a_weapon_magic}{AWeaponMagic}}();}
+\DoxyCodeLine{00028\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_a_weapon_magic}{\string~AWeaponMagic}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Tick(\textcolor{keywordtype}{float}\ DeltaTime)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00037\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ SpawnProjectile()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00040\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ BeginPlay()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00041\ }
+\DoxyCodeLine{00042\ \ \ \ \ UFUNCTION(Server,\ Reliable)}
+\DoxyCodeLine{00043\ \ \ \ \ \textcolor{keywordtype}{void}\ Server\_SpawnProjectile(\textcolor{keyword}{const}\ FVector\ AimOrigin,\ \textcolor{keyword}{const}\ FVector\ AimDirection);}
+\DoxyCodeLine{00044\ }
+\DoxyCodeLine{00045\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00046\ \ \ \ \ \textcolor{comment}{//\ Support\ functions\ for\ spawning\ projectiles}}
+\DoxyCodeLine{00047\ \ \ \ \ \textcolor{keywordtype}{bool}\ GetPlayerAim(FVector\&\ OutWorldOrigin,\ FVector\&\ OutWorldDirection)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00048\ \ \ \ \ FVector\ ComputeTraceEnd(\textcolor{keyword}{const}\ FVector\&\ WorldOrigin,\ \textcolor{keyword}{const}\ FVector\&\ WorldDirection)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keywordtype}{bool}\ PerformAimTrace(\textcolor{keyword}{const}\ FVector\&\ WorldOrigin,\ \textcolor{keyword}{const}\ FVector\&\ TraceEnd,\ FHitResult\&\ OutHit)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00054\ \ \ \ \ \textcolor{keywordtype}{bool}\ GetProjectileSpawnTransform(FVector\&\ OutLocation,\ FRotator\&\ OutRotation,\ FVector\&\ OutDirection,\ \textcolor{keyword}{const}\ FVector\&\ TargetPoint)\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00055\ \ \ \ \ \textcolor{keywordtype}{void}\ SpawnProjectileAt(\textcolor{keyword}{const}\ FVector\&\ Location,\ \textcolor{keyword}{const}\ FRotator\&\ Rotation,\ \textcolor{keyword}{const}\ FVector\&\ Direction);\ \ \ \ }
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ }
+\DoxyCodeLine{00059\ \};}
+
+\end{DoxyCode}

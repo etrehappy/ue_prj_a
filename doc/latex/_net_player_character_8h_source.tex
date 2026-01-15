@@ -1,0 +1,91 @@
+\doxysection{Net\+Player\+Character.\+h}
+\hypertarget{_net_player_character_8h_source}{}\label{_net_player_character_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/Character/NetPlayerCharacter.h@{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/Character/NetPlayerCharacter.h}}
+\mbox{\hyperlink{_net_player_character_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*****************************************************************/}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00009\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00010\ }
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_ability_component_8h}{AbilityComponent.h}}"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_base_character_8h}{Character/BaseCharacter.h}}"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_combat_component_8h}{Character/CombatComponent.h}}"{}}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_custom_input_component_8h}{Character/CustomInputComponent.h}}"{}}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ "{}Character/CustomLocomotionComponent.h"{}}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ "{}Character/CustomPlayerController.h"{}}}
+\DoxyCodeLine{00017\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_weapon_component_8h}{WeaponComponent.h}}"{}}}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{preprocessor}{\#include\ "{}NetPlayerCharacter.generated.h"{}}}
+\DoxyCodeLine{00020\ }
+\DoxyCodeLine{00021\ \textcolor{keyword}{class\ }USpringArmComponent;}
+\DoxyCodeLine{00022\ \textcolor{keyword}{class\ }UCameraComponent;}
+\DoxyCodeLine{00023\ \textcolor{keyword}{class\ }UArrowComponent;}
+\DoxyCodeLine{00024\ }
+\DoxyCodeLine{00034\ UCLASS()}
+\DoxyCodeLine{00035\ class\ PROJECT\_A\_API\ \mbox{\hyperlink{class_a_net_player_character}{ANetPlayerCharacter}}\ :\ public\ \mbox{\hyperlink{class_a_base_character}{ABaseCharacter}}}
+\DoxyCodeLine{00036\ \{}
+\DoxyCodeLine{00037\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00038\ }
+\DoxyCodeLine{00039\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00040\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00041\ \ \ \ \ \mbox{\hyperlink{class_a_net_player_character}{ANetPlayerCharacter}}();}
+\DoxyCodeLine{00042\ }
+\DoxyCodeLine{00043\ }
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_a_net_player_character}{\string~ANetPlayerCharacter}}()\ \textcolor{keyword}{override}\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00048\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Destroyed()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00049\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Tick(\textcolor{keywordtype}{float}\ DeltaTime)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00050\ \ \ \ \ }
+\DoxyCodeLine{00051\ }
+\DoxyCodeLine{00056\ \ \ \ \ \textcolor{keywordtype}{void}\ EquipWeapon(\mbox{\hyperlink{_custom_input_component_8h_adffab3f7ba97d694dec7973a6bcd0979}{EInputActionId}}\ InputActionType);}
+\DoxyCodeLine{00057\ }
+\DoxyCodeLine{00058\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00059\ }
+\DoxyCodeLine{00060\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ BeginPlay()\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00061\ }
+\DoxyCodeLine{00068\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ SetupPlayerInputComponent(\textcolor{keyword}{class}\ UInputComponent*\ PlayerInputComponent)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00069\ }
+\DoxyCodeLine{00070\ }
+\DoxyCodeLine{00072\ \textcolor{keyword}{protected}:}
+\DoxyCodeLine{00081\ \ \ \ \ UFUNCTION(BlueprintImplementableEvent,\ Category\ =\ \textcolor{stringliteral}{"{}Events"{}})}
+\DoxyCodeLine{00082\ \ \ \ \ void\ OnEquipWeapon(const\ \mbox{\hyperlink{_custom_input_component_8h_adffab3f7ba97d694dec7973a6bcd0979}{EInputActionId}}\ InputActionType);\textcolor{comment}{/*TODO\ Check\ Net*/}}
+\DoxyCodeLine{00083\ }
+\DoxyCodeLine{00090\ \ \ \ \ UFUNCTION()}
+\DoxyCodeLine{00091\ \ \ \ \ \textcolor{keywordtype}{void}\ HandleAbilityActivated(FGameplayTag\ Ability);\textcolor{comment}{/*TODO\ Check\ Net\ today*/}}
+\DoxyCodeLine{00092\ }
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00095\ protected:}
+\DoxyCodeLine{00096\ \ \ \ \ UPROPERTY(VisibleAnywhere,\ BlueprintReadWrite,\ Category\ =\ "{}Camera"{},\ meta\ =\ (AllowPrivateAccess\ =\ "{}true"{}))}
+\DoxyCodeLine{00097\ \ \ \ \ TObjectPtr<USpringArmComponent>\ CameraBoom\{\};}
+\DoxyCodeLine{00098\ }
+\DoxyCodeLine{00099\ \ \ \ \ UPROPERTY(VisibleAnywhere,\ BlueprintReadWrite,\ Category\ =\ \textcolor{stringliteral}{"{}Camera"{}},\ meta\ =\ (AllowPrivateAccess\ =\ \textcolor{stringliteral}{"{}true"{}}))}
+\DoxyCodeLine{00100\ \ \ \ \ TObjectPtr<UCameraComponent>\ FollowCamera\{\};}
+\DoxyCodeLine{00101\ }
+\DoxyCodeLine{00102\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadWrite,\ Category\ =\ \textcolor{stringliteral}{"{}Camera"{}},\ meta\ =\ (AllowPrivateAccess\ =\ \textcolor{stringliteral}{"{}true"{}}))}
+\DoxyCodeLine{00103\ \ \ \ \ TObjectPtr<UArrowComponent>\ Arrow\{\};}
+\DoxyCodeLine{00104\ }
+\DoxyCodeLine{00108\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Components"{}})}
+\DoxyCodeLine{00109\ \ \ \ \ TObjectPtr<\mbox{\hyperlink{class_u_custom_locomotion_component}{UCustomLocomotionComponent}}>\ LocomotionComponent\{\};}
+\DoxyCodeLine{00110\ }
+\DoxyCodeLine{00111\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Components"{}})}
+\DoxyCodeLine{00112\ \ \ \ \ TObjectPtr<UCustomInputComponent>\ CustomInputComponent\{\};}
+\DoxyCodeLine{00113\ }
+\DoxyCodeLine{00114\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Components"{}})}
+\DoxyCodeLine{00115\ \ \ \ \ TObjectPtr<\mbox{\hyperlink{class_u_weapon_component}{UWeaponComponent}}>\ WeaponComponent\{\};\textcolor{comment}{/*TODO\ Check\ Net\ today*/}}
+\DoxyCodeLine{00116\ }
+\DoxyCodeLine{00120\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Components"{}})}
+\DoxyCodeLine{00121\ \ \ \ \ TObjectPtr<\mbox{\hyperlink{class_u_ability_component}{UAbilityComponent}}>\ AbilityComponent\{\};\textcolor{comment}{/*TODO\ Check\ Net\ today*/}}
+\DoxyCodeLine{00122\ }
+\DoxyCodeLine{00126\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Components"{}})}
+\DoxyCodeLine{00127\ \ \ \ \ TObjectPtr<UCombatComponent>\ CombatComponent\{\};\textcolor{comment}{/*TODO\ Check\ Net\ today*/}}
+\DoxyCodeLine{00128\ }
+\DoxyCodeLine{00129\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Components"{}})}
+\DoxyCodeLine{00130\ \ \ \ \ TObjectPtr<\mbox{\hyperlink{class_a_custom_player_controller}{ACustomPlayerController}}>\ PlayerController\{\};}
+\DoxyCodeLine{00131\ }
+\DoxyCodeLine{00132\ \};}
+\DoxyCodeLine{00133\ }
+\DoxyCodeLine{00134\ }
+\DoxyCodeLine{00135\ \textcolor{comment}{//UFUNCTION(BlueprintCallable)}}
+\DoxyCodeLine{00136\ \textcolor{comment}{//void\ UnequipAnyWeapon(const\ EInputActionId\ InputActionType);}}
+\DoxyCodeLine{00137\ }
+\DoxyCodeLine{00138\ \textcolor{comment}{//virtual\ void\ GetLifetimeReplicatedProps(TArray<FLifetimeProperty>\&\ OutLifetimeProps)\ const\ override;}}
+
+\end{DoxyCode}

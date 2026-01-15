@@ -1,0 +1,101 @@
+\doxysection{Combat\+Component.\+h}
+\hypertarget{_combat_component_8h_source}{}\label{_combat_component_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/Character/CombatComponent.h@{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/Character/CombatComponent.h}}
+\mbox{\hyperlink{_combat_component_8h}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ \textcolor{comment}{/*****************************************************************/}}
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00011\ \textcolor{preprocessor}{\#include\ "{}Components/ActorComponent.h"{}}}
+\DoxyCodeLine{00012\ \textcolor{preprocessor}{\#include\ "{}GameplayTagContainer.h"{}}}
+\DoxyCodeLine{00013\ \textcolor{preprocessor}{\#include\ "{}CharacterStateEnums.h"{}}}
+\DoxyCodeLine{00014\ \textcolor{preprocessor}{\#include\ "{}Animation/CombatMontageTable.h"{}}}
+\DoxyCodeLine{00015\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_weapon_component_8h}{WeaponComponent.h}}"{}}}
+\DoxyCodeLine{00016\ \textcolor{preprocessor}{\#include\ "{}\mbox{\hyperlink{_custom_input_component_8h}{Character/CustomInputComponent.h}}"{}}}
+\DoxyCodeLine{00017\ }
+\DoxyCodeLine{00018\ \textcolor{preprocessor}{\#include\ "{}CombatComponent.generated.h"{}}}
+\DoxyCodeLine{00019\ }
+\DoxyCodeLine{00020\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_a_net_player_character}{ANetPlayerCharacter}};}
+\DoxyCodeLine{00021\ \textcolor{keyword}{class\ }\mbox{\hyperlink{class_u_custom_locomotion_component}{UCustomLocomotionComponent}};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00029\ UCLASS(\ ClassGroup=(CustomCombat),\ meta=(BlueprintSpawnableComponent)\ )}
+\DoxyCodeLine{00030\ \textcolor{keyword}{class\ }PROJECT\_A\_API\ UCombatComponent\ :\ \textcolor{keyword}{public}\ UActorComponent}
+\DoxyCodeLine{00031\ \{}
+\DoxyCodeLine{00032\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00034\ public:\ }
+\DoxyCodeLine{00035\ \ \ \ \ UCombatComponent();}
+\DoxyCodeLine{00036\ \ \ \ \ virtual\ \string~UCombatComponent()\ =\ default;}
+\DoxyCodeLine{00037\ \ \ \ \ virtual\ \textcolor{keywordtype}{void}\ TickComponent(\textcolor{keywordtype}{float}\ DeltaTime,\ ELevelTick\ TickType,\ FActorComponentTickFunction*\ ThisTickFunction)\ override;}
+\DoxyCodeLine{00038\ \ \ \ \ virtual\ \textcolor{keywordtype}{void}\ GetLifetimeReplicatedProps(TArray<FLifetimeProperty>\&\ OutLifetimeProps)\ const\ override;}
+\DoxyCodeLine{00039\ }
+\DoxyCodeLine{00040\ private:}
+\DoxyCodeLine{00044\ \ \ \ \ \textcolor{keywordtype}{void}\ Initialize();}
+\DoxyCodeLine{00045\ }
+\DoxyCodeLine{00046\ public:}
+\DoxyCodeLine{00063\ \ \ \ \ virtual\ \textcolor{keywordtype}{bool}\ UpdateAttackState(const\ FGameplayTag\&\ CurrentAbilityTag,\ const\ FGameplayTag\&\ CurrentWeaponTag);}
+\DoxyCodeLine{00064\ }
+\DoxyCodeLine{00076\ \ \ \ \ \textcolor{keywordtype}{bool}\ TryUnequipWeapon(const\ \mbox{\hyperlink{_custom_input_component_8h_adffab3f7ba97d694dec7973a6bcd0979}{EInputActionId}}\ InputActionType);}
+\DoxyCodeLine{00077\ }
+\DoxyCodeLine{00084\ \ \ \ \ \textcolor{keywordtype}{void}\ OnAttackAnimationFinished();}
+\DoxyCodeLine{00085\ }
+\DoxyCodeLine{00092\ \ \ \ \ \textcolor{keywordtype}{void}\ OnSpawnProjectile();}
+\DoxyCodeLine{00093\ }
+\DoxyCodeLine{00102\ \ \ \ \ \textcolor{keywordtype}{void}\ OnSpawnBombProjectile();}
+\DoxyCodeLine{00103\ }
+\DoxyCodeLine{00104\ protected:}
+\DoxyCodeLine{00105\ \ \ \ \ virtual\ \textcolor{keywordtype}{void}\ BeginPlay()\ override;}
+\DoxyCodeLine{00106\ }
+\DoxyCodeLine{00107\ private:}
+\DoxyCodeLine{00114\ \ \ \ \ \textcolor{keywordtype}{void}\ StartAnimAttack();}
+\DoxyCodeLine{00115\ \ \ \ \ }
+\DoxyCodeLine{00120\ \ \ \ \ UAnimMontage*\ FindMontage();}
+\DoxyCodeLine{00121\ }
+\DoxyCodeLine{00126\ \ \ \ \ UAnimInstance*\ GetAnimInstance()\ const;}
+\DoxyCodeLine{00127\ }
+\DoxyCodeLine{00131\ \ \ \ \ \textcolor{keywordtype}{void}\ CleanCurrentMontage();}
+\DoxyCodeLine{00132\ }
+\DoxyCodeLine{00133\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }
+\DoxyCodeLine{00135\ private:}
+\DoxyCodeLine{00139\ \ \ \ \ UAnimMontage*\ CurrentMontage\{\textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{00140\ }
+\DoxyCodeLine{00141\ }
+\DoxyCodeLine{00144\ \textcolor{keyword}{protected}:\ \ }
+\DoxyCodeLine{00145\ \ \ \ \ UFUNCTION(Server,\ Reliable)}
+\DoxyCodeLine{00146\ \ \ \ \ \textcolor{keywordtype}{void}\ Server\_StopAttack();}
+\DoxyCodeLine{00147\ }
+\DoxyCodeLine{00151\ \ \ \ \ UFUNCTION(NetMulticast,\ Reliable)}
+\DoxyCodeLine{00152\ \ \ \ \ \textcolor{keywordtype}{void}\ Multicast\_StopAttack();}
+\DoxyCodeLine{00153\ }
+\DoxyCodeLine{00158\ \ \ \ \ UFUNCTION()}
+\DoxyCodeLine{00159\ \ \ \ \ void\ OnRep\_UpdateAttackState();}
+\DoxyCodeLine{00160\ }
+\DoxyCodeLine{00161\ }
+\DoxyCodeLine{00163\ protected:}
+\DoxyCodeLine{00168\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ ReplicatedUsing\ =\ OnRep\_UpdateAttackState,\ BlueprintReadOnly,\ Category\ =\ "{}Attack"{})}
+\DoxyCodeLine{00169\ \ \ \ \ FGameplayTagContainer\ CurrentAttackTags\{\};}
+\DoxyCodeLine{00170\ }
+\DoxyCodeLine{00177\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ \textcolor{comment}{/*Replicated,*/}\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Attack"{}})}
+\DoxyCodeLine{00178\ \ \ \ \ bool\ bIsFighting\{\textcolor{keyword}{false}\};}
+\DoxyCodeLine{00179\ }
+\DoxyCodeLine{00185\ \ \ \ \ UPROPERTY(VisibleDefaultsOnly,\ Replicated,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Attack"{}})}
+\DoxyCodeLine{00186\ \ \ \ \ E\_CharacterBattleState\ BattleState\{E\_CharacterBattleState::Normal\};}
+\DoxyCodeLine{00187\ }
+\DoxyCodeLine{00188\ \ \ \ \ UPROPERTY(EditDefaultsOnly,\ BlueprintReadOnly,\ Category\ =\ \textcolor{stringliteral}{"{}Attack"{}})}
+\DoxyCodeLine{00189\ \ \ \ \ TObjectPtr<UDataTable>\ MontageTable\{\};}
+\DoxyCodeLine{00190\ }
+\DoxyCodeLine{00191\ \textcolor{keyword}{private}:}
+\DoxyCodeLine{00192\ \ \ \ \ UPROPERTY()}
+\DoxyCodeLine{00193\ \ \ \ \ TObjectPtr<\mbox{\hyperlink{class_a_net_player_character}{ANetPlayerCharacter}}>\ OwnerCharacter\{\};}
+\DoxyCodeLine{00194\ }
+\DoxyCodeLine{00198\ \ \ \ \ UPROPERTY()}
+\DoxyCodeLine{00199\ \ \ \ \ TObjectPtr<\mbox{\hyperlink{class_u_weapon_component}{UWeaponComponent}}>\ OwnerWeaponComponent\{\};}
+\DoxyCodeLine{00200\ \};}
+\DoxyCodeLine{00201\ }
+\DoxyCodeLine{00202\ }
+\DoxyCodeLine{00203\ }
+\DoxyCodeLine{00205\ \textcolor{comment}{//\ *\ @see\ BattleState}}
+\DoxyCodeLine{00206\ \textcolor{comment}{//\ */}}
+\DoxyCodeLine{00207\ \textcolor{comment}{//E\_CharacterBattleState\ GetBattleState();}}
+\DoxyCodeLine{00208\ \textcolor{comment}{//void\ ChangeWeapon();}}
+
+\end{DoxyCode}

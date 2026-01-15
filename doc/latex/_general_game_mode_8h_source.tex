@@ -1,0 +1,37 @@
+\doxysection{General\+Game\+Mode.\+h}
+\hypertarget{_general_game_mode_8h_source}{}\label{_general_game_mode_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/GeneralGameMode.h@{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/GeneralGameMode.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}GameFramework/GameModeBase.h"{}}}
+\DoxyCodeLine{00007\ }
+\DoxyCodeLine{00008\ \textcolor{preprocessor}{\#include\ "{}GeneralGameMode.generated.h"{}}}
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00010\ UENUM(BlueprintType)}
+\DoxyCodeLine{00011\ \textcolor{keyword}{enum\ class}\ EServerWorldType\ :\ uint8}
+\DoxyCodeLine{00012\ \{}
+\DoxyCodeLine{00013\ \ \ \ \ None\ \ \ \ \ \ \ \ \ \ \ \ UMETA(DisplayName\ =\ \textcolor{stringliteral}{"{}None"{}})}
+\DoxyCodeLine{00014\ \ \ \ \ ,\ Test\ \ \ \ \ \ \ \ \ \ UMETA(DisplayName\ =\ \textcolor{stringliteral}{"{}Test"{}})}
+\DoxyCodeLine{00015\ \ \ \ \ ,\ Hub\ \ \ \ \ \ \ \ \ \ \ UMETA(DisplayName\ =\ \textcolor{stringliteral}{"{}Hub"{}})}
+\DoxyCodeLine{00016\ \ \ \ \ ,\ MainWorld\ \ \ \ \ UMETA(DisplayName\ =\ \textcolor{stringliteral}{"{}MainWorld"{}})}
+\DoxyCodeLine{00017\ \};}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00022\ UCLASS()}
+\DoxyCodeLine{00023\ class\ PROJECT\_A\_API\ \mbox{\hyperlink{class_a_general_game_mode}{AGeneralGameMode}}\ :\ public\ AGameModeBase}
+\DoxyCodeLine{00024\ \{}
+\DoxyCodeLine{00025\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00026\ \ \ \ \ }
+\DoxyCodeLine{00027\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00028\ \ \ \ \ \mbox{\hyperlink{class_a_general_game_mode}{AGeneralGameMode}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00029\ \ \ \ \ \textcolor{keyword}{virtual}\ \mbox{\hyperlink{class_a_general_game_mode}{\string~AGeneralGameMode}}()\ =\ \textcolor{keywordflow}{default};}
+\DoxyCodeLine{00030\ }
+\DoxyCodeLine{00031\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ PostLogin(APlayerController*\ NewPlayer)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00032\ \ \ \ \ \textcolor{keyword}{virtual}\ EServerWorldType\ GetMapIdentifier()\ \textcolor{keyword}{const};}
+\DoxyCodeLine{00033\ \ \ \ \ }
+\DoxyCodeLine{00034\ \};}
+
+\end{DoxyCode}

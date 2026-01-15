@@ -1,0 +1,43 @@
+\doxysection{UAnim\+Attack\+Notifies.\+h}
+\hypertarget{_u_anim_attack_notifies_8h_source}{}\label{_u_anim_attack_notifies_8h_source}\index{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/Animation/UAnimAttackNotifies.h@{F:/Download/test/ue\_prj\_a/Project\_A/Source/Project\_A/Public/Animation/UAnimAttackNotifies.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00001\ }
+\DoxyCodeLine{00002\ }
+\DoxyCodeLine{00003\ \textcolor{preprocessor}{\#pragma\ once}}
+\DoxyCodeLine{00004\ }
+\DoxyCodeLine{00005\ \textcolor{preprocessor}{\#include\ "{}CoreMinimal.h"{}}}
+\DoxyCodeLine{00006\ \textcolor{preprocessor}{\#include\ "{}GameFramework/Actor.h"{}}}
+\DoxyCodeLine{00007\ \textcolor{preprocessor}{\#include\ "{}UAnimAttackNotifies.generated.h"{}}}
+\DoxyCodeLine{00008\ }
+\DoxyCodeLine{00009\ }
+\DoxyCodeLine{00014\ UCLASS()}
+\DoxyCodeLine{00015\ class\ PROJECT\_A\_API\ \mbox{\hyperlink{class_u_attack_finished}{UAttackFinished}}\ :\ public\ UAnimNotify}
+\DoxyCodeLine{00016\ \{}
+\DoxyCodeLine{00017\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00018\ }
+\DoxyCodeLine{00019\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00020\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Notify(USkeletalMeshComponent*\ MeshComp,\ UAnimSequenceBase*\ Animation)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00021\ \};}
+\DoxyCodeLine{00022\ }
+\DoxyCodeLine{00023\ }
+\DoxyCodeLine{00024\ UCLASS()}
+\DoxyCodeLine{00025\ class\ \mbox{\hyperlink{class_u_anim_notify___spawn_magic_projectile}{UAnimNotify\_SpawnMagicProjectile}}\ :\ public\ UAnimNotify}
+\DoxyCodeLine{00026\ \{}
+\DoxyCodeLine{00027\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00028\ }
+\DoxyCodeLine{00029\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00030\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Notify(USkeletalMeshComponent*\ MeshComp,\ UAnimSequenceBase*\ Animation)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00031\ \};}
+\DoxyCodeLine{00032\ }
+\DoxyCodeLine{00033\ UCLASS()}
+\DoxyCodeLine{00034\ class\ \mbox{\hyperlink{class_u_anim_notify___spawn_bomb_projectile}{UAnimNotify\_SpawnBombProjectile}}\ :\ public\ UAnimNotify}
+\DoxyCodeLine{00035\ \{}
+\DoxyCodeLine{00036\ \ \ \ \ GENERATED\_BODY()}
+\DoxyCodeLine{00037\ }
+\DoxyCodeLine{00038\ \textcolor{keyword}{public}:}
+\DoxyCodeLine{00039\ \ \ \ \ \textcolor{keyword}{virtual}\ \textcolor{keywordtype}{void}\ Notify(USkeletalMeshComponent*\ MeshComp,\ UAnimSequenceBase*\ Animation)\ \textcolor{keyword}{override};}
+\DoxyCodeLine{00040\ \};}
+\DoxyCodeLine{00041\ }
+
+\end{DoxyCode}

@@ -1,0 +1,291 @@
+\doxysection{AWeapon\+Base Class Reference}
+\hypertarget{class_a_weapon_base}{}\label{class_a_weapon_base}\index{AWeaponBase@{AWeaponBase}}
+
+
+Abstract class for all weapons in the Weapon System Plugin.  
+
+
+
+
+{\ttfamily \#include $<$Weapon\+Base.\+h$>$}
+
+Inheritance diagram for AWeapon\+Base\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_a_weapon_base}
+\end{center}
+\end{figure}
+\doxysubsubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_a_weapon_base_a64b8ab90669db2552d55cd83df90509b}{AWeapon\+Base}} ()
+\item 
+\Hypertarget{class_a_weapon_base_a374eaf0983cf4631264da30e50cfc042}\label{class_a_weapon_base_a374eaf0983cf4631264da30e50cfc042} 
+virtual void {\bfseries Tick} (float Delta\+Time) override
+\item 
+\Hypertarget{class_a_weapon_base_a86b8f3b281e468b7d27dfce72cb12016}\label{class_a_weapon_base_a86b8f3b281e468b7d27dfce72cb12016} 
+virtual void {\bfseries Get\+Lifetime\+Replicated\+Props} (TArray$<$ FLifetime\+Property $>$ \&Out\+Lifetime\+Props) const override
+\item 
+bool \mbox{\hyperlink{class_a_weapon_base_a63fe359c83fee3edc6aa709bbaea1497}{Initialise\+Mesh\+Component}} (UStreamable\+Render\+Asset \texorpdfstring{$\ast$}{*}New\+Mesh)
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_a536defbe4ce913858a87703e6d6738e9}{Initialise\+From\+Data}} (\mbox{\hyperlink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset}} \texorpdfstring{$\ast$}{*}Data)
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_af471513e30ae9f1b39124e2808a238aa}{Start\+Attack}} ()
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_acfde171c4e0523f86d00733447088fd4}{Stop\+Attack}} ()
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_add2ac0ce6eb11aecc8ac83b75cfad02e}{Start\+Aiming}} ()
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_a63875a919af96ed31787b9fd61e3fb64}{Stop\+Aiming}} ()
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_a8bbe1a65bef7cd4c37e9e31219adfa8a}{Request\+Fire\+At\+Location}} (const FVector \&Target)
+\begin{DoxyCompactList}\small\item\em Client function. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_a9db40dc3b3fc66e990de0643ac94559a}{Spawn\+Projectile}} ()
+\begin{DoxyCompactList}\small\item\em Client function. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a4f11cedf6c48425dc0eb8d3656d4b650}\label{class_a_weapon_base_a4f11cedf6c48425dc0eb8d3656d4b650} 
+const FGameplay\+Tag \& {\bfseries Get\+Weapon\+Tag} () const
+\begin{DoxyCompactList}\small\item\em Client and Server function. ~\newline
+ \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a824e30324f7b44d4cc7b19f7aaaafd55}\label{class_a_weapon_base_a824e30324f7b44d4cc7b19f7aaaafd55} 
+bool {\bfseries Is\+Weapon\+Attacking} () const
+\begin{DoxyCompactList}\small\item\em Client and Server function. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a03ee7a4eb465dd933991182878520b75}\label{class_a_weapon_base_a03ee7a4eb465dd933991182878520b75} 
+void {\bfseries Set\+Is\+Weapon\+Attacking} (bool b\+New\+Is\+Weapon\+Attacking)
+\begin{DoxyCompactList}\small\item\em Client and Server function. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_ab98d9284a1cc7f6137d53e787c76304b}\label{class_a_weapon_base_ab98d9284a1cc7f6137d53e787c76304b} 
+void {\bfseries Set\+Collision} (ECollision\+Enabled\+::\+Type Collision\+Enabled, ECollision\+Response Collision\+Response)
+\begin{DoxyCompactList}\small\item\em Server function. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\Hypertarget{class_a_weapon_base_a08284e51f5427ccccfb76c4da4839170}\label{class_a_weapon_base_a08284e51f5427ccccfb76c4da4839170} 
+virtual void {\bfseries Begin\+Play} () override
+\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_a6660e9b7c2f3f87bda4ed441e064e745}{Multicast\+\_\+\+Set\+Collision}} (ECollision\+Enabled\+::\+Type Collision\+Enabled, ECollision\+Response Collision\+Response)
+\item 
+virtual void \mbox{\hyperlink{class_a_weapon_base_aa76a14fbee3d5b4050a3ae03a4bc734f}{Client\+\_\+\+Start\+Attack}} ()
+\item 
+\Hypertarget{class_a_weapon_base_a4e2cce38e2d11f388989ebda7ca8fd4e}\label{class_a_weapon_base_a4e2cce38e2d11f388989ebda7ca8fd4e} 
+virtual void {\bfseries Client\+\_\+\+Stop\+Attack} ()
+\item 
+\Hypertarget{class_a_weapon_base_ade142333f1047f4f6481c1f215ed8f39}\label{class_a_weapon_base_ade142333f1047f4f6481c1f215ed8f39} 
+void {\bfseries Server\+\_\+\+Set\+Is\+Weapon\+Attacking} (bool b\+New\+Is\+Weapon\+Attacking)
+\end{DoxyCompactItemize}
+\doxysubsubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+bool \mbox{\hyperlink{class_a_weapon_base_ac601f05c4ef6cca5c1d8c59628b5ba99}{b\+Is\+Weapon\+Attacking}} \{false\}
+\begin{DoxyCompactList}\small\item\em Indicates whether the weapon is currently attacking. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a8d6e1ad94be82008e42dc3a70aa0d01f}\label{class_a_weapon_base_a8d6e1ad94be82008e42dc3a70aa0d01f} 
+TObject\+Ptr$<$ ACharacter $>$ {\bfseries Owning\+Character} \{\}
+\begin{DoxyCompactList}\small\item\em The character that owns this weapon. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_afae6f78b1a029cb4e197af11adf1689d}\label{class_a_weapon_base_afae6f78b1a029cb4e197af11adf1689d} 
+FGameplay\+Tag {\bfseries Weapon\+Tag} \{\}
+\begin{DoxyCompactList}\small\item\em A unique tag that identifies the weapon type. Throwable items are also considered weapons. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_aaa661f74b4eb4b24fb8eb2770a0c3545}\label{class_a_weapon_base_aaa661f74b4eb4b24fb8eb2770a0c3545} 
+TObject\+Ptr$<$ UMesh\+Component $>$ {\bfseries Mesh\+Component} \{\}
+\begin{DoxyCompactList}\small\item\em It can be either a static mesh or a skeletal mesh, depending on the weapon type. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a321561f9745746d44f6040ea679ce872}\label{class_a_weapon_base_a321561f9745746d44f6040ea679ce872} 
+float {\bfseries Damage} \{1.f\}
+\begin{DoxyCompactList}\small\item\em Current implementation does not support Damage. Future versions may include it. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a250a5b19bd48456bf388c14d32dcc488}\label{class_a_weapon_base_a250a5b19bd48456bf388c14d32dcc488} 
+float {\bfseries Attack\+Range} \{50.f\}
+\begin{DoxyCompactList}\small\item\em Current implementation does not support Damage. Future versions may include it. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a8acd751dae54019397ba8b042a947b0a}\label{class_a_weapon_base_a8acd751dae54019397ba8b042a947b0a} 
+TSubclass\+Of$<$ \mbox{\hyperlink{class_a_projectile_base}{AProjectile\+Base}} $>$ {\bfseries Projectile\+Class} \{\}
+\begin{DoxyCompactList}\small\item\em The class of the projectile that this weapon can spawn. Used by magic and throwable weapons. \end{DoxyCompactList}\item 
+\Hypertarget{class_a_weapon_base_a7ccaa9135a5b82d6f5b57587fc58fac8}\label{class_a_weapon_base_a7ccaa9135a5b82d6f5b57587fc58fac8} 
+TSubclass\+Of$<$ \mbox{\hyperlink{class_a_target_indicator}{ATarget\+Indicator}} $>$ {\bfseries Indicator\+Class} \{\}
+\begin{DoxyCompactList}\small\item\em Used by throwable weapons. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Abstract class for all weapons in the Weapon System Plugin. 
+
+Responsibilities\+:
+\begin{DoxyItemize}
+\item Serve as a base class for different weapon types (melee, magic, throwable).
+\item Define common properties and methods for weapon behavior.
+\item Facilitate weapon initialization from data assets.
+\item Manage weapon mesh and collision settings.
+\end{DoxyItemize}
+
+Network\+: available
+
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_u_weapon_factory}{UWeapon\+Factory} \doxylink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset} 
+
+\doxylink{class_a_weapon_melee}{AWeapon\+Melee} \doxylink{class_a_weapon_magic}{AWeapon\+Magic} \doxylink{class_a_weapon_throwable}{AWeapon\+Throwable} 
+\end{DoxySeeAlso}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\Hypertarget{class_a_weapon_base_a64b8ab90669db2552d55cd83df90509b}\index{AWeaponBase@{AWeaponBase}!AWeaponBase@{AWeaponBase}}
+\index{AWeaponBase@{AWeaponBase}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{AWeaponBase()}{AWeaponBase()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a64b8ab90669db2552d55cd83df90509b} 
+AWeapon\+Base\+::\+AWeapon\+Base (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+=== C++ member functions === 
+
+\doxysubsection{Member Function Documentation}
+\Hypertarget{class_a_weapon_base_aa76a14fbee3d5b4050a3ae03a4bc734f}\index{AWeaponBase@{AWeaponBase}!Client\_StartAttack@{Client\_StartAttack}}
+\index{Client\_StartAttack@{Client\_StartAttack}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{Client\_StartAttack()}{Client\_StartAttack()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_aa76a14fbee3d5b4050a3ae03a4bc734f} 
+virtual void AWeapon\+Base\+::\+Client\+\_\+\+Start\+Attack (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+\begin{DoxySeeAlso}{See also}
+AWeapon\+Component 
+\end{DoxySeeAlso}
+\begin{DoxyRefDesc}{Todo}
+\item[\mbox{\hyperlink{todo__todo000013}{Todo}}]Check the architecture. Decide whether the server should call RPC when a cheracter is attacked. \end{DoxyRefDesc}
+\Hypertarget{class_a_weapon_base_a536defbe4ce913858a87703e6d6738e9}\index{AWeaponBase@{AWeaponBase}!InitialiseFromData@{InitialiseFromData}}
+\index{InitialiseFromData@{InitialiseFromData}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{InitialiseFromData()}{InitialiseFromData()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a536defbe4ce913858a87703e6d6738e9} 
+void AWeapon\+Base\+::\+Initialise\+From\+Data (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset}} \texorpdfstring{$\ast$}{*}}]{Data}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Server function. 
+
+Once the Data\+Asset has been validated, the weapon\textquotesingle{}s properties are initialised based on the data asset provided.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Data} & The data asset containing weapon properties. \\
+\hline
+\end{DoxyParams}
+\begin{DoxySeeAlso}{See also}
+\doxylink{class_u_weapon_data_asset}{UWeapon\+Data\+Asset} 
+\end{DoxySeeAlso}
+
+
+Reimplemented in \mbox{\hyperlink{class_a_weapon_ranged_a7005625533e013114f4c135eb4e858da}{AWeapon\+Ranged}}.
+
+\Hypertarget{class_a_weapon_base_a63fe359c83fee3edc6aa709bbaea1497}\index{AWeaponBase@{AWeaponBase}!InitialiseMeshComponent@{InitialiseMeshComponent}}
+\index{InitialiseMeshComponent@{InitialiseMeshComponent}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{InitialiseMeshComponent()}{InitialiseMeshComponent()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a63fe359c83fee3edc6aa709bbaea1497} 
+bool AWeapon\+Base\+::\+Initialise\+Mesh\+Component (\begin{DoxyParamCaption}\item[{UStreamable\+Render\+Asset \texorpdfstring{$\ast$}{*}}]{New\+Mesh}{}\end{DoxyParamCaption})}
+
+
+
+Server function. 
+
+Initialises the mesh component using the specified mesh asset.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em New\+Mesh} & This can be either static or skeletal. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the mesh component was successfully initialized. 
+\end{DoxyReturn}
+\Hypertarget{class_a_weapon_base_a6660e9b7c2f3f87bda4ed441e064e745}\index{AWeaponBase@{AWeaponBase}!Multicast\_SetCollision@{Multicast\_SetCollision}}
+\index{Multicast\_SetCollision@{Multicast\_SetCollision}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{Multicast\_SetCollision()}{Multicast\_SetCollision()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a6660e9b7c2f3f87bda4ed441e064e745} 
+virtual void AWeapon\+Base\+::\+Multicast\+\_\+\+Set\+Collision (\begin{DoxyParamCaption}\item[{ECollision\+Enabled\+::\+Type}]{Collision\+Enabled}{, }\item[{ECollision\+Response}]{Collision\+Response}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+=== Unreal Engine UFUNCTION === \Hypertarget{class_a_weapon_base_a8bbe1a65bef7cd4c37e9e31219adfa8a}\index{AWeaponBase@{AWeaponBase}!RequestFireAtLocation@{RequestFireAtLocation}}
+\index{RequestFireAtLocation@{RequestFireAtLocation}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{RequestFireAtLocation()}{RequestFireAtLocation()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a8bbe1a65bef7cd4c37e9e31219adfa8a} 
+virtual void AWeapon\+Base\+::\+Request\+Fire\+At\+Location (\begin{DoxyParamCaption}\item[{const FVector \&}]{Target}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Client function. 
+
+This is a specific function for weapons that support aiming. Implementation depends on a derived class. 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\texttt{ in}}  & {\em Target} & The target location where the player is aiming. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{class_a_weapon_base_a9db40dc3b3fc66e990de0643ac94559a}\index{AWeaponBase@{AWeaponBase}!SpawnProjectile@{SpawnProjectile}}
+\index{SpawnProjectile@{SpawnProjectile}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{SpawnProjectile()}{SpawnProjectile()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a9db40dc3b3fc66e990de0643ac94559a} 
+virtual void AWeapon\+Base\+::\+Spawn\+Projectile (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Client function. 
+
+This should be overridden in derived classes in order to implement specific projectile-\/spawning logic. \begin{DoxySeeAlso}{See also}
+\doxylink{_u_anim_attack_notifies_8h_source}{UAnim\+Attack\+Notifies.\+h} 
+\end{DoxySeeAlso}
+
+
+Reimplemented in \mbox{\hyperlink{class_a_weapon_magic_aa47ed9b7b0f42771744fa10c519d6d82}{AWeapon\+Magic}}, and \mbox{\hyperlink{class_a_weapon_throwable_accd97cae84df752d103490b3a59e0c01}{AWeapon\+Throwable}}.
+
+\Hypertarget{class_a_weapon_base_add2ac0ce6eb11aecc8ac83b75cfad02e}\index{AWeaponBase@{AWeaponBase}!StartAiming@{StartAiming}}
+\index{StartAiming@{StartAiming}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{StartAiming()}{StartAiming()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_add2ac0ce6eb11aecc8ac83b75cfad02e} 
+virtual void AWeapon\+Base\+::\+Start\+Aiming (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Server function. 
+
+This is a specific function for weapons that support aiming. Implementation depends on a derived class. 
+
+Reimplemented in \mbox{\hyperlink{class_a_weapon_throwable_a65f7d641687461f60126309ddc06e52e}{AWeapon\+Throwable}}.
+
+\Hypertarget{class_a_weapon_base_af471513e30ae9f1b39124e2808a238aa}\index{AWeaponBase@{AWeaponBase}!StartAttack@{StartAttack}}
+\index{StartAttack@{StartAttack}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{StartAttack()}{StartAttack()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_af471513e30ae9f1b39124e2808a238aa} 
+void AWeapon\+Base\+::\+Start\+Attack (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Server function. 
+
+A simple public function for calling client-\/\+RPC. \Hypertarget{class_a_weapon_base_a63875a919af96ed31787b9fd61e3fb64}\index{AWeaponBase@{AWeaponBase}!StopAiming@{StopAiming}}
+\index{StopAiming@{StopAiming}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{StopAiming()}{StopAiming()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_a63875a919af96ed31787b9fd61e3fb64} 
+virtual void AWeapon\+Base\+::\+Stop\+Aiming (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [virtual]}}
+
+
+
+Server function. 
+
+This is a specific function for weapons that support aiming. Implementation depends on a derived class. 
+
+Reimplemented in \mbox{\hyperlink{class_a_weapon_throwable_ae6a7a849ad9f712cb857d225ed93a48a}{AWeapon\+Throwable}}.
+
+\Hypertarget{class_a_weapon_base_acfde171c4e0523f86d00733447088fd4}\index{AWeaponBase@{AWeaponBase}!StopAttack@{StopAttack}}
+\index{StopAttack@{StopAttack}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{StopAttack()}{StopAttack()}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_acfde171c4e0523f86d00733447088fd4} 
+void AWeapon\+Base\+::\+Stop\+Attack (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Server function. 
+
+A simple public function for calling client-\/\+RPC. 
+
+\doxysubsection{Member Data Documentation}
+\Hypertarget{class_a_weapon_base_ac601f05c4ef6cca5c1d8c59628b5ba99}\index{AWeaponBase@{AWeaponBase}!bIsWeaponAttacking@{bIsWeaponAttacking}}
+\index{bIsWeaponAttacking@{bIsWeaponAttacking}!AWeaponBase@{AWeaponBase}}
+\doxysubsubsection{\texorpdfstring{bIsWeaponAttacking}{bIsWeaponAttacking}}
+{\footnotesize\ttfamily \label{class_a_weapon_base_ac601f05c4ef6cca5c1d8c59628b5ba99} 
+bool AWeapon\+Base\+::b\+Is\+Weapon\+Attacking \{false\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Indicates whether the weapon is currently attacking. 
+
+=== Unreal Engine UPROPERTY === 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Public/\mbox{\hyperlink{_weapon_base_8h}{Weapon\+Base.\+h}}\item 
+F\+:/\+Download/test/ue\+\_\+prj\+\_\+a/\+Project\+\_\+\+A/\+Plugins/\+Weapon\+System\+Plugin/\+Source/\+Weapon\+System\+Plugin/\+Private/Weapon\+Base.\+cpp\end{DoxyCompactItemize}

@@ -222,9 +222,9 @@
     - [ProjectileBase](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/ProjectileBase.h)  — для магического оружия или метательных предметов
     - [TargetIndicator](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/TargetIndicator.h)  — для визуализации траектории броска
     - [AreaExplosion](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/AreaExplosion.h)  — для метательных предметов
-- [AnimAttackNotifies](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/AnimAttackNotifies.h) — добавлены собственные уведомления для работы с анимацией атаки
-- [CombatMontageTable](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/CombatMontageTable.h) — в C++ используется montage для слияния атаки с Locomotion
-- [CharacterAnimInterface](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/CharacterAnimInterface.h) — для передачи информации из C++ в ABP.
+- [AnimAttackNotifies](./Project_A/Source/Project_A/Public/Animation/AnimAttackNotifies.h) — добавлены собственные уведомления для работы с анимацией атаки
+- [CombatMontageTable](./Project_A/Source/Project_A/Public/Animation/CombatMontageTable.h) — в C++ используется montage для слияния атаки с Locomotion
+- [CharacterAnimInterface](./Project_A/Source/Project_A/Public/Animation/CharacterAnimInterface.h) — для передачи информации из C++ в ABP.
 
 **Личная цель задания**:
 Рассмотреть разные варианты работы с оружием в RPG играх. 
@@ -288,9 +288,9 @@
     - Реализована только простая атака.    
 10. Анимация атаки
     - В [ABP](./Project_A/Content/Project_A_Root/Character/Player/Animation/ABP_SimpleCharacter.uasset) есть state machine. В одной ветке ChoserTable "Locmotion", а в другой добавляется AnimMontage (как наиболее простой вариант для смешивания анимаций). 
-    - Переключение на другую ветку происходит по обновлению состояния атаки. ABP реализует интерфейс [ICharacterAnimInterface](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/CharacterAnimInterface.h), благодаря чему [UCombatComponent::StartAnimAttack()](./Project_A/Source/Project_A/Private/Character/CombatComponent.cpp) выполняет [ICharacterAnimInterface::Execute_SetCanAttack(AnimInstance, bIsFighting)](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Private/CharacterAnimInterface.cpp).
+    - Переключение на другую ветку происходит по обновлению состояния атаки. ABP реализует интерфейс [ICharacterAnimInterface](./Project_A/Source/Project_A/Public/Animation/CharacterAnimInterface.h), благодаря чему [UCombatComponent::StartAnimAttack()](./Project_A/Source/Project_A/Private/Character/CombatComponent.cpp) выполняет [ICharacterAnimInterface::Execute_SetCanAttack(AnimInstance, bIsFighting)](./Project_A/Source/Project_A/Private/Animation/CharacterAnimInterface.cpp).
     - После того, как способность активирована, это приведёт к запуску анимации на клиенте. 
-    - Анимация атаки имеет [уведомление об окончании](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/AnimAttackNotifies.h), чтобы изменить состояние атаки.
+    - Анимация атаки имеет [уведомление об окончании](./Project_A/Source/Project_A/Public/Animation/AnimAttackNotifies.h), чтобы изменить состояние атаки.
     - Для прицеливания метательным предметом используется зацикленный AnimMontage. Выход из цикла происходит в C++ при броске или при смене оружия.
     - Каждой способности соответсвует своя анимация (через теги) в таблице [DT_CombatAnimation](./Project_A/Content/Project_A_Root/Character/Player/Animation/Attack/DT_CombatAnimation.uasset)
 </details>

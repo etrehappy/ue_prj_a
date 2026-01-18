@@ -27,7 +27,7 @@ class WEAPONSYSTEMPLUGIN_API UAbilityComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	UAbilityComponent();
     virtual ~UAbilityComponent() = default;
@@ -54,7 +54,7 @@ private:
     void CreateAbilities();
 
 
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 private:
 	/**
 	 * @brief If an ability is found for the input action, the ability's handler will be called.
@@ -66,7 +66,7 @@ private:
 	void Server_HandleInputAction(const FName InputName, const ETriggerEvent Event) const;
 
 
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 public:
 
 	/**

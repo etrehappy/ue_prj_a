@@ -29,7 +29,7 @@ class WEAPONSYSTEMPLUGIN_API AWeaponThrowable : public AWeaponBase
 {
 	GENERATED_BODY()
 	
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	AWeaponThrowable();
 	virtual ~AWeaponThrowable() override = default;	
@@ -89,7 +89,7 @@ private:
 	void ExecuteFire(const FVector& TargetServer);	
 
 
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 protected:
 	/**
 	 * @brief If a player inputs an attack command, this client function is called to throw an item.
@@ -121,7 +121,7 @@ private:
 	 * @todo Should it be a part of the projectile class?
 	 */
 	UPROPERTY(EditAnywhere, /*Replicated,*/ Category = "Weapon|Bomb")
-	float ExplosionRadius{300.f};
+	float ExplosionRadius{100.f};
 
 	/**
 	 * @brief Initial speed of the thrown projectile.

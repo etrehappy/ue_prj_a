@@ -9,6 +9,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "WspDamageType.h"
+
 #include "AreaExplosion.generated.h"
 
 /**
@@ -20,7 +22,7 @@ class WEAPONSYSTEMPLUGIN_API AAreaExplosion : public AActor
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	AAreaExplosion();
 	virtual ~AAreaExplosion() = default;
@@ -32,12 +34,12 @@ public:
 protected:
 	virtual void BeginPlay() override;	
 
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 protected:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayEffects();
 
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UParticleSystemComponent* ParticleComponent;
@@ -52,7 +54,7 @@ protected:
 	float Radius{};
 
 	UPROPERTY(EditAnywhere, Category = "Explosion")
-	TSubclassOf<UDamageType> DamageType;
+	TSubclassOf<UWspDamageType> DamageType;
 
 	
 

@@ -17,6 +17,15 @@ UCombatComponent::UCombatComponent()
 }
 
 
+bool UCombatComponent::IsAttackAvailable() const
+{
+	if (bIsFighting && BattleState == E_CharacterBattleState::AimThrowable)	{ return true; }
+	else if (bIsFighting) { return false; }
+	else { return true;	}
+
+	/*return false;*/
+}
+
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -66,11 +75,6 @@ bool UCombatComponent::UpdateAttackState(const FGameplayTag& CurrentAbilityTag, 
 		return false;
 	}
 
-	if (!CurrentAttackTags.IsEmpty())
-	{
-		CurrentAttackTags.Reset();
-	}
-
 	if (!CurrentWeaponTag.IsValid())
 	{
 		UE_LOGFMT(LogProjectA, Warning, "{0} - WeaponTag is not valid", FString(__FUNCTION__));
@@ -83,11 +87,16 @@ bool UCombatComponent::UpdateAttackState(const FGameplayTag& CurrentAbilityTag, 
 		return false;
 	}
 
-	if (bIsFighting 
-		&& (BattleState != E_CharacterBattleState::AimThrowable))
+	//if (bIsFighting 
+	//	&& (BattleState != E_CharacterBattleState::AimThrowable))
+	//{
+	//	UE_LOGFMT(LogProjectA, Log, "{0} - Character is already fighting", FString(__FUNCTION__));
+	//	return false;
+	//}
+
+	if (!CurrentAttackTags.IsEmpty())
 	{
-		UE_LOGFMT(LogProjectA, Log, "{0} - Character is already fighting", FString(__FUNCTION__));
-		return false;
+		CurrentAttackTags.Reset();
 	}
 
 	// Set Values
@@ -194,7 +203,10 @@ bool UCombatComponent::TryUnequipWeapon(const EInputActionId InputActionType)
 void UCombatComponent::OnAttackAnimationFinished()
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - OnAttackAnimationFinished called", FString(__FUNCTION__));
-	Server_StopAttack();
+	if (bIsFighting)
+	{
+		Server_StopAttack();
+	}
 }
 
 void UCombatComponent::OnSpawnProjectile()

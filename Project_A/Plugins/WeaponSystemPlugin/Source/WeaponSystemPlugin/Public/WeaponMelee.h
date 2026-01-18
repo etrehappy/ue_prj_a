@@ -22,7 +22,7 @@ class WEAPONSYSTEMPLUGIN_API AWeaponMelee : public AWeaponBase
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	AWeaponMelee();
 	~AWeaponMelee() = default;
@@ -56,7 +56,7 @@ private:
 	void TickAttack(float DeltaTime);
 
 
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 private:
 	/**
 	 * @brief The tip should be placed in the socket of a mesh.
@@ -80,8 +80,44 @@ private:
 	 */
 	const float WeaponRadius {5.f};
 
+
+
+
+
+
+	/* ================================================================
+	 * Per-attack server-side guard to ensure a single successful hit
+	 * is applied for one weapon attack cycle (one press/animation).
+	 * The weapon itself does not track input count; the server
+	 * simply allows only one damage application per attack start.
+	 * ================================================================ */
+protected:
+	/**
+	 * @brief Server-only flag: was damage already applied during the current attack cycle.
+	 */
+	bool bHasAppliedDamageThisAttack{false};
+
+	/**
+	 * @brief Attempt to consume the attack hit on the server.
+	 * @return true if damage may be applied now (and marks it consumed), false if already consumed.
+	 */
+	bool ConsumeAttackHit();
+
+	/**
+	 * @brief Reset per-attack consumed flag (called when an attack starts).
+	 */
+	void ResetAttackHit();
+
+	virtual void Server_SetIsWeaponAttacking_Implementation(bool bNewIsWeaponAttacking) override;
+
+
+
+
+
+
+
 	
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 protected:
 	/**
 	 * @brief The client sends the weapon swing positions to the server for verification and application of damage.

@@ -54,7 +54,7 @@ UCLASS( ClassGroup=(Weapon), meta=(BlueprintSpawnableComponent) )
 class WEAPONSYSTEMPLUGIN_API UWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	UWeaponComponent();
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -169,7 +169,7 @@ private:
 	void PutLastWeaponBackOn();
 
 
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 private:
 	/**
 	 * @brief Server only.
@@ -179,7 +179,7 @@ private:
 	 */
 	FLustWeaponSettings LastWeaponSettings{};
 
-						/** === Unreal Engine UFUNCTION === */	
+						/* === Unreal Engine UFUNCTION === */	
 public:
 	/**
 	 * @brief Client function for weapons and throwable items.
@@ -215,7 +215,7 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeaponByTag(const FGameplayTag WeaponTag, const FName AttachSocketName, const FTransform SpawnTransform, ACharacter* AttachToCharacter, bool bIsCollisionDesabled = true, FName InProjectileSocketName = "");
 
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 private:
 	/**
 	 * @brief Any weapon (magic, melee, etc., but not throwable items) currently held by the character.

@@ -77,7 +77,7 @@ class PROJECT_A_API UCustomInputComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	UCustomInputComponent();
 	virtual ~UCustomInputComponent() = default;
@@ -127,12 +127,12 @@ private:
 	 */
 	void HandleAbility(const FInputActionInstance& Instance);
 
-						/** === C++ member === */
+						/* === C++ member === */
 
 	ANetPlayerCharacter* Owner{};
 
 
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 private:
 	/**
 	 * @brief Needs to be set up in the Blueprint with input actions to bind them in code.

@@ -101,6 +101,16 @@ public:
 	 */
 	void OnSpawnBombProjectile();
 
+	/**
+	 * @brief Server and client function.
+	 */
+	bool IsFighting() const { return bIsFighting; }
+
+	/**
+	 * @brief Server and client function.
+	 */
+	bool IsAttackAvailable() const;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -131,7 +141,7 @@ private:
 	void CleanCurrentMontage();
 
 						
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 private:
 	/**
 	 * @brief It is cached for cleaning montage as required.
@@ -139,8 +149,7 @@ private:
 	UAnimMontage* CurrentMontage{nullptr};
 
 
-						/** === Unreal Engine UFUNCTION === */
-
+						/* === Unreal Engine UFUNCTION === */
 protected:	
 	UFUNCTION(Server, Reliable)
 	void Server_StopAttack();
@@ -159,7 +168,7 @@ protected:
 	void OnRep_UpdateAttackState();
 
 
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 protected:
 	/**
 	 * @brief It is a main parameter of this component.

@@ -152,7 +152,6 @@ void ACustomPlayerController::Client_DrawEnemySpawnDebug_Implementation(FVector 
 }
 
 
-
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests
 
@@ -177,4 +176,10 @@ const TArray<FInputMappingContextWithPriority>& ACustomPlayerController::AutoTes
 //{
 //	Super::OnUnPossess();
 //
+//}
+
+
+//void ACustomPlayerController::RespawnPlayer()
+//{
+//	this->UnPossess();
 //}

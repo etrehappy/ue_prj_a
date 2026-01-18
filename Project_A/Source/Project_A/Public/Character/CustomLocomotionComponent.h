@@ -159,7 +159,7 @@ private:
 	void Jump(const FInputActionValue& Value);
 
 
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 private:
 	ANetPlayerCharacter* Owner{};
 	UCharacterMovementComponent* CharacterMovementComponent{};
@@ -190,7 +190,7 @@ private:
 	const float MaxDotProductRange{0.1f};
 
 
-					/** === Unreal Engine UFUNCTION === */
+					/* === Unreal Engine UFUNCTION === */
 private:
 	/**
 	 * @brief Client only.
@@ -221,7 +221,7 @@ private:
 	void Server_UnCrouchState();
 
 
-					/** === Unreal Engine UPROPERTY === */
+					/* === Unreal Engine UPROPERTY === */
 private:
 	/**
 	 * @brief Needs to be set up in the Blueprint before the game is run.

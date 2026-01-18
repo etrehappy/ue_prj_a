@@ -7,6 +7,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
+#include "HealthComponent.h"
 
 #include "ProjectALog.h"
 
@@ -40,6 +41,9 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 
 	CombatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComponent"));
 	CombatComponent->SetComponentTickEnabled(false);
+
+	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
+	HealthComponent->SetComponentTickEnabled(false);
 }
 
 void ANetPlayerCharacter::Destroyed()
@@ -66,6 +70,10 @@ void ANetPlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	AbilityComponent->OnAbilityActivated.AddDynamic(this, &ANetPlayerCharacter::HandleAbilityActivated);
+	HealthComponent->OnDeath.AddDynamic(this, &ANetPlayerCharacter::OnDead);
+	HealthComponent->OnIncreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnIncreaseHealth);
+	HealthComponent->OnDecreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnDecreaseHealth);	
+
 }
 
 void ANetPlayerCharacter::Tick(float DeltaTime)
@@ -98,6 +106,7 @@ void ANetPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	}
 
 }
+
 
 void ANetPlayerCharacter::HandleAbilityActivated(FGameplayTag AbilityTag)
 {
@@ -137,8 +146,88 @@ void ANetPlayerCharacter::HandleAbilityActivated(FGameplayTag AbilityTag)
 	}
 }
 
+void ANetPlayerCharacter::OnDead()
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	Multicast_PlayDeathFX();
+}
+
+void ANetPlayerCharacter::OnIncreaseHealth(float HealAmount)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	Multicast_PlayHealFX(HealAmount);
+}
+
+void ANetPlayerCharacter::OnDecreaseHealth(float DamageAmount)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	Multicast_PlayDamageFX(DamageAmount);
+}
+
+void ANetPlayerCharacter::Multicast_PlayHealFX_Implementation(float HealAmount)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	if(IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - called on a dedicated server, skipping ", FString(__FUNCTION__));
+		return;
+	}
+
+	OnPlayHealFX(HealAmount);
+}		
+
+void ANetPlayerCharacter::Multicast_PlayDamageFX_Implementation(float DamageAmount)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - called on a dedicated server, skipping ", FString(__FUNCTION__));
+		return;
+	}
+
+	OnPlayDamageFX(DamageAmount);
+}
+
+void ANetPlayerCharacter::Multicast_PlayDeathFX_Implementation()
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - called on a dedicated server, skipping ", FString(__FUNCTION__));
+		return;
+	}
+
+	OnPlayDeathFX();
+}
+
+void ANetPlayerCharacter::Server_OnDeathFxFinished_Implementation()
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	
+	AController* PController = GetController();
+	if(!PController)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController = nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	
+	PController->UnPossess();
 
 
+	AGameModeBase* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode() : nullptr;
+	if (GameMode)
+	{		
+		Destroy();
+				
+		GameMode->RestartPlayer(PController);
+		UE_LOGFMT(LogProjectA, Log, "{0} - RestartPlayer called", FString(__FUNCTION__));
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - GameMode not found, cannot restart player", FString(__FUNCTION__));
+	}
+}
 
 //void ANetPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 //{

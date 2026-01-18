@@ -44,6 +44,7 @@ void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	DOREPLIFETIME(AWeaponBase, AttackRange);
 	DOREPLIFETIME(AWeaponBase, IndicatorClass);
 	DOREPLIFETIME(AWeaponBase, bIsWeaponAttacking);
+	DOREPLIFETIME(AWeaponBase, DamageTypeClass);
 }
 
 bool AWeaponBase::InitialiseMeshComponent(UStreamableRenderAsset* NewMesh)
@@ -115,18 +116,18 @@ void AWeaponBase::InitialiseFromData(UWeaponDataAsset* Data)
 	}
 	else if (Data->GetHasProjectile())
 	{
-		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - ProjectileClass in WeaponDataAsset is null in a {1}", FString(__FUNCTION__), Data->GetName());
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - ProjectileClass is null in a {1}", FString(__FUNCTION__), Data->GetName());
 	}
 
 
 	if (Data->GetIndicatorClass())
 	{
-		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Setting IndicatorClass from WeaponDataAsset", FString(__FUNCTION__));
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Setting IndicatorClass", FString(__FUNCTION__));
 		IndicatorClass = Data->GetIndicatorClass();
 	}
 	else if (Data->GetDoesSupportAiming())
 	{
-		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - IndicatorClass in WeaponDataAsset is null in a {1}", FString(__FUNCTION__), Data->GetName());
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - IndicatorClass is null in a {1}", FString(__FUNCTION__), Data->GetName());
 	}
 
 	if (Data->GetMesh())
@@ -135,8 +136,18 @@ void AWeaponBase::InitialiseFromData(UWeaponDataAsset* Data)
 	}
 	else
 	{
-		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Mesh in WeaponDataAsset is null in a {1}", FString(__FUNCTION__), Data->GetName());
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - Mesh is null in a {1}", FString(__FUNCTION__), Data->GetName());
 	}
+
+	if (Data->GetDamageTypeClass())
+	{		
+		DamageTypeClass = Data->GetDamageTypeClass();
+	}
+	else
+	{
+		UE_LOGFMT(LogWeaponPlugin, Warning, "{0} - DamageType is null in a {1}", FString(__FUNCTION__), Data->GetName());
+	}
+	
 
 	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Weapon initialized from data: {1}", FString(__FUNCTION__), *Data->GetName());
 }

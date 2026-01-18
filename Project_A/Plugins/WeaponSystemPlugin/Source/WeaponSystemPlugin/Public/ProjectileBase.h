@@ -12,6 +12,7 @@
 #include "AreaExplosion.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "WspDamageType.h"
 
 #include "ProjectileBase.generated.h"
 
@@ -26,7 +27,7 @@ class WEAPONSYSTEMPLUGIN_API AProjectileBase : public AActor
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:		
 	AProjectileBase();
 	virtual ~AProjectileBase() = default;
@@ -60,7 +61,7 @@ private:
 	void Explode(const FHitResult& Hit);
 
 
-	/** === Unreal Engine UFUNCTION === */
+	/* === Unreal Engine UFUNCTION === */
 public:
 	/**
 	 * @brief Can be used in Blueprints to implement custom behavior upon projectile impact.
@@ -71,12 +72,12 @@ public:
 	void OnProjectileImpact(const FHitResult& Hit);
 
 
-	/** === Unreal Engine UPROPERTY === */
+	/* === Unreal Engine UPROPERTY === */
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<USphereComponent> Collision{};
 		
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	float Damage{20.f};
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
@@ -86,5 +87,12 @@ protected:
 	TSubclassOf<AAreaExplosion> ExplosionClass{};
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Weapon")
-	float ExplosionRadius {300.f};	
+	float ExplosionRadius {300.f};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	bool bIsItAoe{false};
+
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<UWspDamageType> DamageTypeClass;
+
 };

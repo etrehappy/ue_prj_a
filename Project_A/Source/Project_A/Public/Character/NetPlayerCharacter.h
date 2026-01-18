@@ -21,6 +21,7 @@
 class USpringArmComponent;
 class UCameraComponent;
 class UArrowComponent;
+class UHealthComponent;
 
 /**
  * @class ANetPlayerCharacter
@@ -36,7 +37,7 @@ class PROJECT_A_API ANetPlayerCharacter : public ABaseCharacter
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:
 	ANetPlayerCharacter();
 
@@ -68,7 +69,7 @@ protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 protected:
 	/**
 	 * @brief Client function.
@@ -90,8 +91,53 @@ protected:
 	UFUNCTION()
 	void HandleAbilityActivated(FGameplayTag Ability);/*TODO Check Net today*/
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayHealFX(float HealAmount);
 
-						/** === Unreal Engine UPROPERTY === */
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayDamageFX(float DamageAmount);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayDeathFX();
+	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic, Category = "Events")
+	void OnPlayHealFX(float HealAmount);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic, Category = "Events")
+	void OnPlayDamageFX(float DamageAmount);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic, Category = "Events")
+	void OnPlayDeathFX();
+
+	/**
+	 * @brief Client function.
+	 * 
+	 * It is called in the character's Blueprint when the death effects have finished playing on the client side.
+	 */
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_OnDeathFxFinished();
+
+private:
+	/**
+	 * @brief Server function.
+	 * It handles the character's death on the server side.
+	 */
+	UFUNCTION()
+	void OnDead();
+
+	/**
+	 * @brief Server function.
+	 */
+	UFUNCTION()
+	void OnIncreaseHealth(float HealAmount);
+
+	/**
+	 * @brief Server function.
+	 */
+	UFUNCTION()
+	void OnDecreaseHealth(float DamageAmount);
+
+						/* === Unreal Engine UPROPERTY === */
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> CameraBoom{};
@@ -128,6 +174,9 @@ protected:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<ACustomPlayerController> PlayerController{};
+		
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UHealthComponent> HealthComponent{};
 
 };
 

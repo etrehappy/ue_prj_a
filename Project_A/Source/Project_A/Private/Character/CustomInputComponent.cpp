@@ -1,5 +1,5 @@
 #include "Character/CustomInputComponent.h"
-
+#include "Character/CombatComponent.h"
 #include "Character/NetPlayerCharacter.h"
 #include "AbilityComponent.h"
 
@@ -97,7 +97,20 @@ void UCustomInputComponent::HandleAbility(const FInputActionInstance& Instance)
 	//    UE_LOGFMT(LogProjectA, Warning, "{0} - Action = nullptr", FString(__FUNCTION__));
 	//    return;
 	//}
-	
+
+	const auto CombatComponent = Owner->GetComponentByClass<UCombatComponent>();
+	if(!CombatComponent)
+	{   
+		UE_LOGFMT(LogProjectA, Warning, "{0} - CombatComponent = nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	if (!CombatComponent->IsAttackAvailable()) // client side check
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - IsAttackAvailable = false, skipping input", FString(__FUNCTION__));
+		return;
+	}
+
 	const auto AbilityComponent = Owner->GetComponentByClass<UAbilityComponent>();
 	if(!AbilityComponent)
 	{   

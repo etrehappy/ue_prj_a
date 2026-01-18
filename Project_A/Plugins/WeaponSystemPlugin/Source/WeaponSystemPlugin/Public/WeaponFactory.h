@@ -27,7 +27,7 @@ class WEAPONSYSTEMPLUGIN_API UWeaponFactory : public UObject
 {
 	GENERATED_BODY()
 
-					/** === C++ member functions === */
+					/* === C++ member functions === */
 public:
 	UWeaponFactory() = default;
 	virtual ~UWeaponFactory() = default;
@@ -52,7 +52,7 @@ private:
 	static void LoadAllWeaponAssets();
 
 
-					/** === C++ member variables === */
+					/* === C++ member variables === */
 private:
 	/**
 	 * @brief Cached list of all weapon data assets for quick access during weapon spawning.

@@ -14,6 +14,7 @@
 #include "GameFramework/Character.h"
 #include "GameplayTagContainer.h"
 #include "ProjectileBase.h"
+#include "WspDamageType.h"
 #include "TargetIndicator.h"
 
 #include "WeaponBase.generated.h"
@@ -38,7 +39,7 @@ UCLASS(Abstract)
 class WEAPONSYSTEMPLUGIN_API AWeaponBase : public AActor
 {
 	GENERATED_BODY()
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:
 	AWeaponBase();	
 	virtual ~AWeaponBase() = default;	
@@ -133,7 +134,7 @@ protected:
 	virtual void BeginPlay() override;
 						
 	
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 private:
 	/**
 	 * @brief Used becuse of different types of meshes.
@@ -155,7 +156,7 @@ private:
 	USkeletalMeshComponent* SkeletalMeshComponent{};
 
 
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 protected:
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void Multicast_SetCollision(ECollisionEnabled::Type CollisionEnabled, ECollisionResponse CollisionResponse);
@@ -175,7 +176,7 @@ protected:
 	void Server_SetIsWeaponAttacking(bool bNewIsWeaponAttacking);
 
 	
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 protected:
 	/**
 	 * @brief Indicates whether the weapon is currently attacking.
@@ -225,6 +226,10 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Weapon")
 	TSubclassOf<ATargetIndicator> IndicatorClass{};  
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "Weapon")
+	TSubclassOf<UWspDamageType> DamageTypeClass{};
+
 };
 
 

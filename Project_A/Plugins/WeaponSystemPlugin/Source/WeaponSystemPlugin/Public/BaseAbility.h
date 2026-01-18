@@ -26,7 +26,7 @@ class WEAPONSYSTEMPLUGIN_API UBaseAbility : public UObject
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:	
 	UBaseAbility() = default;
 	virtual ~UBaseAbility() = default;
@@ -64,7 +64,7 @@ private:
 	 */
 	void Activate() const;
 
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 
 private:
 	/**
@@ -74,7 +74,7 @@ private:
 	FName InputAction{}; // "AttackLight", "AttackHeavy", "BowShot" /*TODO Check Net today*/
 		
 
-						/** === Unreal Engine UFUNCTION === */
+						/* === Unreal Engine UFUNCTION === */
 protected:
 	
 	/**
@@ -113,7 +113,7 @@ protected:
 	void OnInputCompleted();
 
 
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 protected:
 	/**
 	 * @todo Check network. Should it be replicated?

@@ -23,7 +23,7 @@ class WEAPONSYSTEMPLUGIN_API ATargetIndicator : public AActor
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:
 	ATargetIndicator();
 	virtual ~ATargetIndicator() = default;
@@ -83,7 +83,7 @@ private:
 	void UpdateExplosionDecal(float ExplosionRadius);
 
 
-						/** === C++ member variables === */
+						/* === C++ member variables === */
 protected:
 	TArray<FVector> ArcPoints{};
 	FVector FinalHitLocation{};

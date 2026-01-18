@@ -40,6 +40,7 @@ class PROJECT_A_API ACustomPlayerController : public APlayerController
 public:
 	ACustomPlayerController() = default;
 	virtual ~ACustomPlayerController() = default;
+		
 
 protected:
 	/** Input mapping context setup */
@@ -50,7 +51,7 @@ protected:
 	virtual void SetupInputComponent() override;
 
 
-						/** === Unreal Engine UFUNCTIONs === */
+						/* === Unreal Engine UFUNCTIONs === */
 public:
 	/**
 	 * @brief Client requests to enter the game world on the Hub-server.
@@ -83,7 +84,7 @@ protected:
 	void Client_DrawEnemySpawnDebug(FVector Location, FRotator Rotation);
 
 						
-							/** === Unreal Engine UPROPERTY === */
+							/* === Unreal Engine UPROPERTY === */
 protected:
 	/**
 	 * @brief Which keys or axes trigger which actions.
@@ -106,3 +107,9 @@ public:
 
 //virtual void OnPossess(APawn* aPawn) override;
 //virtual void OnUnPossess() override;
+
+///**
+//	 * @brief Server function.
+//	 *
+//	 */
+//void RespawnPlayer();

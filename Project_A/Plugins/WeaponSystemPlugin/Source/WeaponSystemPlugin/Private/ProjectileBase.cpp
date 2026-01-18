@@ -3,6 +3,8 @@
 
 #include "ProjectileBase.h"
 #include "Net/UnrealNetwork.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "WeaponPluginLog.h"
 
 
@@ -153,7 +155,22 @@ void AProjectileBase::NotifyHit(UPrimitiveComponent* MyComp, AActor* Other, UPri
 
     if (HasAuthority())
     {
-		Explode(Hit);
+
+        if (bIsItAoe)
+        {
+            Explode(Hit);
+        }
+        else
+        {
+            UGameplayStatics::ApplyDamage(
+                Other,
+                Damage,
+                GetInstigatorController(),
+                this,
+                DamageTypeClass
+            );
+        }
+		
         Destroy();
     }
     else

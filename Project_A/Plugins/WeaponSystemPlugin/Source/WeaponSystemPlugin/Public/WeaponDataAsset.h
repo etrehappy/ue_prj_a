@@ -11,6 +11,7 @@
 
 #include "Engine/DataAsset.h"
 #include "ProjectileBase.h"
+#include "WspDamageType.h"
 #include "WeaponBase.h"
 
 #include "WeaponDataAsset.generated.h"
@@ -30,7 +31,7 @@ class WEAPONSYSTEMPLUGIN_API UWeaponDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
-						/** === C++ member functions === */
+						/* === C++ member functions === */
 public:  
 	UWeaponDataAsset() = default;
 	virtual ~UWeaponDataAsset() = default		;
@@ -47,10 +48,11 @@ public:
 	const TSubclassOf<ATargetIndicator> GetIndicatorClass() const { return IndicatorClass; }
 	const float GetDamage() const { return Damage; }
 	const float GetAttackRange() const { return AttackRange; }
+	const TSubclassOf<UWspDamageType> GetDamageTypeClass() const { return DamageTypeClass; }
 	/** ==================================================================== */
 
 						
-						/** === Unreal Engine UPROPERTY === */
+						/* === Unreal Engine UPROPERTY === */
 protected:
 	/**
 	 * @brief Only for Editor. If true, then Mesh property will be shown.
@@ -84,6 +86,12 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (DisplayName = "WeaponClass (required for all)") )
 	TSubclassOf<AWeaponBase> WeaponClass{};
+
+	/**
+	 * @brief The class type of the damage type.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon", meta = (DisplayName = "DamageTypeClass"))
+	TSubclassOf<UWspDamageType> DamageTypeClass{};
 
 	/**
 	 * @brief Can be Static or Skeletal mesh. The WeaponBase will create a MeshComponent of the appropriate type at runtime.

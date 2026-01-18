@@ -107,6 +107,13 @@ void AWeaponMelee::Server_SendSwingPositions_Implementation(const FVector LastBa
 		return;
 	}
 
+	if (!IsWeaponAttacking())
+	{
+		//@see ConsumeAttackHit
+		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Weapon is not attacking, rejecting swing positions.", FString(__FUNCTION__));
+		return;
+	}
+
 	// Check distance from owner to BaseNow
 	const FVector OwnerLoc = OwnerActor->GetActorLocation();
 	if (FVector::DistSquared(OwnerLoc, BaseNow) > MaxClientPositionDelta * MaxClientPositionDelta)
@@ -158,6 +165,12 @@ void AWeaponMelee::Server_SendSwingPositions_Implementation(const FVector LastBa
 	// Apply damage if hit
 	if (bHit && Hit.GetActor())
 	{
+		if (!ConsumeAttackHit())
+		{
+			UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Damage already applied this attack, skipping.", FString(__FUNCTION__));
+			return;
+		}
+
 		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Hit Actor: {1}", FString(__FUNCTION__), *Hit.GetActor()->GetName());
 				
 		UGameplayStatics::ApplyDamage(
@@ -165,12 +178,44 @@ void AWeaponMelee::Server_SendSwingPositions_Implementation(const FVector LastBa
 			Damage,
 			GetInstigatorController(),
 			this,
-			UDamageType::StaticClass()
+			DamageTypeClass
 		);
 				
 		this->Client_StopAttack();
 	}
 }
+
+
+void AWeaponMelee::Server_SetIsWeaponAttacking_Implementation(bool bNewIsWeaponAttacking)
+{
+	AWeaponBase::bIsWeaponAttacking = bNewIsWeaponAttacking;
+
+	// When a new attack starts on the server, reset the per-attack consumed flag
+	// so the next successful sweep can apply damage exactly once.
+	if (bNewIsWeaponAttacking)
+	{
+		ResetAttackHit();
+	}
+}
+
+bool AWeaponMelee::ConsumeAttackHit()
+{
+	// Server-only check: allow one damage application per attack start.
+	if (bHasAppliedDamageThisAttack)
+	{
+		return false;
+	}
+
+	bHasAppliedDamageThisAttack = true;
+	return true;
+}
+
+void AWeaponMelee::ResetAttackHit()
+{
+	bHasAppliedDamageThisAttack = false;
+}
+
+
 
 //void AWeaponMelee::Client_DrawDebug_Implementation()
 //{

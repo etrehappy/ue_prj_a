@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw8' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив ( MB)]() и распаковать с заменой в .\ue_prj_a\ 
+2. Скачать [архив (323 MB)](https://drive.google.com/file/d/1E_b0SIcEGt5JzGRlox0AUjiwaDilBpR-/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A
@@ -319,7 +319,7 @@
 2. Получение урона
     <br> Разные виды оружия работают по простой схеме со встроенными инструментами.
     - Меч <p>Использует UGameplayStatics::ApplyDamage. [Тип урона (физический)](./Project_A/Content/Project_A_Root/Weapons/DamageType/WspDamageType_PhysicalDamage.uasset) задается через DataAsset оружия</p>
-    - Магия (fireball) <p>Так как оружие создает [Projectile](AProjectileBase), то урон также наносится этим Projectile с помощью ApplyDamage. [Тип урона (магический)](./Project_A/Content/Project_A_Root/Weapons/DamageType/WspDamageType_MagicIce.uasset) задается через [Projectile's blueprint](./Project_A/Content/Project_A_Root/Weapons/Magic/BP_Fireball.uasset)</p> 
+    - Магия (fireball) <p>Так как оружие создает [Projectile](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Public/ProjectileBase.h), то урон также наносится этим Projectile с помощью ApplyDamage. [Тип урона (магический)](./Project_A/Content/Project_A_Root/Weapons/DamageType/WspDamageType_MagicIce.uasset) задается через [Projectile's blueprint](./Project_A/Content/Project_A_Root/Weapons/Magic/BP_Fireball.uasset)</p> 
     - Метательное (бомба) <p>По аналогии с магическим использует Projectile, но наносит урон по площади. [Тип урона (физический)](./Project_A/Content/Project_A_Root/Weapons/DamageType/WspDamageType_PhysicalDamage.uasset) также задаётся через [Projectile's blueprint](./Project_A/Content/Project_A_Root/Weapons/Throwable/BP_BombProjectile.uasset), но имеет флаг урона по площади. Урон по области реализуется в методе [AAreaExplosion::Explode](./Project_A/Plugins/WeaponSystemPlugin/Source/WeaponSystemPlugin/Private/AreaExplosion.cpp) с помощью Collision Sphere, bHit и стандартного ApplyDamage.</p>
 3. Исцеление
     - Работает только в соответсвующей зоне, с помощью отрицательного урона и ApplyDamage.

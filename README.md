@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw9' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив ( MB)]() и распаковать с заменой в .\ue_prj_a\ 
+2. Скачать [архив (323 MB)](https://drive.google.com/file/d/189y99_q1Tmq_B-OgjoxTCup5XeWfTesH/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A
@@ -359,7 +359,7 @@
 <br> [ <--- ВИДЕО ---> ](https://drive.google.com/file/d/1CuxZw_uTpaNWLs4wt6N9_XUH93Rg0Tku/view?usp=sharing)
 
 - [x] Добавлены специализированные типы объектов.
-- [x] Реализовано их поднятие
+- [x] Реализовано их поднятие.
 - [x] Реализован учёт в персонаже.
 - [x] В лог выводится информацию о поднятых объектах.
 
@@ -378,9 +378,8 @@
     - Input вызывает метод Interact() у персонажа -> PickUp и Destroy у поднимаемого объекта -> AddToInventory у персонажа (временное решение, пока не продуман полноценный инвентарь)
     - AddItem просто добавляет элементы в контейнер и выводит в лог их количество (временное решение) 
 3. Popup
-    - реализовано с помощью WBP_Hud (аналогично примеру на занятии) и простого текстового WBP_PickupTooltip
+    - реализовано с помощью [WBP_Hud](./Project_A/Content/Project_A_Root/Character/Player/UI/WBP_Hud.uasset) (аналогично примеру на занятии) и простого текстового [WBP_PickupTooltip](./Project_A/Content/Project_A_Root/Character/Player/UI/WBP_PickupTooltip.uasset)
     - Hud создается и сохраняется через BP персонажа (временное решение)
     - персонаж реализует [PickUpInterface](./Project_A/Source/Project_A/Public/PickUpInterface.h) (временное решение)
 
 </details>
-

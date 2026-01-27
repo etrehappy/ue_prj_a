@@ -15,6 +15,7 @@
 #include "Character/CustomLocomotionComponent.h"
 #include "Character/CustomPlayerController.h"
 #include "WeaponComponent.h"
+#include "PickUpInterface.h"
 
 #include "NetPlayerCharacter.generated.h"
 
@@ -22,6 +23,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UArrowComponent;
 class UHealthComponent;
+class UInventoryComponent;
 
 /**
  * @class ANetPlayerCharacter
@@ -33,7 +35,7 @@ class UHealthComponent;
  * 
  */
 UCLASS()
-class PROJECT_A_API ANetPlayerCharacter : public ABaseCharacter
+class PROJECT_A_API ANetPlayerCharacter : public ABaseCharacter, public  IPickUpInterface
 {
 	GENERATED_BODY()
 
@@ -54,7 +56,16 @@ public:
 	 * @brief Client.
 	 *	Handles equipping and unequipping of weapons and throwable items based on the input action type.
 	 */
-	void EquipWeapon(EInputActionId InputActionType);
+	void EquipWeapon(EInputActionId InputActionType);	
+
+	/**
+	 * @brief Client.
+	 * 
+	 */
+	void Interact();
+
+	virtual void UpdatedCurrentPickUpItem(AItemPickup* Item) override;
+	virtual void CleanCurrentPickUpItem() override;
 
 protected:
 
@@ -117,6 +128,21 @@ protected:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_OnDeathFxFinished();
 
+	virtual void PickUpItem_Implementation(AItemPickup* Item) override;
+	
+	/**
+	 * @brief In the curremt implemenation, it only works with AItemPickup.
+	 * @todo Should work with diverse actors.
+	 */
+	UFUNCTION(Server, Reliable)
+	void Server_TryInteract();
+
+	UFUNCTION(Server, Reliable)
+	void Server_UpdatedCurrentPickUpItem(AItemPickup* Item);
+
+	UFUNCTION(Server, Reliable)
+	void Server_CleanCurrentPickUpItem();
+
 private:
 	/**
 	 * @brief Server function.
@@ -136,6 +162,7 @@ private:
 	 */
 	UFUNCTION()
 	void OnDecreaseHealth(float DamageAmount);
+
 
 						/* === Unreal Engine UPROPERTY === */
 protected:
@@ -177,6 +204,16 @@ protected:
 		
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UHealthComponent> HealthComponent{};
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UInventoryComponent> InventoryComponent{};
+
+	/**
+	 * @brief The temporary solution. 
+	 * @todo Update with Interact system
+	 */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Interaction")
+	TObjectPtr<AActor> CurrentInteractable{};
 
 };
 

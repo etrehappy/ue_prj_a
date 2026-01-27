@@ -59,6 +59,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInputAction> EquipThrowableItem{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UInputAction> Interaction{};
 };
 
 
@@ -126,6 +129,12 @@ private:
 	 * 
 	 */
 	void HandleAbility(const FInputActionInstance& Instance);
+
+	/**
+	 * @brief Client only.
+	 * 
+	 */
+	void Interaction(const FInputActionValue& Value);
 
 						/* === C++ member === */
 

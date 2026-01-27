@@ -71,9 +71,13 @@ void UCustomInputComponent::BindActions(UEnhancedInputComponent* EIC)
 
 	if (InputActions.ThrowThrowableItem)
 	{
-		EIC->BindAction(InputActions.ThrowThrowableItem, ETriggerEvent::Completed, this, &UCustomInputComponent::/*LaunchThrowable*/HandleAbility);
+		EIC->BindAction(InputActions.ThrowThrowableItem, ETriggerEvent::Completed, this, &UCustomInputComponent::HandleAbility);
 	}
 
+	if (InputActions.Interaction)
+	{
+		EIC->BindAction(InputActions.Interaction, ETriggerEvent::Completed, this, &UCustomInputComponent::Interaction);
+	}
 
 }
 
@@ -121,6 +125,11 @@ void UCustomInputComponent::HandleAbility(const FInputActionInstance& Instance)
 	FName InputName = Instance.GetSourceAction()->GetFName();
 
 	AbilityComponent->HandleInputAction(InputName, InputEvent);
+}
+
+void UCustomInputComponent::Interaction(const FInputActionValue& Value)
+{
+	Owner->Interact();
 }
 
 

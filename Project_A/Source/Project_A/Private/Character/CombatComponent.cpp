@@ -130,7 +130,7 @@ bool UCombatComponent::UpdateAttackState(const FGameplayTag& CurrentAbilityTag, 
 	{
 		UE_LOGFMT(LogProjectA, Log, "{0} - No ThrowableWeapon is equiped", FString(__FUNCTION__));
 	}
-  	
+	
 	// Execute weapon attack
 
 	OwnerWeaponComponent->Attack();

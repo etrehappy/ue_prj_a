@@ -8,6 +8,8 @@
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
 #include "HealthComponent.h"
+#include "InventoryComponent.h"
+#include "ItemPickup.h"
 
 #include "ProjectALog.h"
 
@@ -44,6 +46,9 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 
 	HealthComponent = CreateDefaultSubobject<UHealthComponent>(TEXT("HealthComponent"));
 	HealthComponent->SetComponentTickEnabled(false);
+
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	InventoryComponent->SetComponentTickEnabled(false);
 }
 
 void ANetPlayerCharacter::Destroyed()
@@ -63,6 +68,23 @@ void ANetPlayerCharacter::Destroyed()
 		WeaponComponent->UnequipThrowableItem();
 	}
 
+}
+
+void ANetPlayerCharacter::Interact()
+{
+	Server_TryInteract();
+}
+
+void ANetPlayerCharacter::UpdatedCurrentPickUpItem(AItemPickup* Item)
+{	
+	IPickUpInterface::Execute_ShowPopup(this, Item);
+	Server_UpdatedCurrentPickUpItem(Item);		
+}
+
+void ANetPlayerCharacter::CleanCurrentPickUpItem()
+{
+	IPickUpInterface::Execute_HidePopup(this);
+	Server_CleanCurrentPickUpItem();
 }
 
 void ANetPlayerCharacter::BeginPlay()
@@ -144,6 +166,11 @@ void ANetPlayerCharacter::HandleAbilityActivated(FGameplayTag AbilityTag)
 		UE_LOGFMT(LogProjectA, Log, "{0} - Failed to update CurrentAttackTags", FString(__FUNCTION__));
 		return;
 	}
+}
+
+void ANetPlayerCharacter::Server_CleanCurrentPickUpItem_Implementation()
+{
+	CurrentInteractable = nullptr;
 }
 
 void ANetPlayerCharacter::OnDead()
@@ -228,6 +255,51 @@ void ANetPlayerCharacter::Server_OnDeathFxFinished_Implementation()
 		UE_LOGFMT(LogProjectA, Warning, "{0} - GameMode not found, cannot restart player", FString(__FUNCTION__));
 	}
 }
+
+void ANetPlayerCharacter::PickUpItem_Implementation(AItemPickup* Item)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+	
+
+	InventoryComponent->AddToInventory(Item);
+}
+
+void ANetPlayerCharacter::Server_UpdatedCurrentPickUpItem_Implementation(AItemPickup* Item)
+{
+	if (!Item)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Item ie empty", FString(__FUNCTION__));
+	}
+
+	const float MaxPickupDist = 300.f;
+	const float DistSq = FVector::DistSquared(Item->GetActorLocation(), GetActorLocation());
+	if (DistSq > FMath::Square(MaxPickupDist))
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - item too far", FString(__FUNCTION__));
+		return;
+	}
+
+	CurrentInteractable = Item;
+}
+
+void ANetPlayerCharacter::Server_TryInteract_Implementation()
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
+
+	/* Temporary solution  */
+
+	if (auto Item = Cast<AItemPickup>(CurrentInteractable))
+	{
+		Item->PickUp(this);
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Item is not AItemPickup", FString(__FUNCTION__));
+	}
+}
+
+
+
 
 //void ANetPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 //{

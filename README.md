@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw10' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив ( MB)]() и распаковать с заменой в .\ue_prj_a\ 
+2. Скачать [архив (323 MB)](https://drive.google.com/file/d/1OaihEwu8qrSHoNA3_FqKqAUOiVU6yJLO/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A
@@ -418,7 +418,7 @@
 <br> Временная система из Задания 9 (выше) удалена. Реализован другой подход.
     - Добавлен [UInteractionComponent](./Project_A/Source/Interaction/Public/InteractionComponent.h)
     - Объекты, с которыми можно взаимодействовать, реализуют интерфейс [UInteractable](./Project_A/Source/Interaction/Public/Interactable.h). Такие объекты имеют Sphere collision для Overlay c пресонажем. 
-    - На тике InteractionComponent [составляет](./Project_A/Source/Interaction/Public/InteractionComponent.cpp) список кандидатов, которые находятся рядом и доступны для взаимодействия.
+    - На тике InteractionComponent [составляет](./Project_A/Source/Interaction/Private/InteractionComponent.cpp) список кандидатов, которые находятся рядом и доступны для взаимодействия.
     - После нажатия на клавишу "E" InteractionComponent выбирает наиболее подходящий объект (в зависимости от поворота и рассотяния до объекта).
     - Interactable-объект реализует метод для взаимодействия с ним.
 
@@ -437,13 +437,13 @@
             </div>
         - [UInventoryItemAdapter_Weapon](./Project_A/Source/Inventory/Public/InventoryItem.h) — наследник UInventoryItem, который связывает представление предмета в инвентаре с оружейным плагином из Задания 6 (выше); 
     - Добавление предмета в инвентарь:
-        1. На серевере [UInventory::AddItem](./Project_A/Source/Inventory/Public/Inventory.cpp) обновляет массив локальных InventorySlots и реплицируемых [ReplicatedSlots](./Project_A/Source/Inventory/Public/Inventory.h).
-        2. На клиенте [FReplicatedSlotArray::PostReplicatedAdd](./Project_A/Source/Inventory/Public/Inventory.cpp) вызывает [UInventory::HandleReplicatedAdd](./Project_A/Source/Inventory/Public/Inventory.cpp), который восстанавливает данные через [UInventory::UpdateLocalSlotFromReplicated](./Project_A/Source/Inventory/Public/Inventory.cpp) и транслирует, что инвентарь обновлён.
-        3. Виджет получает уведомление OnInventoryChanged и [обновляется](./Project_A/Source/UI/Public/InventoryWidget.cpp).
+        1. На серевере [UInventory::AddItem](./Project_A/Source/Inventory/Private/Inventory.cpp) обновляет массив локальных InventorySlots и реплицируемых [ReplicatedSlots](./Project_A/Source/Inventory/Public/Inventory.h).
+        2. На клиенте [FReplicatedSlotArray::PostReplicatedAdd](./Project_A/Source/Inventory/Private/Inventory.cpp) вызывает [UInventory::HandleReplicatedAdd](./Project_A/Source/Inventory/Private/Inventory.cpp), который восстанавливает данные через [UInventory::UpdateLocalSlotFromReplicated](./Project_A/Source/Inventory/Private/Inventory.cpp) и транслирует, что инвентарь обновлён.
+        3. Виджет получает уведомление OnInventoryChanged и [обновляется](./Project_A/Source/UI/Private/InventoryWidget.cpp).
     - Перемещение предметов внутри инвентаря или в другой инвентарь:
-        1. Виджет проверяет в какую ячейку и в какой инвентарь был сделан Drop (в методе [UInventorySlotWidget::NativeOnDrop](./Project_A/Source/UI/Public/InventoryWidget.cpp)), а затем вызывает соответствующий метод инвентаря (перенос внутри инвентаря или в другой).
+        1. Виджет проверяет в какую ячейку и в какой инвентарь был сделан Drop (в методе [UInventorySlotWidget::NativeOnDrop](./Project_A/Source/UI/Private/InventoryWidget.cpp)), а затем вызывает соответствующий метод инвентаря (перенос внутри инвентаря или в другой).
         2. Так как инвентарь — это UObject, он транслирует событие (например, FOnInventoryMoveRequested) для UInventoryComponent, чтобы запустить логику именно на сервере.
-        3. UInventoryComponent вызывает на сервере подходящий метод (например, [UInventoryComponent::MoveItemToOtherInventory](./Project_A/Source/Inventory/Public/InventoryComponent.cpp)), чтобы обновить локальный инвентарь и "облегченный" инвентарь для репликации.
+        3. UInventoryComponent вызывает на сервере подходящий метод (например, [UInventoryComponent::MoveItemToOtherInventory](./Project_A/Source/Inventory/Private/InventoryComponent.cpp)), чтобы обновить локальный инвентарь и "облегченный" инвентарь для репликации.
         4. На клиенте данные обновляются по аналогии с "добавление предмета" выше.
 3. UI
 <br> Минимум для визуализации.        
@@ -456,6 +456,6 @@
         - [UEquippedItemWidget](./Project_A/Source/UI/Public/EquippedItemWidget.h) — для инвентаря экипировки; 
         - [UEquippedItemSlotWidget](./Project_A/Source/UI/Public/EquippedItemSlotWidget.h) — для слота инвентаря экипировки;
     - Для фиксации 'drag & drop' [UInventorySlotWidget](./Project_A/Source/UI/Public/InventorySlotWidget.h) использует Native-события.
-    - Для визуализации перетаскивания [UInventorySlotWidget](./Project_A/Source/UI/Public/InventorySlotWidget.cpp) использует встроенный UDragDropOperation.
+    - Для визуализации перетаскивания [UInventorySlotWidget](./Project_A/Source/UI/Private/InventorySlotWidget.cpp) использует встроенный UDragDropOperation.
 
 </details>

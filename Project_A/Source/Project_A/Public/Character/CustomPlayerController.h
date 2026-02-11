@@ -41,8 +41,11 @@ public:
 	ACustomPlayerController() = default;
 	virtual ~ACustomPlayerController() = default;
 		
+	void OnFocusChanged(AActor* NewFocusedActor);
 
 protected:
+	virtual void BeginPlay() override;
+
 	/** Input mapping context setup */
 	/**
 	 * @brief Client only. Iterates through `InputMappingContext` and adds non-empty `MappingContext` to `UEnhancedInputLocalPlayerSubsystem`.
@@ -82,6 +85,15 @@ protected:
 	 */
 	UFUNCTION(Client, Reliable, meta = (DevelopmentOnly))
 	void Client_DrawEnemySpawnDebug(FVector Location, FRotator Rotation);
+
+	UFUNCTION(Client, Reliable)
+	void Client_OnFocusChanged(AActor* NewFocusedActor);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
+	void ShowPopup(AActor* Actor);
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
+	void HidePopup();
 
 						
 							/* === Unreal Engine UPROPERTY === */

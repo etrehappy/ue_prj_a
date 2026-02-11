@@ -48,20 +48,23 @@ struct FInputActionStruct
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	TObjectPtr<UInputAction> EquipWeapon{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	TObjectPtr<UInputAction> SimpleAttack{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	TObjectPtr<UInputAction> ThrowThrowableItem{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	TObjectPtr<UInputAction> EquipThrowableItem{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Action", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
 	TObjectPtr<UInputAction> Interaction{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Menu")
+	TObjectPtr<UInputAction> ToggleInventory{};
 };
 
 
@@ -101,7 +104,7 @@ private:
 	/**
 	 * @brief Sets the Owner
 	 */
-	void Initialize();
+	void Initialise();
 
 	/**
 	 * @brief Client only. 
@@ -135,6 +138,12 @@ private:
 	 * 
 	 */
 	void Interaction(const FInputActionValue& Value);
+
+	/**
+	 * @brief 
+	 * 	
+	 */
+	void ToggleInventory(const FInputActionValue& Value);
 
 						/* === C++ member === */
 

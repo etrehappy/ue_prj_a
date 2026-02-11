@@ -1,4 +1,4 @@
-﻿
+
 
 #pragma once
 
@@ -24,9 +24,9 @@ public:
 	virtual void Shutdown() override;    
 	void HideCurrentFullScreenWidget();
 
-	/*!
-	* @brief Executed when the connection to the server is successful
-	*/
+	/** 
+	 * @brief Executed when the connection to the server is successful
+	 */
 	void OnConnectedSuccessfully(EServerWorldType World);
 
 private:
@@ -34,6 +34,13 @@ private:
 	void OnPostLoadMap(UWorld* LoadedWorld);
 	void ShowMouse();
 	void HideMouse();
+
+	/**
+	 * @brief Temporary solution
+	 * @todo Is it still needed
+	 */
+	void PreloadInventoryItemDefinitions();
+	void OnInventoryItemDefinitionsLoaded();
 
 public:
 	UFUNCTION(BlueprintCallable)
@@ -55,4 +62,6 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly)
 	FString PendingErrorMessage;
+
+
 };

@@ -29,7 +29,7 @@ bool UCombatComponent::IsAttackAvailable() const
 void UCombatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	Initialize();
+	Initialise();
 	
 }
 
@@ -47,7 +47,7 @@ void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UCombatComponent, BattleState);
 }
 
-void UCombatComponent::Initialize()
+void UCombatComponent::Initialise()
 {
 	OwnerCharacter = Cast<ANetPlayerCharacter>(GetOwner());
 	if (!OwnerCharacter)

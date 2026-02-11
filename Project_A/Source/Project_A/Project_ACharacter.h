@@ -62,7 +62,7 @@ public:
 
 protected:
 
-	/** Initialize input action bindings */
+	/** Initialise input action bindings */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:

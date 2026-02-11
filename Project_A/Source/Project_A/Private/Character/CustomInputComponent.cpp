@@ -18,12 +18,12 @@ void UCustomInputComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Initialize();
+	Initialise();
 	
 }
 
 
-void UCustomInputComponent::Initialize()
+void UCustomInputComponent::Initialise()
 {
 	Owner = Cast<ANetPlayerCharacter>(GetOwner());    
 
@@ -79,6 +79,11 @@ void UCustomInputComponent::BindActions(UEnhancedInputComponent* EIC)
 		EIC->BindAction(InputActions.Interaction, ETriggerEvent::Completed, this, &UCustomInputComponent::Interaction);
 	}
 
+	if (InputActions.ToggleInventory)
+	{
+		EIC->BindAction(InputActions.ToggleInventory, ETriggerEvent::Completed, this, &UCustomInputComponent::ToggleInventory);
+	}
+
 }
 
 void UCustomInputComponent::EquipWeapon(const FInputActionValue& Value)
@@ -130,6 +135,17 @@ void UCustomInputComponent::HandleAbility(const FInputActionInstance& Instance)
 void UCustomInputComponent::Interaction(const FInputActionValue& Value)
 {
 	Owner->Interact();
+}
+
+void UCustomInputComponent::ToggleInventory(const FInputActionValue& Value)
+{
+	if (!Owner)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Owner = nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	Owner->ToggleInventory();
 }
 
 

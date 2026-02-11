@@ -26,8 +26,11 @@ public class Project_A : ModuleRules
             "Logger"
 			, "Enemy"
 			, "Common"
-           
-        });
+			, "Interaction"
+			, "Inventory"
+			, "UI"
+
+		});
 
 		PublicIncludePaths.AddRange(new string[] {
 			"Project_A"

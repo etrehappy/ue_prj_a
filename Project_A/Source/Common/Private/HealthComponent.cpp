@@ -20,7 +20,7 @@ void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Initialize();
+	Initialise();
 
 	if(OwnerActor)
 	{
@@ -45,7 +45,7 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(UHealthComponent, CurrentHealth);
 }
 
-void UHealthComponent::Initialize()
+void UHealthComponent::Initialise()
 {
 	OwnerActor = GetOwner();
 	if(!OwnerActor)

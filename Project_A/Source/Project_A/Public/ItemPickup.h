@@ -9,12 +9,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interactable.h"
+#include "InventoryItem.h"
+
 #include "ItemPickup.generated.h"
 
 class USphereComponent;
 
+
 UCLASS(Abstract)
-class PROJECT_A_API AItemPickup : public AActor
+class PROJECT_A_API AItemPickup : public AActor, public IInteractable
 {
 	GENERATED_BODY()
 	
@@ -22,12 +26,18 @@ public:
 	AItemPickup();
 	virtual void Tick(float DeltaTime) override;
 
+	virtual bool CanInteract(APawn* Interactor) const override;
+
+	virtual void Interact(APawn* Interactor) override;
+
+	UInventoryItemDefinition* GetItemDefinition() const { return ItemDefinition; }
+
 protected:
 	virtual void BeginPlay() override;
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void PickUp(AActor* Picker);
+	void PickUp(APawn* Picker);
 
 private:
 
@@ -44,5 +54,8 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UStaticMeshComponent>StaticMeshComponent{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
+	TObjectPtr<UInventoryItemDefinition> ItemDefinition;
 
 };

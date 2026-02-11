@@ -187,6 +187,7 @@ void UWeaponComponent::SetCurrentWeapon(AWeaponBase* NewWeapon, const FGameplayT
 	CurrentWeapon = NewWeapon;
 	bIsWeaponEquiped = true;
 	LastWeaponSettings.Update(WeaponTag, AttachSocketName, SpawnTransform, AttachToCharacter, bIsCollisionDesabled, InProjectileSocketName);
+	NotifyEquippedWeaponChanged();
 
 
 #if UE_BUILD_DEVELOPMENT
@@ -305,6 +306,7 @@ void UWeaponComponent::Server_UnequipWeapon_Implementation()
 	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
 	bIsWeaponEquiped = false;
+	NotifyEquippedWeaponChanged();
 }
 
 void UWeaponComponent::Server_UnequipThrowableItem_Implementation()
@@ -323,6 +325,16 @@ void UWeaponComponent::Server_UnequipThrowableItem_Implementation()
 	bIsThrowableItemEquiped = false;
 
 	PutLastWeaponBackOn();
+}
+
+void UWeaponComponent::NotifyEquippedWeaponChanged()
+{
+	OnEquippedWeaponChanged.Broadcast(CurrentWeapon);
+}
+
+void UWeaponComponent::OnRep_CurrentWeapon()
+{
+	NotifyEquippedWeaponChanged();
 }
 
 void UWeaponComponent::Server_EquipWeaponByTag_Implementation(const FGameplayTag WeaponTag, const FName AttachSocketName, const FTransform SpawnTransform, ACharacter* AttachToCharacter, bool bIsCollisionDesabled, FName InProjectileSocketName)

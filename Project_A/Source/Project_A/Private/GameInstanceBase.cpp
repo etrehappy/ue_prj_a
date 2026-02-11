@@ -1,7 +1,7 @@
-﻿#include "GameInstanceBase.h"
+#include "GameInstanceBase.h"
 
 #include "Kismet/GameplayStatics.h"
-
+#include "Engine/AssetManager.h"
 #include "NetworkSettings.h"
 #include "ProjectALog.h"
 
@@ -49,6 +49,8 @@ void UGameInstanceBase::OnStart()
 void UGameInstanceBase::OnPostLoadMap(UWorld* LoadedWorld)
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - Map loaded: {1}", FString(__FUNCTION__), *LoadedWorld->GetName() );
+
+	PreloadInventoryItemDefinitions();
 	
 	if (IsRunningDedicatedServer())
 	{
@@ -140,6 +142,33 @@ void UGameInstanceBase::ConnectToHubServer()
 	UE_LOGFMT(LogProjectA, Log, "{0} - Connecting to the server...", FString(__FUNCTION__));
 
 	UGameplayStatics::OpenLevel(this, FName(NetSet::HubServerAddress), true);
+}
+
+void UGameInstanceBase::PreloadInventoryItemDefinitions()
+{
+	UAssetManager & AssetManager = UAssetManager::Get();
+
+	TArray<FPrimaryAssetId> AssetIds;
+	AssetManager.GetPrimaryAssetIdList(FPrimaryAssetType(TEXT("InventoryItemDefinition")), AssetIds);
+
+	//TArray<FAssetData> AssetData{};
+	//UAssetManager::Get().GetPrimaryAssetDataList(FPrimaryAssetType("InventoryItemDefinition"), AssetData);
+
+	if (AssetIds.Num() == 0)
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - No InventoryItemDefinition primary assets found to preload", FString(__FUNCTION__));
+		return;
+	}
+
+	UE_LOGFMT(LogProjectA, Log, "{0} - Requesting preload of {1} InventoryItemDefinition assets", FString(__FUNCTION__), AssetIds.Num());
+
+	AssetManager.LoadPrimaryAssets(AssetIds, TArray<FName>(), FStreamableDelegate::CreateUObject(this, &UGameInstanceBase::OnInventoryItemDefinitionsLoaded));
+
+}
+
+void UGameInstanceBase::OnInventoryItemDefinitionsLoaded()
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - InventoryItemDefinition primary assets loaded", FString(__FUNCTION__));
 }
 
 void UGameInstanceBase::HideCurrentFullScreenWidget()

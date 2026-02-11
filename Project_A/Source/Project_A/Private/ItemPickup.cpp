@@ -43,7 +43,25 @@ void AItemPickup::Tick(float DeltaTime)
 
 }
 
-void AItemPickup::PickUp(AActor* Picker)
+bool AItemPickup::CanInteract(APawn* Interactor) const
+{
+	return true;
+}
+
+void AItemPickup::Interact(APawn* Interactor)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
+
+	if(!Interactor)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Interactor is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	PickUp(Interactor);
+}
+
+void AItemPickup::PickUp(APawn* Picker)
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
 
@@ -59,37 +77,21 @@ void AItemPickup::PickUp(AActor* Picker)
 		return;
 	}
 
-	IPickUpInterface::Execute_PickUpItem(Picker, this);
+	bool bIsPickedUp = IPickUpInterface::Execute_PickUpItem(Picker, this);
 
-	Destroy();
+	if (bIsPickedUp)
+	{
+		Destroy();
+	}	
 }
 
 void AItemPickup::OtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!OtherActor->Implements<UPickUpInterface>())
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - {1} has not IPickUpInterface", FString(__FUNCTION__), OtherActor->GetName());
-		return;
-	}
 
-	if (IPickUpInterface* Interface = Cast<IPickUpInterface>(OtherActor)) 
-	{ 
-		Interface->UpdatedCurrentPickUpItem(this); 
-	}	
 }
 
 void AItemPickup::OtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {	
-	if (!OtherActor->Implements<UPickUpInterface>())
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - {1} has not IPickUpInterface", FString(__FUNCTION__), OtherActor->GetName());
-		return;
-	}
-
-	if (IPickUpInterface* Interface = Cast<IPickUpInterface>(OtherActor))
-	{
-		Interface->CleanCurrentPickUpItem();
-	}
 }
 
 

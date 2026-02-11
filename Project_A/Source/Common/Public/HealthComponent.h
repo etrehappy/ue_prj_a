@@ -44,7 +44,7 @@ protected:
 
 						/* === C++ member variables === */
 private:
-	void Initialize();
+	void Initialise();
 	/**
 	 * @brief Server function.
 	 * 

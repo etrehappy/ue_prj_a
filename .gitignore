@@ -119,6 +119,9 @@ Project_A/Content/Project_A_Root/Weapons/Magic/
 Project_A/Content/Project_A_Root/Weapons/Sword/
 Project_A/Content/Project_A_Root/Weapons/Throwable/
 Project_A/Content/Project_A_Root/Ability/
+Project_A/Content/Project_A_Root/UI/
+Project_A/Content/Project_A_Root/Inventory/
+Project_A/Content/Project_A_Root/Levels/FirstMap/Items/
 
 Launch bats/Editor_StartGame.bat
 Launch bats/Editor_StartServer.bat

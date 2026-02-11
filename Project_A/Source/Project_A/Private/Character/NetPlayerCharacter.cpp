@@ -4,12 +4,18 @@
 #include "Animation/CharacterAnimInterface.h"
 #include "Camera/CameraComponent.h"
 #include "Character/CustomInputComponent.h"
+#include "Character/CustomPlayerController.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameplayTagContainer.h"
-#include "Net/UnrealNetwork.h"
+#include "GeneralHud.h"
 #include "HealthComponent.h"
+#include "Interactable.h"
+#include "InteractionComponent.h"
 #include "InventoryComponent.h"
+#include "InventoryItem.h"
 #include "ItemPickup.h"
+#include "Net/UnrealNetwork.h"
 
 #include "ProjectALog.h"
 
@@ -49,6 +55,20 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 	InventoryComponent->SetComponentTickEnabled(false);
+
+	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
+	InteractionComponent->SetComponentTickEnabled(true);
+
+	if (auto* Capsule = GetCapsuleComponent())
+	{
+		Capsule->SetGenerateOverlapEvents(true);
+		Capsule->OnComponentBeginOverlap.AddDynamic(this, &ANetPlayerCharacter::OtherBeginOverlap);
+		Capsule->OnComponentEndOverlap.AddDynamic(this, &ANetPlayerCharacter::OtherEndOverlap);
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - No collision component found on owner {1}", FString(__FUNCTION__), *Owner->GetName());
+	}
 }
 
 void ANetPlayerCharacter::Destroyed()
@@ -72,30 +92,62 @@ void ANetPlayerCharacter::Destroyed()
 
 void ANetPlayerCharacter::Interact()
 {
-	Server_TryInteract();
+	InteractionComponent->TryInteract();
 }
 
-void ANetPlayerCharacter::UpdatedCurrentPickUpItem(AItemPickup* Item)
-{	
-	IPickUpInterface::Execute_ShowPopup(this, Item);
-	Server_UpdatedCurrentPickUpItem(Item);		
-}
-
-void ANetPlayerCharacter::CleanCurrentPickUpItem()
+void ANetPlayerCharacter::ToggleInventory()
 {
-	IPickUpInterface::Execute_HidePopup(this);
-	Server_CleanCurrentPickUpItem();
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - Running on dedicated server, skip", FString(__FUNCTION__));
+		return;
+	}
+
+	AController* PController = GetController();
+	if (!PController)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PController = nullptr", FString(__FUNCTION__));
+		return;
+	}
+	ACustomPlayerController* PlayerController = Cast<ACustomPlayerController>(PController);
+	if (!PlayerController)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	AGeneralHud* HUD = Cast<AGeneralHud>(PlayerController->GetHUD());
+	if (!HUD)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HUD is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	HUD->ToggleInventory();
 }
+
 
 void ANetPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AbilityComponent->OnAbilityActivated.AddDynamic(this, &ANetPlayerCharacter::HandleAbilityActivated);
-	HealthComponent->OnDeath.AddDynamic(this, &ANetPlayerCharacter::OnDead);
-	HealthComponent->OnIncreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnIncreaseHealth);
-	HealthComponent->OnDecreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnDecreaseHealth);	
+	if (AbilityComponent)
+	{
+		AbilityComponent->OnAbilityActivated.AddDynamic(this, &ANetPlayerCharacter::HandleAbilityActivated);
+	}	
 
+	if (HealthComponent)
+	{
+		HealthComponent->OnDeath.AddDynamic(this, &ANetPlayerCharacter::OnDead);
+		HealthComponent->OnIncreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnIncreaseHealth);
+		HealthComponent->OnDecreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnDecreaseHealth);
+	}	
+
+	if (InteractionComponent)
+	{
+		InteractionComponent->OnFocusChanged.AddUObject(this,&ANetPlayerCharacter::HandleFocusChanged);
+	}
+	
 }
 
 void ANetPlayerCharacter::Tick(float DeltaTime)
@@ -129,6 +181,32 @@ void ANetPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 }
 
+void ANetPlayerCharacter::HandleFocusChanged(AActor* NewFocusedActor)
+{
+	ACustomPlayerController* PC = Cast<ACustomPlayerController>(GetController());
+	if (PC)
+	{
+		PC->OnFocusChanged(NewFocusedActor);
+	}
+}
+
+void ANetPlayerCharacter::OtherBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{	
+	if (IsRunningDedicatedServer())
+	{
+		InteractionComponent->OtherBeginOverlap(OtherActor);
+	}
+	
+}
+
+void ANetPlayerCharacter::OtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (IsRunningDedicatedServer())
+	{
+		InteractionComponent->OtherEndOverlap(OtherActor);
+	}
+}
 
 void ANetPlayerCharacter::HandleAbilityActivated(FGameplayTag AbilityTag)
 {
@@ -166,11 +244,6 @@ void ANetPlayerCharacter::HandleAbilityActivated(FGameplayTag AbilityTag)
 		UE_LOGFMT(LogProjectA, Log, "{0} - Failed to update CurrentAttackTags", FString(__FUNCTION__));
 		return;
 	}
-}
-
-void ANetPlayerCharacter::Server_CleanCurrentPickUpItem_Implementation()
-{
-	CurrentInteractable = nullptr;
 }
 
 void ANetPlayerCharacter::OnDead()
@@ -256,52 +329,26 @@ void ANetPlayerCharacter::Server_OnDeathFxFinished_Implementation()
 	}
 }
 
-void ANetPlayerCharacter::PickUpItem_Implementation(AItemPickup* Item)
+bool ANetPlayerCharacter::PickUpItem_Implementation(AItemPickup* Item)
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
-	
+	bool bWasPickedUp = false;
 
-	InventoryComponent->AddToInventory(Item);
+	if (!IsValid(InventoryComponent))
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - InventoryComponent = nullptr", FString(__FUNCTION__));
+		return bWasPickedUp;
+	}
+
+	UInventoryItem* InventoryItem = NewObject<UInventoryItem>();
+	InventoryItem->Definition = Item->GetItemDefinition();
+	InventoryItem->StackCount = 1;
+	bWasPickedUp = InventoryComponent->AddToInventory(InventoryItem);
+
+	if (!bWasPickedUp)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Failed to add item to inventory", FString(__FUNCTION__));
+	}
+
+	return bWasPickedUp;
 }
-
-void ANetPlayerCharacter::Server_UpdatedCurrentPickUpItem_Implementation(AItemPickup* Item)
-{
-	if (!Item)
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Item ie empty", FString(__FUNCTION__));
-	}
-
-	const float MaxPickupDist = 300.f;
-	const float DistSq = FVector::DistSquared(Item->GetActorLocation(), GetActorLocation());
-	if (DistSq > FMath::Square(MaxPickupDist))
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - item too far", FString(__FUNCTION__));
-		return;
-	}
-
-	CurrentInteractable = Item;
-}
-
-void ANetPlayerCharacter::Server_TryInteract_Implementation()
-{
-	UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
-
-	/* Temporary solution  */
-
-	if (auto Item = Cast<AItemPickup>(CurrentInteractable))
-	{
-		Item->PickUp(this);
-	}
-	else
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Item is not AItemPickup", FString(__FUNCTION__));
-	}
-}
-
-
-
-
-//void ANetPlayerCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//}

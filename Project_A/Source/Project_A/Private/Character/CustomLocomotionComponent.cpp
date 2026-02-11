@@ -72,10 +72,10 @@ void UCustomLocomotionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Initialize();	
+	Initialise();	
 }
 
-void UCustomLocomotionComponent::Initialize()
+void UCustomLocomotionComponent::Initialise()
 {       
 	Owner = Cast<ANetPlayerCharacter>(GetOwner() );
 	CharacterMovementComponent = Owner->GetCharacterMovement();

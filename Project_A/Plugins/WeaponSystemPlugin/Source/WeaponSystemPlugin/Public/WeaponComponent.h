@@ -15,6 +15,8 @@
 
 class AWeaponThrowable;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEquippedWeaponChanged, AWeaponBase*, NewWeapon);
+
 /**
  * @struct FLustWeaponSettings
  * @brief This is used to restore the last weapon.
@@ -54,6 +56,27 @@ UCLASS( ClassGroup=(Weapon), meta=(BlueprintSpawnableComponent) )
 class WEAPONSYSTEMPLUGIN_API UWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
+
+	/* NEW */
+private:
+	void NotifyEquippedWeaponChanged();
+
+public:
+	/**
+	 * @brief Broadcasts when the equipped weapon changes.
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Weapon")
+	FOnEquippedWeaponChanged OnEquippedWeaponChanged{};
+
+protected:
+	UFUNCTION()
+	void OnRep_CurrentWeapon();
+
+
+	/* OLD */
+
+
 						/* === C++ member functions === */
 public:	
 	UWeaponComponent();
@@ -169,7 +192,7 @@ private:
 	void PutLastWeaponBackOn();
 
 
-						/* === C++ member variables === */
+							/* === C++ member variables === */
 private:
 	/**
 	 * @brief Server only.
@@ -215,6 +238,8 @@ protected:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeaponByTag(const FGameplayTag WeaponTag, const FName AttachSocketName, const FTransform SpawnTransform, ACharacter* AttachToCharacter, bool bIsCollisionDesabled = true, FName InProjectileSocketName = "");
 
+
+
 						/* === Unreal Engine UPROPERTY === */
 private:
 	/**
@@ -222,7 +247,7 @@ private:
 	 * If CurrentThrowableItem is equipped, this will be nullptr.
 	 * @see LastWeaponSettings
 	 */
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Replicated, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = OnRep_CurrentWeapon, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<AWeaponBase> CurrentWeapon{};
 
 	/**
@@ -251,7 +276,7 @@ private:
 	 */
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Replicated, meta = (AllowPrivateAccess = "true"))
 	bool bIsThrowableItemEquiped{false};
-	
+		
 };
 
 //	const bool IsAnyWeaponEquiped() const;

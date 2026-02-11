@@ -11,6 +11,12 @@
 #include "ProjectALog.h"
 
 
+
+void ACustomPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void ACustomPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -151,6 +157,22 @@ void ACustomPlayerController::Client_DrawEnemySpawnDebug_Implementation(FVector 
 #endif //UE_BUILD_DEVELOPMENT
 }
 
+
+void ACustomPlayerController::OnFocusChanged(AActor* NewFocusedActor)
+{
+	Client_OnFocusChanged(NewFocusedActor);
+}
+
+void ACustomPlayerController::Client_OnFocusChanged_Implementation(AActor* NewFocusedActor)
+{
+	if (!NewFocusedActor)
+	{
+		HidePopup();
+		return;
+	}
+
+	ShowPopup(NewFocusedActor);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests

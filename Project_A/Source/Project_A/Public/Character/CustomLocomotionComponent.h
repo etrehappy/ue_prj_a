@@ -90,7 +90,7 @@ private:
 	/**
 	 * @brief Sets up initial references. Subscribes UCustomLocomotionComponent::OnMovementModeChanged to Character's MovementModeChangedDelegate 
 	 */
-	void Initialize();
+	void Initialise();
 
 	/**
 	 * @brief Validates the input vector for movement or look direction.

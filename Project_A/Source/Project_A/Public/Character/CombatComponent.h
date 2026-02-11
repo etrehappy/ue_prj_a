@@ -41,7 +41,7 @@ private:
 	/**
 	 * @brief Updates internal pointers to the owner character and its weapon component.
 	 */
-	void Initialize();
+	void Initialise();
 
 public:
 	/**

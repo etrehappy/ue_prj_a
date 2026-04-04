@@ -61,3 +61,17 @@ void AGeneralHud::ToggleInventory()
 
 	MainWidget->ToggleInventoryVisibility();
 }
+
+void AGeneralHud::InitialiseMainWidgetForPawn()
+{
+	if (!MainWidget)
+	{
+		if (!CreateMainWidget())
+		{
+			UE_LOGFMT(LogProjectA, Log, "{0} - MainWidget is not available", FString(__FUNCTION__));
+			return;
+		}
+	}
+		
+	MainWidget->EnsureHealthInitialised();
+}

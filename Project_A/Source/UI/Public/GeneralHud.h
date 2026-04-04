@@ -45,6 +45,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleInventory();
 
+	/**
+	 * @brief Initializes the main widget for the pawn. This function should be called when the player possesses a new pawn to ensure that the HUD is correctly set up for the new character.
+	 */
+	UFUNCTION(BlueprintCallable)
+	void InitialiseMainWidgetForPawn();
+
 protected:
 	/**
 	 * @brief The class type of the general widget to create and manage.
@@ -57,7 +63,4 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UGeneralWidget> MainWidget{};
-
-
-
 };

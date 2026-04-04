@@ -14,6 +14,8 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathEvent);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnIncreaseHealthEvent, float, HealAmount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDecreaseHealthEvent, float, DamageAmount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedEvent, float, CurrentHealthValue, float, MaxHealthValue);
+
 
 /**
  * @class UHealthComponent
@@ -75,6 +77,11 @@ private:
 	UFUNCTION()
 	void TakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser);
 
+	UFUNCTION()
+	void OnRep_CurrentHealth();
+
+	UFUNCTION()
+	void OnRep_MaxHealth();
 
 
 						/* === Unreal Engine UPROPERTY === */
@@ -88,21 +95,18 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Health")
 	FOnDecreaseHealthEvent OnDecreaseHealth{};
 
+	UPROPERTY(BlueprintAssignable, Category = "Health")
+	FOnHealthChangedEvent OnHealthChanged{};
+
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Health")
 	TObjectPtr<AActor> OwnerActor{nullptr};
 
 private:
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "Health")
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Health")
 	float MaxHealth{100.f};
 
-	UPROPERTY(VisibleAnywhere, Replicated, Category = "Health")
+	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
 	float CurrentHealth{};
-	
-
-
-
-
-		
 	
 };

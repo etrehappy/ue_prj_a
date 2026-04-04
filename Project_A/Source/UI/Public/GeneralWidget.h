@@ -14,6 +14,7 @@
 #include "GeneralWidget.generated.h"
 
 class UInventoryWidget;
+class UHealthWidget;
 
 /**
  * @class UGeneralWidget
@@ -34,10 +35,18 @@ protected:
 	/**
 	 * @brief Ensures that the equipped item widget is initialised. If it is not, it initialises it.
 	 */
-	void EnsureEquippedItemInitialised();
+	void EnsureEquippedItemInitialised();	
 
 	bool bInventoryInitialised{false};
 	bool bWeaponInitialised{false};
+	bool bHealthInitialised{false};
+
+private:
+	/**
+	 * @brief Cached reference to the pawn whose health is being displayed. 
+	 * This is used to correctly unbind from the health change event when the pawn changes.
+	 */
+	TWeakObjectPtr<APawn> CachedHealthPawn{};
 
 						/* === Unreal Engine UFUNCTION and UPROPERTY === */
 public:
@@ -46,6 +55,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	void ToggleInventoryVisibility();
+
+	/**
+	 * @brief Ensures that the health widget is initialised. If it is not, it initialises it.
+	 */
+	UFUNCTION(BlueprintCallable)
+	void EnsureHealthInitialised();
 	
 protected:
 
@@ -54,6 +69,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UEquippedItemWidget> EquippedItemWidget{};
+
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UHealthWidget> HealthWidget{};
 
 	
 

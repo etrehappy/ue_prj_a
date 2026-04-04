@@ -14,6 +14,8 @@ public class UI: ModuleRules
 			, "UMG"
             , "Slate"
             , "SlateCore"
-            , "InputCore"});
+            , "InputCore"
+            , "Common"
+		});
     }
 }

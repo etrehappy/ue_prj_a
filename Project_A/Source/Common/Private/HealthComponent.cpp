@@ -54,6 +54,9 @@ void UHealthComponent::Initialise()
 	}
 
 	CurrentHealth = MaxHealth;
+
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+
 	UE_LOGFMT(LogProjectA, Log, "{0} - Initialized. MaxHealth: {1} / CurrentHealth: {2}", FString(__FUNCTION__), MaxHealth, CurrentHealth);
 }
 
@@ -75,7 +78,9 @@ void UHealthComponent::SetMaxHealth(float NewHealth)
 		return;
 	}
 
-	MaxHealth = NewHealth;		
+	MaxHealth = NewHealth;
+
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
 
@@ -126,6 +131,7 @@ void UHealthComponent::DecreaseHealth(float DamageAmount)
 	
 	CurrentHealth = NewHealth;
 	OnDecreaseHealth.Broadcast(DamageAmount);
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 
 	if (CurrentHealth <= 0.f)
 	{
@@ -147,6 +153,7 @@ void UHealthComponent::IncreaseHealth(float HealAmount)
 
 	CurrentHealth = NewHealth;
 	OnIncreaseHealth.Broadcast(HealAmount);
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 
 	UE_LOGFMT(LogProjectA, Log, "{0} - Healed: {1} / CurrentHealth: {2}", FString(__FUNCTION__), HealAmount, CurrentHealth);
 }
@@ -154,5 +161,15 @@ void UHealthComponent::IncreaseHealth(float HealAmount)
 void UHealthComponent::ToKill()
 {
 	OnDeath.Broadcast();
+}
+
+void UHealthComponent::OnRep_CurrentHealth()
+{
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+}
+
+void UHealthComponent::OnRep_MaxHealth()
+{
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 

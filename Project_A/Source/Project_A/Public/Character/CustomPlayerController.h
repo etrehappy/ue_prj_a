@@ -8,6 +8,7 @@
 #include "CustomPlayerController.generated.h"
 
 class UInputMappingContext;
+class UDeathMenuWidget;
 
 /**
  * @struct FInputMappingContextWithPriority
@@ -43,15 +44,41 @@ public:
 		
 	void OnFocusChanged(AActor* NewFocusedActor);
 
+	void SetDeathMenuVisible(bool bVisible);
+
 protected:
 	virtual void BeginPlay() override;
 
 	/** Input mapping context setup */
 	/**
-	 * @brief Client only. Iterates through `InputMappingContext` and adds non-empty `MappingContext` to `UEnhancedInputLocalPlayerSubsystem`.
+	 * @brief Client only. Iterates through `InputMappingContext` and adds non-empty `MappingContext` to UEnhancedInputLocalPlayerSubsystem`.
 	 * @see  TArray<FInputMappingContextWithPriority> InputMappingContext
 	 */
 	virtual void SetupInputComponent() override;
+
+	virtual void OnPossess(APawn* InPawn) override;
+
+protected:
+	/**
+	 * @brief This function is called on the client after the server has confirmed possession of a pawn. It is responsible for setting up the player's HUD and other client-side elements based on the newly possessed pawn.
+	 */
+	virtual void AcknowledgePossession(APawn* InPawn) override;
+
+	virtual void OnRep_Pawn() override;
+
+	void ShowDeathMenu();
+	void HideDeathMenu();
+
+private:
+	/**
+	 * @brief It checks if the pawn is valid and if the HUD can be initialized for it, and if so, it sets up the necessary widgets and UI elements.
+	 */
+	void TryInitialiseHudForPawn();
+
+	/**
+	 * @brief This flag is used to prevent multiple respawn requests from being sent to the server while waiting for a response. It is set to true when a respawn request is made and reset to false when the player successfully respawns or exits the death menu.
+	 */
+	bool bRespawnRequested{false};
 
 
 						/* === Unreal Engine UFUNCTIONs === */
@@ -66,6 +93,9 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_OnConnected(EServerWorldType World);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_RequestRespawn();
 
 	/**
 	 * @brief It just spawns an enemy in front of the player. Used for testing purposes only.
@@ -95,6 +125,13 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
 	void HidePopup();
 
+private:
+	UFUNCTION()
+	void HandleDeathMenuRespawnRequested();
+
+	UFUNCTION()
+	void HandleDeathMenuExitRequested();
+
 						
 							/* === Unreal Engine UPROPERTY === */
 protected:
@@ -104,6 +141,12 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", meta = (AllowPrivateAccess = "true"))
 	TArray<FInputMappingContextWithPriority> InputMappingContext{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UDeathMenuWidget> DeathMenuWidgetClass{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UDeathMenuWidget> DeathMenuWidget{};
 
 
 								/** === Additional === */
@@ -117,7 +160,6 @@ public:
 };
 
 
-//virtual void OnPossess(APawn* aPawn) override;
 //virtual void OnUnPossess() override;
 
 ///**

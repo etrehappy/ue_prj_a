@@ -95,6 +95,16 @@ protected:
      */
     virtual void HandleFocusChanged(AActor* NewFocusedActor);
 
+    /**
+     * @brief Disables the character's control, preventing any input actions from being processed.
+     */
+    void DisableCharacterControl();
+
+    /**
+     * @brief Restores the character's collision settings to their default state.
+     * 
+     */
+    void RestoreCollision();
 
                         /* === Unreal Engine UFUNCTION === */
 protected:
@@ -173,6 +183,12 @@ private:
      */
     UFUNCTION()
     void OnDecreaseHealth(float DamageAmount);
+
+    /**
+	 * @brief Client function.
+     */
+    UFUNCTION()
+    void HandleHealthChanged(float CurrentHealthValue, float MaxHealthValue);
 
 
                         /* === Unreal Engine UPROPERTY === */

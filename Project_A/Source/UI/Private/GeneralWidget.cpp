@@ -9,6 +9,8 @@
 #include "InventoryComponent.h"
 #include "InventoryWidget.h"
 #include "EquippedItemWidget.h"
+#include "HealthWidget.h"
+#include "HealthComponent.h"
 
 #include "ProjectALog.h"
 
@@ -66,6 +68,39 @@ void UGeneralWidget::EnsureEquippedItemInitialised()
 
 	EquippedItemWidget->InitialiseWithInventory(InventoryComponent);
 	bWeaponInitialised = true;
+}
+
+void UGeneralWidget::EnsureHealthInitialised()
+{
+	APawn* OwningPawn = GetOwningPlayerPawn();
+	if (!OwningPawn)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - OwningPawn is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	if (bHealthInitialised && CachedHealthPawn.Get() == OwningPawn)
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - Health already initialised for this pawn {1}", FString(__FUNCTION__), *OwningPawn->GetName());
+		return;
+	}
+
+	if (!HealthWidget)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HealthWidget is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	UHealthComponent* HealthComponent = OwningPawn->GetComponentByClass<UHealthComponent>();
+	if (!HealthComponent)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HealthComponent not found on owning pawn {1}", FString(__FUNCTION__), *OwningPawn->GetName());
+		return;
+	}
+
+	HealthWidget->InitialiseWithHealthComponent(HealthComponent);
+	bHealthInitialised = true;
+	CachedHealthPawn = OwningPawn;
 }
 
 void UGeneralWidget::ToggleInventoryVisibility()

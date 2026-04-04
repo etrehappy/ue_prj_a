@@ -10,12 +10,12 @@
 #include "GameplayTagContainer.h"
 #include "GeneralHud.h"
 #include "HealthComponent.h"
-#include "Interactable.h"
 #include "InteractionComponent.h"
 #include "InventoryComponent.h"
 #include "InventoryItem.h"
 #include "ItemPickup.h"
 #include "Net/UnrealNetwork.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "ProjectALog.h"
 
@@ -141,13 +141,17 @@ void ANetPlayerCharacter::BeginPlay()
 		HealthComponent->OnDeath.AddDynamic(this, &ANetPlayerCharacter::OnDead);
 		HealthComponent->OnIncreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnIncreaseHealth);
 		HealthComponent->OnDecreaseHealth.AddDynamic(this, &ANetPlayerCharacter::OnDecreaseHealth);
+		HealthComponent->OnHealthChanged.AddDynamic(this, &ANetPlayerCharacter::HandleHealthChanged);
+
+		HandleHealthChanged(HealthComponent->GetCurrentHealth(), HealthComponent->GetMaxHealth());
 	}	
 
 	if (InteractionComponent)
 	{
 		InteractionComponent->OnFocusChanged.AddUObject(this,&ANetPlayerCharacter::HandleFocusChanged);
 	}
-	
+
+	RestoreCollision();	
 }
 
 void ANetPlayerCharacter::Tick(float DeltaTime)
@@ -249,6 +253,8 @@ void ANetPlayerCharacter::HandleAbilityActivated(FGameplayTag AbilityTag)
 void ANetPlayerCharacter::OnDead()
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
+
+	DisableCharacterControl();
 	Multicast_PlayDeathFX();
 }
 
@@ -262,6 +268,23 @@ void ANetPlayerCharacter::OnDecreaseHealth(float DamageAmount)
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
 	Multicast_PlayDamageFX(DamageAmount);
+}
+
+void ANetPlayerCharacter::HandleHealthChanged(float CurrentHealthValue, float MaxHealthValue)
+{
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	ACustomPlayerController* PlayerController = Cast<ACustomPlayerController>(GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	const bool bIsDead = CurrentHealthValue <= 0.f;
+	PlayerController->SetDeathMenuVisible(bIsDead);
 }
 
 void ANetPlayerCharacter::Multicast_PlayHealFX_Implementation(float HealAmount)
@@ -288,6 +311,39 @@ void ANetPlayerCharacter::Multicast_PlayDamageFX_Implementation(float DamageAmou
 	OnPlayDamageFX(DamageAmount);
 }
 
+void ANetPlayerCharacter::DisableCharacterControl()
+{
+	if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+	{
+		MovementComp->StopMovementImmediately();
+		MovementComp->DisableMovement();
+	}
+
+	if (AController* CharacterController = GetController())
+	{
+		CharacterController->SetIgnoreMoveInput(true);
+		CharacterController->SetIgnoreLookInput(true);
+	}
+
+	if (UCapsuleComponent* Capsule = GetCapsuleComponent())
+	{
+		Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+}
+
+void ANetPlayerCharacter::RestoreCollision()
+{
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+
+	if (!Capsule)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - CapsuleComponent = nullptr", FString(__FUNCTION__));
+		return;	
+	}
+
+	Capsule->SetCollisionProfileName(TEXT("Pawn"));
+}
+
 void ANetPlayerCharacter::Multicast_PlayDeathFX_Implementation()
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
@@ -297,6 +353,7 @@ void ANetPlayerCharacter::Multicast_PlayDeathFX_Implementation()
 		return;
 	}
 
+	DisableCharacterControl();
 	OnPlayDeathFX();
 }
 
@@ -304,29 +361,6 @@ void ANetPlayerCharacter::Server_OnDeathFxFinished_Implementation()
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - called ", FString(__FUNCTION__));
 	
-	AController* PController = GetController();
-	if(!PController)
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController = nullptr", FString(__FUNCTION__));
-		return;
-	}
-
-	
-	PController->UnPossess();
-
-
-	AGameModeBase* GameMode = GetWorld() ? GetWorld()->GetAuthGameMode() : nullptr;
-	if (GameMode)
-	{		
-		Destroy();
-				
-		GameMode->RestartPlayer(PController);
-		UE_LOGFMT(LogProjectA, Log, "{0} - RestartPlayer called", FString(__FUNCTION__));
-	}
-	else
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - GameMode not found, cannot restart player", FString(__FUNCTION__));
-	}
 }
 
 bool ANetPlayerCharacter::PickUpItem_Implementation(AItemPickup* Item)

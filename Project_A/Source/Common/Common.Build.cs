@@ -7,6 +7,7 @@ public class Common: ModuleRules
         PrivateDependencyModuleNames.AddRange(new string[] {"Core", "CoreUObject", "Engine"
             , "Logger"
 			, "WeaponSystemPlugin"
+			, "GameplayTags"
 		});
     }
 }

@@ -8,6 +8,7 @@
 #include "EnhancedInputComponent.h"
 #include "InputAction.h"
 #include "InputActionValue.h"
+#include "StatusEffect/StatusEffectStatHandler.h"
 
 #include "CustomLocomotionComponent.generated.h"
 
@@ -62,7 +63,7 @@ struct FInputStruct
  * @todo Restrict camera's rotation along the Z axis.
  */
 UCLASS( ClassGroup=(Moving), meta=(BlueprintSpawnableComponent) )
-class PROJECT_A_API UCustomLocomotionComponent : public UActorComponent
+class PROJECT_A_API UCustomLocomotionComponent : public UActorComponent, public IStatusEffectStatHandler
 {
 	GENERATED_BODY()
 
@@ -82,6 +83,22 @@ public:
 	 * @todo Replace to UCustomInputComponent
 	 */
 	void BindActions(UEnhancedInputComponent* EIC);
+	
+	/**
+	 * @see IStatusEffectStatHandler
+	 */
+	virtual bool CanHandleStatTag(const FGameplayTag& StatTag) const override;
+
+	/**
+	 * @see IStatusEffectStatHandler
+	 */
+	virtual void ApplyStatusEffectAction(const FEffectAction& Action) override;
+
+	/**
+	 * @see IStatusEffectStatHandler
+	 */
+	virtual void RemoveStatusEffectAction(const FEffectAction& Action) override;
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -157,6 +174,7 @@ private:
 	 * @brief Owner has character movement component, so this will autoreplicate to server
 	 */
 	void Jump(const FInputActionValue& Value);
+
 
 
 						/* === C++ member variables === */
@@ -248,14 +266,20 @@ private:
 		meta = (ClampMin = "0.0", ClampMax = "1.0", UIMin = "0.0", UIMax = "1.0", AllowPrivateAccess = "true"))
 	float MoveInputScale{1.f};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float BackwordSpeed{200.f};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated,	Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float RunSpeed{350.f};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Replicated, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SprintSpeed{500.f};
+
+	/**
+	 * @brief Tags of stats that this component can handle. Should be set up in the Blueprint before the game is run.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "StatusEffect")
+	FGameplayTagContainer SupportedStatTags{};
 
 
 #if WITH_DEV_AUTOMATION_TESTS

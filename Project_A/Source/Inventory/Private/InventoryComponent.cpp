@@ -6,6 +6,7 @@
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
 #include "InventoryItem.h"
+#include "StatusEffect/StatusEffectsComponent.h"
 
 #include "ProjectALog.h"
 
@@ -126,6 +127,47 @@ void UInventoryComponent::AddItemToEquipment(EEquipmentSlot Slot, UInventoryItem
 	EquipmentInventory->AddItemToSlot(Item, SlotIndex);	
 }
 
+void UInventoryComponent::UseItem(int32 SlotIndex)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called with SlotIndex: {1}", FString(__FUNCTION__), SlotIndex);
+
+	if (!IsRunningDedicatedServer())
+	{
+		Server_UseItem(SlotIndex);
+		return;
+	}
+
+	if (!Inventory)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Inventory is null", FString(__FUNCTION__));
+		return;
+	}
+
+	UInventoryItem* Item = Inventory->FindItemBySlot(SlotIndex);
+	if (!Item || !Item->HasValidData())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid item in slot {1}", FString(__FUNCTION__), SlotIndex);
+		return;
+	}
+
+	const UInventoryItemDefinition* Definition = Item->Definition;
+	if (!Definition || !Definition->bConsumable || !Definition->EffectTagOnUse.IsValid())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Item in slot {1} is not consumable", FString(__FUNCTION__), SlotIndex);
+		return;
+	}
+
+	UStatusEffectComponent* StatusEffectComponent = GetOwner()->FindComponentByClass<UStatusEffectComponent>();
+	if (!StatusEffectComponent)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - StatusEffectComponent was not found on owner", FString(__FUNCTION__));
+		return;
+	}
+
+	StatusEffectComponent->ApplyEffectByTag(Definition->EffectTagOnUse);
+	Inventory->UseItemFromSlot(SlotIndex);
+}
+
 void UInventoryComponent::UnequipItem(EEquipmentSlot Slot)
 {
 	UE_LOGFMT(LogProjectA, Error, "{0} - called", FString(__FUNCTION__));
@@ -213,6 +255,13 @@ void UInventoryComponent::BindInventoryDelegates(UInventory* InInventory)
 
 	InInventory->OnRelocateItemRequested.RemoveAll(this);
 	InInventory->OnRelocateItemRequested.AddUniqueDynamic(this, &UInventoryComponent::RelocateItemInInventory);
+}
+
+void UInventoryComponent::Server_UseItem_Implementation(int32 SlotIndex)
+{
+	UE_LOGFMT(LogProjectA, Log, "{0} - called with SlotIndex: {1}", FString(__FUNCTION__), SlotIndex);
+
+	UseItem(SlotIndex);
 }
 
 void UInventoryComponent::MoveItemToOtherInventory(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex)

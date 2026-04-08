@@ -147,6 +147,16 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
 	void AddItemToEquipment(EEquipmentSlot Slot, UInventoryItem* Item);
 
+	/**
+	 * @brief Server function.
+	 * 
+	 * It applies the item's effect to the owner and removes the item from the inventory. 
+	 * @see StatusEffectComponent
+	 * @see UInventory::UseItemFromSlot
+	 */
+	UFUNCTION(BlueprintCallable)
+	void UseItem(int32 SlotIndex);
+
 protected:
 	/**
 	 * @brief Only calls MoveItemToOtherInventory 
@@ -161,6 +171,13 @@ protected:
 	 */
 	UFUNCTION(Server, Reliable)
 	void Server_RelocateItemInInventory(UInventory* InInventory, int32 FromIndex, int32 ToIndex);
+
+	/**
+	 * @brief Only calls UseItem 
+	 * @see UseItem
+	 */
+	UFUNCTION(Server, Reliable)
+	void Server_UseItem(int32 SlotIndex);
 
 private:
 	/**

@@ -9,6 +9,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "StatusEffect/StatusEffectStatHandler.h"
+
 #include "HealthComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeathEvent);
@@ -26,7 +28,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthChangedEvent, float, Curre
  * Network: available
  */
 UCLASS( ClassGroup=(CustomHealth), meta=(BlueprintSpawnableComponent) )
-class COMMON_API UHealthComponent : public UActorComponent
+class COMMON_API UHealthComponent : public UActorComponent, public IStatusEffectStatHandler
 {
 	GENERATED_BODY()
 						/* === C++ member functions === */
@@ -39,6 +41,21 @@ public:
 	FORCEINLINE float GetMaxHealth() const;
 	FORCEINLINE float GetCurrentHealth() const;
 	void SetMaxHealth(float NewHealth);
+
+	/**
+	 * @see IStatusEffectStatHandler
+	 */
+	virtual bool CanHandleStatTag(const FGameplayTag& StatTag) const override;
+
+	/**
+	 * @see IStatusEffectStatHandler
+	 */
+	virtual void ApplyStatusEffectAction(const FEffectAction& Action) override;
+
+	/**
+	 * @see IStatusEffectStatHandler
+	 */
+	virtual void RemoveStatusEffectAction(const FEffectAction& Action) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -63,9 +80,13 @@ private:
 
 	/**
 	 * @brief Server function.
-	 * 
 	 */
 	void ToKill();
+
+	/**
+	 * @brief Server function.
+	 */
+	void SetCurrentHealth(float NewHealth);
 
 
 
@@ -102,11 +123,29 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Health")
 	TObjectPtr<AActor> OwnerActor{nullptr};
 
+	/**
+	 * @brief Tags of stats that this component can handle. Should be set up in the Blueprint before the game is run.
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "StatusEffect")
+	FGameplayTagContainer SupportedStatTags{};
+
 private:
 	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Health")
 	float MaxHealth{100.f};
 
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
-	float CurrentHealth{};
+	float CurrentHealth{1.f};
+
+	/**
+	 * @see UHealthComponent::TakeAnyDamage
+	 */
+	UPROPERTY()
+	float IncomingDamageMultiplier{1.f};
+
+	/**
+	 * @brief Value that reduces incoming damage.
+	 */
+	UPROPERTY()
+	float Defense{0.f};
 	
 };

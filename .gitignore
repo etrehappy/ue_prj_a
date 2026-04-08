@@ -122,6 +122,8 @@ Project_A/Content/Project_A_Root/Ability/
 Project_A/Content/Project_A_Root/UI/
 Project_A/Content/Project_A_Root/Inventory/
 Project_A/Content/Project_A_Root/Levels/FirstMap/Items/
+Project_A/Content/ThirdPerson/Blueprints/SlowDebuff/
+Project_A/Content/ThirdPerson/Spike_Trap/
 
 Launch bats/Editor_StartGame.bat
 Launch bats/Editor_StartServer.bat

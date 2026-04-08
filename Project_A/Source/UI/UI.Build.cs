@@ -4,7 +4,9 @@ public class UI: ModuleRules
 {
     public UI(ReadOnlyTargetRules Target) : base(Target)
     {
-        PrivateDependencyModuleNames.AddRange(new string[] {"Core", "CoreUObject", "Engine"
+        //PublicDependencyModuleNames.AddRange(new string[] {"Common"});
+
+		PrivateDependencyModuleNames.AddRange(new string[] {"Core", "CoreUObject", "Engine"
 
 			,"UMG"
             , "Logger"

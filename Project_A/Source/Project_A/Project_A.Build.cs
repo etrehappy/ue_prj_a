@@ -19,13 +19,13 @@ public class Project_A : ModuleRules
 			"GameplayStateTreeModule",
 			"UMG",
             "GameplayTags",
-			"WeaponSystemPlugin"
-    });
+			"WeaponSystemPlugin",
+			"Common"
+	});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
             "Logger"
 			, "Enemy"
-			, "Common"
 			, "Interaction"
 			, "Inventory"
 			, "UI"

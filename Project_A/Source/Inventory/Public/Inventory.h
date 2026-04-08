@@ -103,6 +103,12 @@ public:
 	 */
 	void MoveItemToOtherInventoryInternal(UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex);
 
+	/**
+	 * @brief Uses an item from the specified slot.
+	 * @see UInventoryComponent::UseItem
+	 */
+	void UseItemFromSlot(int32 SlotIndex);
+
 private:
 	void UpdateInventorySize(int32 NewSize);
 	/**

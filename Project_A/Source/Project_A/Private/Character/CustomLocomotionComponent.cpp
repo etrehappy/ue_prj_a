@@ -21,7 +21,10 @@ void UCustomLocomotionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UCustomLocomotionComponent, CharacterMovementStruct);	
+	DOREPLIFETIME(UCustomLocomotionComponent, CharacterMovementStruct);
+	DOREPLIFETIME(UCustomLocomotionComponent, BackwordSpeed);
+	DOREPLIFETIME(UCustomLocomotionComponent, RunSpeed);
+	DOREPLIFETIME(UCustomLocomotionComponent, SprintSpeed);
 }
 
 void UCustomLocomotionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -346,6 +349,103 @@ void UCustomLocomotionComponent::Server_UnCrouchState_Implementation()
 	CharacterMovementStruct.Stance = E_CharacterMovementStance::Stand;
 	CharacterMovementStruct.Gait = E_CharacterMovementGait::Run;    
 }
+
+bool UCustomLocomotionComponent::CanHandleStatTag(const FGameplayTag& StatTag) const
+{
+	return SupportedStatTags.HasTag(StatTag);
+}
+
+void UCustomLocomotionComponent::ApplyStatusEffectAction(const FEffectAction& Action)
+{
+	if (!IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Should only be called on dedicated server", FString(__FUNCTION__));
+		return;
+	}
+
+	/* simple implementation */
+
+	switch (Action.Type)
+	{
+	case EModifierType::Add:
+	{
+		BackwordSpeed += Action.Value;
+		RunSpeed += Action.Value;
+		SprintSpeed += Action.Value;
+		break;
+	}
+	case EModifierType::Multiply:
+	{
+		if (FMath::IsNearlyZero(Action.Value))
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid multiplier", FString(__FUNCTION__));
+			return;
+		}
+
+		BackwordSpeed *= Action.Value;
+		RunSpeed *= Action.Value;
+		SprintSpeed *= Action.Value;
+		break;
+	}
+	default:
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported modifier type", FString(__FUNCTION__));
+		return;
+	}
+
+	if (Action.Value < 0.f && CharacterMovementStruct.Gait == E_CharacterMovementGait::Sprint)
+	{
+		// If the character is currently sprinting and receives a debuff, switch to run
+		CharacterMovementStruct.Gait = E_CharacterMovementGait::Run;
+	}
+
+	CharacterMovementComponent->MaxWalkSpeed = RunSpeed;
+
+	UE_LOGFMT(LogProjectA, Log, "{0} - Debuff applied. BackwordSpeed={1}, RunSpeed={2}, SprintSpeed={3}",
+		FString(__FUNCTION__), BackwordSpeed, RunSpeed, SprintSpeed);
+}
+
+void UCustomLocomotionComponent::RemoveStatusEffectAction(const FEffectAction& Action) 
+{
+	if (!IsRunningDedicatedServer()) 
+	{ 
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Should only be called on dedicated server", FString(__FUNCTION__));
+		return; 
+	}
+
+	/* simple implementation */
+
+	switch (Action.Type)
+	{
+	case EModifierType::Add:
+	{	
+		BackwordSpeed -= Action.Value;
+		RunSpeed -= Action.Value;
+		SprintSpeed -= Action.Value;
+		break;
+	}
+	case EModifierType::Multiply:
+	{
+		if (FMath::IsNearlyZero(Action.Value))
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid multiplier for revert", FString(__FUNCTION__));
+			return;
+		}
+
+		BackwordSpeed /= Action.Value;
+		RunSpeed /= Action.Value;
+		SprintSpeed /= Action.Value;
+		break;
+	}
+	default:
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported modifier type", FString(__FUNCTION__));
+		return;
+	}
+
+	CharacterMovementComponent->MaxWalkSpeed = RunSpeed;
+}
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests

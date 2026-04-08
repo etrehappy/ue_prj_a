@@ -1,11 +1,14 @@
 #include "Character/NetPlayerCharacter.h"
 
+#include "Character/NetPlayerCharacter.h"
+
 #include "AbilityComponent.h"
 #include "Animation/CharacterAnimInterface.h"
 #include "Camera/CameraComponent.h"
 #include "Character/CustomInputComponent.h"
 #include "Character/CustomPlayerController.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameplayTagContainer.h"
 #include "GeneralHud.h"
@@ -15,7 +18,7 @@
 #include "InventoryItem.h"
 #include "ItemPickup.h"
 #include "Net/UnrealNetwork.h"
-#include "GameFramework/CharacterMovementComponent.h"
+#include "StatusEffect/StatusEffectsComponent.h"
 
 #include "ProjectALog.h"
 
@@ -58,6 +61,9 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("InteractionComponent"));
 	InteractionComponent->SetComponentTickEnabled(true);
+
+	StatusEffectComponent = CreateDefaultSubobject<UStatusEffectComponent>(TEXT("StatusEffectComponent"));
+	StatusEffectComponent->SetComponentTickEnabled(false);
 
 	if (auto* Capsule = GetCapsuleComponent())
 	{

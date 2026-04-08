@@ -70,6 +70,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSlotData(const FInventorySlot& InSlot);
 
+	/**
+	 * @brief Called when the context menu is requested for this inventory slot.
+	 */
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
+	void OnContextMenuRequested(int32 InSlotIndex);
+
 private:
 
 	UFUNCTION()

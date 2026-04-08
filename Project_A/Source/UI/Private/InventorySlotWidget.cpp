@@ -77,6 +77,18 @@ void UInventorySlotWidget::SetSlotData(const FInventorySlot& InSlot)
 
 FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		if (!Inventory.IsValid()) { return FReply::Unhandled(); }
+		
+		const TArray<FInventorySlot>& Slots = Inventory->GetSlots();
+		if (Slots.IsValidIndex(SlotIndex) && !Slots[SlotIndex].IsEmpty())
+		{
+			OnContextMenuRequested(SlotIndex);
+			return FReply::Handled();
+		}		
+	}
+
 	return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
 }
 

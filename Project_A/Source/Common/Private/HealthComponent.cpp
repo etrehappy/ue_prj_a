@@ -1,9 +1,7 @@
-
-
-
 #include "HealthComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "WspDamageType.h"
+#include "StatusEffect/StatusEffectsTags.h"
 
 #include "ProjectALog.h"
 
@@ -12,8 +10,6 @@ UHealthComponent::UHealthComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
-
-	// ...
 }
 
 void UHealthComponent::BeginPlay()
@@ -107,7 +103,10 @@ void UHealthComponent::TakeAnyDamage(AActor* DamagedActor, float Damage, const U
 	}
 	else if(DamageTypeEnum != EInjuryType::None)
 	{
-		DecreaseHealth(Damage);
+		const float DefenseMultiplier = 100.f / (100.f + Defense);
+		const float EffectiveDamage = FMath::Max(Damage * IncomingDamageMultiplier * DefenseMultiplier, 0.f);
+
+		DecreaseHealth(EffectiveDamage);
 	}
 	else
 	{
@@ -171,5 +170,132 @@ void UHealthComponent::OnRep_CurrentHealth()
 void UHealthComponent::OnRep_MaxHealth()
 {
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+}
+
+bool UHealthComponent::CanHandleStatTag(const FGameplayTag& StatTag) const
+{
+	return SupportedStatTags.HasTag(StatTag);
+}
+
+void UHealthComponent::ApplyStatusEffectAction(const FEffectAction& Action)
+{
+	if (!IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Should only be called on dedicated server", FString(__FUNCTION__));
+		return;
+	}
+
+	/* simple implementation */
+
+	const float EffectiveValue = Action.Value;
+
+	if (Action.TargetStat == StatusEffectsTags::DefenseTag)
+	{
+		switch (Action.Type)
+		{
+		case EModifierType::Add:
+			Defense = FMath::Max(Defense + Action.Value, 0.f);
+			break;
+
+		case EModifierType::Multiply:
+			Defense = FMath::Max(Defense * Action.Value, 0.f);
+			break;
+
+		default:
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported modifier type for Defense", FString(__FUNCTION__));
+			break;
+		}
+
+		UE_LOGFMT(LogProjectA, Log, "{0} - Defense updated to {1}", FString(__FUNCTION__), Defense);
+		return;
+	}
+
+	if (Action.TargetStat == StatusEffectsTags::HealthTag)
+	{
+
+		switch (Action.Type)
+		{
+		case EModifierType::Add:
+			if (EffectiveValue >= 0.f)
+			{
+				IncreaseHealth(EffectiveValue);
+			}
+			else
+			{
+				DecreaseHealth(FMath::Abs(EffectiveValue));
+			}
+			break;
+
+		case EModifierType::Multiply:
+			SetCurrentHealth(CurrentHealth * EffectiveValue);
+			break;
+
+		default:
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported modifier type", FString(__FUNCTION__));
+			break;
+		}
+	}
+
+	UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported TargetStat {1}", FString(__FUNCTION__), Action.TargetStat.ToString());
+	return;
+
+}
+
+void UHealthComponent::RemoveStatusEffectAction(const FEffectAction& Action)
+{
+	if (Action.TargetStat == StatusEffectsTags::DefenseTag)
+	{	
+		switch (Action.Type)
+		{
+		case EModifierType::Add:
+			Defense = FMath::Max(Defense - Action.Value, 0.f);
+			break;
+
+		case EModifierType::Multiply:
+			if (FMath::IsNearlyZero(Action.Value))
+			{
+				UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid multiplier for revert", FString(__FUNCTION__));
+				return;
+			}
+
+			Defense /= Action.Value;
+			Defense = FMath::Max(Defense, 0.f);
+			break;
+		default:
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported modifier type", FString(__FUNCTION__));
+			return;
+		}
+
+		UE_LOGFMT(LogProjectA, Log, "{0} - Defense reverted to {1}", FString(__FUNCTION__),
+			Defense);
+	}
+
+	UE_LOGFMT(LogProjectA, Warning, "{0} - RemoveStatusEffectAction called but not supported for tag {1}",
+		FString(__FUNCTION__), Action.TargetStat.ToString());
+
+	return;
+}
+
+void UHealthComponent::SetCurrentHealth(float NewHealth)
+{
+	if (!IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Should only be called on dedicated server", FString(__FUNCTION__));
+		return;
+	}
+
+	const float ClampedHealth = FMath::Clamp(NewHealth, 0.f, MaxHealth);
+	if (CurrentHealth == ClampedHealth)
+	{
+		return;
+	}
+
+	CurrentHealth = ClampedHealth;
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+
+	if (CurrentHealth <= 0.f)
+	{
+		ToKill();
+	}
 }
 

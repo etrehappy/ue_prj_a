@@ -25,6 +25,7 @@ class UArrowComponent;
 class UHealthComponent;
 class UInventoryComponent;
 class UInteractionComponent;
+class UStatusEffectComponent;
 
 class UInventory;
 
@@ -234,6 +235,9 @@ protected:
 
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UInteractionComponent> InteractionComponent{};
+
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UStatusEffectComponent> StatusEffectComponent{};
 
     /**
      * @brief The temporary solution. 

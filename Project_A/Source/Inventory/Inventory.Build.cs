@@ -8,6 +8,8 @@ public class Inventory: ModuleRules
 			, "GameplayTags"
             , "WeaponSystemPlugin"
             , "Logger"
-		    , "NetCore" });
+		    , "NetCore"
+            , "Common"
+        });
     }
 }

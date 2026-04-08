@@ -62,5 +62,15 @@ public:
 	TObjectPtr<UTexture2D> Icon{};
 
 	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag ItemType{};	
+	FGameplayTag ItemType{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Effects")
+	bool bConsumable{false};
+
+	/**
+	 * @see FStatusEffectDef
+	 * @see UStatusEffectComponent
+	 */
+	UPROPERTY(EditDefaultsOnly, Category = "Effects", meta = (EditCondition = "bConsumable"))
+	FGameplayTag EffectTagOnUse{};
 };

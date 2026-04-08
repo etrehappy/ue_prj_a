@@ -538,3 +538,42 @@ void UInventory::MoveItemToOtherInventoryInternal(UInventory* TargetInventory, i
 
 	return;
 }
+
+void UInventory::UseItemFromSlot(int32 SlotIndex)
+{
+	if (!IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Only the server can consume items", FString(__FUNCTION__));
+		return;
+	}
+
+	if (!ReplicatedSlots.Items.IsValidIndex(SlotIndex) || !InventorySlots.IsValidIndex(SlotIndex))
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid SlotIndex {1}", FString(__FUNCTION__), SlotIndex);
+		return;
+	}
+
+	FInventoryReplicatedSlot& ReplicatedSlot = ReplicatedSlots.Items[SlotIndex];
+	FInventorySlot& LocalSlot = InventorySlots[SlotIndex];
+
+	if (ReplicatedSlot.IsEmpty())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Slot {1} is empty", FString(__FUNCTION__), SlotIndex);
+		return;
+	}
+
+	ReplicatedSlot.CurrentStackCount = FMath::Max(ReplicatedSlot.CurrentStackCount - 1, 0);
+
+	if (ReplicatedSlot.CurrentStackCount == 0)
+	{
+		ReplicatedSlot.Clear();
+		LocalSlot.Clear();
+	}
+	else if (LocalSlot.Item)
+	{
+		LocalSlot.Item->StackCount = ReplicatedSlot.CurrentStackCount;
+	}
+
+	ReplicatedSlots.MarkItemDirty(ReplicatedSlot);
+	OnInventoryChanged.Broadcast();
+}

@@ -542,7 +542,7 @@
     - Предмет из инвентаря
         - В [InventoryItem](./Project_A/Source/Inventory/Public/InventoryItem.h) добавлено поле bConsumable. 
         - Если в ячейке ([UInventorySlotWidget](./Project_A/Source/UI/Public/InventorySlotWidget.h)) есть предмет, то по ПКМ срабатывает OnContextMenuRequested, который в BP создаёт виджет контектного меню. Сейчас добавлена только одна кнопка — UseItem (без доп. проверок).
-        - Вызывается метод UInventoryComponent::[UseItem](./Project_A/Source/Inventory/Private/InventoryComponent.cpp) далее UInventory::[UseItemFromSlot](./Project_A/Source/Project_A/Private/Inventory.cpp) (для очистки) и  UStatusEffectComponent::ApplyEffectByTag. 
+        - Вызывается метод UInventoryComponent::[UseItem](./Project_A/Source/Inventory/Private/InventoryComponent.cpp) далее UInventory::[UseItemFromSlot](./Project_A/Source/Inventory/Private/Inventory.cpp) (для очистки) и  UStatusEffectComponent::ApplyEffectByTag. 
         - Дальнейшая схема аналогична.
 
 </details>

@@ -527,7 +527,7 @@
 
 **Как сделано**:
 1. Система эффектов (бафов и дебафов)
-    a. Объект в мире
+    - Объект в мире
         - Объект, который может наложить эффект, отслеживает пересечение. 
         - Если Actor имеет компонент [UStatusEffectComponent](./Project_A/Source/Common/Public/StatusEffect/StatusEffectsComponent.h), то вызывается метод UStatusEffectComponent::[ApplyEffectByTag](./Project_A/Source/Common/Private/StatusEffect/StatusEffectsComponent.cpp).
         - Если это [i]периодический[/i] эффект (например, кровотечение) или [i]длительный[/i] (например, увеличение защиты на 30 сек.), он помещается в список активных. 
@@ -539,7 +539,7 @@
 
         Сейчас используется примитивная логика в методах ApplyStatusEffectAction.
 
-    b. Предмет из инвентаря
+    - Предмет из инвентаря
         - В [InventoryItem](./Project_A/Source/Inventory/Public/InventoryItem.h) добавлено поле bConsumable. 
         - Если в ячейке ([UInventorySlotWidget](./Project_A/Source/UI/Public/InventorySlotWidget.h)) есть предмет, то по ПКМ срабатывает OnContextMenuRequested, который в BP создаёт виджет контектного меню. Сейчас добавлена только одна кнопка — UseItem (без доп. проверок).
         - Вызывается метод UInventoryComponent::[UseItem](./Project_A/Source/Inventory/Private/InventoryComponent.cpp) далее UInventory::[UseItemFromSlot](./Project_A/Source/Project_A/Private/Inventory.cpp) (для очистки) и  UStatusEffectComponent::ApplyEffectByTag. 

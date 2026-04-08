@@ -1,5 +1,5 @@
 # Сборка
-1. git clone -b 'hw11' --single-branch https://github.com/etrehappy/ue_prj_a.git
+1. git clone -b 'hw12' --single-branch https://github.com/etrehappy/ue_prj_a.git
 2. Скачать [архив (415 MB)](https://drive.google.com/file/d/1FN15XZiW6PwbDbhoAitiqEUu5gwEYAJr/view?usp=sharing)) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"

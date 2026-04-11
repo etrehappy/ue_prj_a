@@ -7,7 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "InventoryItem.h"
 #include "StatusEffect/StatusEffectsComponent.h"
-
+#include "WeaponComponent.h"
 #include "ProjectALog.h"
 
 UInventoryComponent::UInventoryComponent()
@@ -104,25 +104,30 @@ void UInventoryComponent::AddItemToEquipment(EEquipmentSlot Slot, UInventoryItem
 	//UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
 	//UE_LOG(LogProjectA, Log, TEXT("%s - Slot (as int): %d, Item ptr: %p, Item name: %s"), *FString(__FUNCTION__), static_cast<int32>(Slot), Item, (Item ? *Item->GetName() : TEXT("null")));
 		
+	if (!Item)
+	{
+		UE_LOG(LogProjectA, Warning, TEXT("%s - Item is null"), *FString(__FUNCTION__));
+		return;
+	}
+	
 	if (!EquipmentInventory)
 	{
 		UE_LOG(LogProjectA, Warning, TEXT("%s - EquipmentInventory is null"), *FString(__FUNCTION__));
 		return;
 	}
 		
-	const int32 SlotIndex = static_cast<int32>(Slot);
-	if (SlotIndex < 0 || SlotIndex >= EquipmentInventory->GetSize())
+	const int32 SlotIndex = GetEquipmentInventoryIndex(Slot);
+	if (SlotIndex == INDEX_NONE || SlotIndex >= EquipmentInventory->GetSize())
 	{
-		UE_LOG(LogProjectA, Warning, TEXT("%s - Invalid SlotIndex %d (Inventory size %d). Aborting."),
-			*FString(__FUNCTION__), SlotIndex, EquipmentInventory->GetSize());
+		UE_LOG(LogProjectA, Warning, TEXT("%s - Invalid equipment slot index"), *FString(__FUNCTION__));
 		return;
-	}
-		
-	if (!Item)
+	}	
+
+	if (!CanPlaceItemIntoEquipmentSlot(SlotIndex, Item))
 	{
-		UE_LOG(LogProjectA, Warning, TEXT("%s - Item is null"), *FString(__FUNCTION__));
+		UE_LOG(LogProjectA, Warning, TEXT("%s - Item is not allowed for this equipment slot"), *FString(__FUNCTION__));
 		return;
-	}
+	}	
 		
 	EquipmentInventory->AddItemToSlot(Item, SlotIndex);	
 }
@@ -168,13 +173,76 @@ void UInventoryComponent::UseItem(int32 SlotIndex)
 	Inventory->UseItemFromSlot(SlotIndex);
 }
 
+void UInventoryComponent::SetInventory(UInventory* NewInventory)
+{
+	if (!GetOwner())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Owner is null", FString(__FUNCTION__));
+		return;
+	}
+
+	// Forward to server when called on client
+	if (!GetOwner()->HasAuthority())
+	{
+		Server_SetInventory(NewInventory);
+		return;
+	}
+
+	// Server: assign and bind delegates
+	if (NewInventory == nullptr)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - NewInventory is null", FString(__FUNCTION__));
+		return;
+	}
+
+	Inventory = NewInventory;
+	BindInventoryDelegates(Inventory);
+	UE_LOGFMT(LogProjectA, Log, "{0} - Inventory set on server", FString(__FUNCTION__));
+}
+
+void UInventoryComponent::Server_SetInventory_Implementation(UInventory* NewInventory)
+{
+	SetInventory(NewInventory);
+}
+
 void UInventoryComponent::UnequipItem(EEquipmentSlot Slot)
 {
-	UE_LOGFMT(LogProjectA, Error, "{0} - called", FString(__FUNCTION__));
+	//UE_LOGFMT(LogProjectA, Error, "{0} - called", FString(__FUNCTION__));
 	
-	// ...
+	if (!GetOwner())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Owner is null", FString(__FUNCTION__));
+		return;
+	}
 
-	// OnEquipmentChanged.Broadcast();
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Must be called on server", FString(__FUNCTION__));
+		return;
+	}
+
+	UWeaponComponent* WeaponComponent = GetOwner()->FindComponentByClass<UWeaponComponent>();
+	if (!WeaponComponent)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - WeaponComponent not found", FString(__FUNCTION__));
+		return;
+	}
+
+	switch (Slot)
+	{
+	case EEquipmentSlot::Weapon:
+		WeaponComponent->UnequipWeapon();
+		break;
+
+	case EEquipmentSlot::Throwable:
+		WeaponComponent->UnequipThrowableItem();
+		break;
+
+	default:
+		return;
+	}
+
+	OnEquipmentChanged.Broadcast();
 }
 
 UInventoryItem* UInventoryComponent::GetEquippedItem(EEquipmentSlot Slot) const
@@ -185,7 +253,13 @@ UInventoryItem* UInventoryComponent::GetEquippedItem(EEquipmentSlot Slot) const
 		return nullptr;
 	}
 
-	return EquipmentInventory->FindItemBySlot(static_cast<int32>(Slot));
+	const int32 SlotIndex = GetEquipmentInventoryIndex(Slot);
+	if (SlotIndex == INDEX_NONE)
+	{
+		return nullptr;
+	}
+
+	return EquipmentInventory->FindItemBySlot(SlotIndex);
 }
 
 void UInventoryComponent::FillEquipmentSlots()
@@ -284,13 +358,41 @@ void UInventoryComponent::MoveItemToOtherInventory(UInventory* SourceInventory, 
 		return;
 	}
 
+	if (TargetInventory == EquipmentInventory)
+	{
+		const UInventoryItem* SourceItem = SourceInventory->FindItemBySlot(SourceSlotIndex);
+		if (!CanPlaceItemIntoEquipmentSlot(TargetSlotIndex, SourceItem))
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Item cannot be placed into equipment slot {1}", FString(__FUNCTION__), TargetSlotIndex);
+			return;
+		}
+	}
+
 	if (!GetOwner()->HasAuthority())
 	{
 		Server_MoveItemToOtherInventory(SourceInventory, TargetInventory, SourceSlotIndex, TargetSlotIndex);
 		return;
 	}
 
+	const bool bSourceIsEquipmentInventory = (SourceInventory == EquipmentInventory);
+	const EEquipmentSlot SourceEquipmentSlot = GetEquipmentSlotFromInventoryIndex(SourceSlotIndex);
+	const UInventoryItem* SourceItemBeforeMove = SourceInventory->FindItemBySlot(SourceSlotIndex);
+
 	SourceInventory->MoveItemToOtherInventoryInternal(TargetInventory, SourceSlotIndex, TargetSlotIndex);
+
+	if (bSourceIsEquipmentInventory && SourceEquipmentSlot != EEquipmentSlot::None && SourceItemBeforeMove)
+	{
+		const UInventoryItem* SourceItemAfterMove = SourceInventory->FindItemBySlot(SourceSlotIndex);
+		if (!SourceItemAfterMove)
+		{
+			UnequipItem(SourceEquipmentSlot);
+		}
+	}
+
+	if (SourceInventory == EquipmentInventory || TargetInventory == EquipmentInventory)
+	{
+		OnEquipmentChanged.Broadcast();
+	}
 }
 
 void UInventoryComponent::Server_MoveItemToOtherInventory_Implementation(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex)
@@ -324,7 +426,30 @@ void UInventoryComponent::RelocateItemInInventory(UInventory* InInventory, int32
 		return;
 	}
 
+	if (InInventory == EquipmentInventory)
+	{
+		const UInventoryItem* SourceItem = InInventory->FindItemBySlot(FromIndex);
+		if (!CanPlaceItemIntoEquipmentSlot(ToIndex, SourceItem))
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Item cannot be relocated into equipment slot {1}", FString(__FUNCTION__), ToIndex);
+			return;
+		}
+	}
+	const bool bIsEquipmentInventory = (InInventory == EquipmentInventory);
+	const EEquipmentSlot SourceEquipmentSlot = GetEquipmentSlotFromInventoryIndex(FromIndex);
+	const UInventoryItem* SourceItemBeforeRelocate = InInventory->FindItemBySlot(FromIndex);
+
 	InInventory->RelocateItemInInventoryInternal(FromIndex, ToIndex);
+
+	if (bIsEquipmentInventory && SourceEquipmentSlot != EEquipmentSlot::None && SourceItemBeforeRelocate)
+	{
+		const UInventoryItem* SourceItemAfterRelocate = InInventory->FindItemBySlot(FromIndex);
+		if (!SourceItemAfterRelocate)
+		{
+			UnequipItem(SourceEquipmentSlot);
+		}
+		OnEquipmentChanged.Broadcast();
+	}
 }
 
 void UInventoryComponent::Server_RelocateItemInInventory_Implementation(UInventory* InInventory, int32 FromIndex, int32 ToIndex)
@@ -359,6 +484,116 @@ void UInventoryComponent::OnRep_EquipmentInventory()
 	LastBoundEquipmentInventory = EquipmentInventory;
 }
 
+
+int32 UInventoryComponent::GetEquipmentInventoryIndex(EEquipmentSlot Slot) const
+{
+	int32 SlotIndex = static_cast<int32>(Slot);
+	
+	if (SlotIndex > 0)
+	{
+		return SlotIndex - 1; // Adjust for 0-based index (assuming EEquipmentSlot::None = 0, Weapon = 1, Throwable = 2, etc.)
+	}	
+
+	return INDEX_NONE;
+}
+
+EEquipmentSlot UInventoryComponent::GetEquipmentSlotFromInventoryIndex(int32 SlotIndex) const
+{
+	EEquipmentSlot Slot = static_cast<EEquipmentSlot>(SlotIndex + 1); // Adjust back to enum values (assuming 0 = None, 1 = Weapon, 2 = Throwable, etc.)
+
+	if (Slot < EEquipmentSlot::Max && Slot > EEquipmentSlot::None)
+	{
+		return Slot;
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid equipment inventory index: {1}", FString(__FUNCTION__), SlotIndex);
+	}
+
+	return EEquipmentSlot::None;
+}
+
+bool UInventoryComponent::CanEquipItemInSlot(EEquipmentSlot Slot, const UInventoryItem* Item) const
+{
+	if (!Item || !Item->HasValidData()) { return false;	}
+
+	switch (Slot)
+	{
+	case EEquipmentSlot::Weapon:
+		return Item->StackCount == 1;
+	case EEquipmentSlot::Throwable:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool UInventoryComponent::CanPlaceItemIntoEquipmentSlot(int32 TargetSlotIndex, const UInventoryItem* Item) const
+{
+	const EEquipmentSlot Slot = GetEquipmentSlotFromInventoryIndex(TargetSlotIndex);
+	if (!CanEquipItemInSlot(Slot, Item)) { return false; }
+
+	if(!EquipmentInventory) 
+	{ 
+		UE_LOGFMT(LogProjectA, Warning, "{0} - EquipmentInventory is null", FString(__FUNCTION__));
+		return false; 
+	}
+
+	switch (Slot)
+	{
+	case EEquipmentSlot::Weapon:
+	{
+		UInventoryItem* ExistingItem = EquipmentInventory->FindItemBySlot(TargetSlotIndex);
+		if (ExistingItem) { return false; }
+		else { return true; }
+	}
+	
+	case EEquipmentSlot::Throwable:
+		return true;
+
+	default:
+		return false;		
+	}
+	
+	//return false;
+}
+
+void UInventoryComponent::UseEquippedItem(EEquipmentSlot Slot)
+{
+	if (!IsRunningDedicatedServer())
+	{
+		Server_UseEquippedItem(Slot);
+		return;
+	}
+
+	if (!EquipmentInventory)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - EquipmentInventory is null", FString(__FUNCTION__));
+		return;
+	}
+
+	const int32 SlotIndex = GetEquipmentInventoryIndex(Slot);
+	if (SlotIndex == INDEX_NONE)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid equipment slot", FString(__FUNCTION__));
+		return;
+	}
+
+	UInventoryItem* EquippedItem = EquipmentInventory->FindItemBySlot(SlotIndex);
+	if (!EquippedItem || !EquippedItem->HasValidData())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - No valid equipped item in slot {1}", FString(__FUNCTION__), SlotIndex);
+		return;
+	}
+
+	EquipmentInventory->UseItemFromSlot(SlotIndex);
+	OnEquipmentChanged.Broadcast();
+}
+
+void UInventoryComponent::Server_UseEquippedItem_Implementation(EEquipmentSlot Slot)
+{
+	UseEquippedItem(Slot);
+}
 
 
 

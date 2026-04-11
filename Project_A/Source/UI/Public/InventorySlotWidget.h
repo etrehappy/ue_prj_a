@@ -14,6 +14,7 @@
 class UInventory;
 class UImage;
 class UDragDropOperation;
+class UTextBlock;
 
 /**
  * @class UInventorySlotWidget
@@ -43,7 +44,12 @@ public:
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InPointerEvent, UDragDropOperation*& OutOperation) override;
 	virtual bool NativeOnDragOver(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
-	//
+
+	/**
+	 * @brief Determines whether the stack count should be displayed for the given inventory slot.
+	 * For example, there is items that cannot be stacked in a equipment inventory.
+	 */
+	virtual bool ShouldShowStackCount(const FInventorySlot& InSlot) const;
 
 private:
 	/**
@@ -52,7 +58,7 @@ private:
 	 * @param[in] InInventory The inventory to bind to.
 	 * @see HandleInventoryChanged
 	 */
-	void BindInventory(UInventory* InInventory);
+	void BindInventory(UInventory* InInventory);	
 
 
 						/* === C++ member variables === */
@@ -102,6 +108,12 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TSoftObjectPtr<UImage> ItemImage{};
+
+	/**
+	 * @brief It is used to display the stack count of the item in this slot. It should be hidden if the item cannot be stacked or if the stack count is 1.
+	 */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UTextBlock> StackCountText{};
 };
 
 //virtual void NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* Operation) override;

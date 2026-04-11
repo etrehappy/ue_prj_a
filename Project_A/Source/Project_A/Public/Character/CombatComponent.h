@@ -140,6 +140,8 @@ private:
 	*/
 	void CleanCurrentMontage();
 
+	const bool HasActiveCombatState() const;
+
 						
 						/* === C++ member variables === */
 private:
@@ -166,6 +168,12 @@ protected:
 	 */
 	UFUNCTION()
 	void OnRep_UpdateAttackState();
+
+	/**
+	 * @brief Updates combat states on clients when the owner character's equipment is changed.	 
+	 */
+	UFUNCTION()
+	void HandleEquipmentChanged();
 
 
 						/* === Unreal Engine UPROPERTY === */

@@ -3,6 +3,7 @@
 #include "Blueprint/DragDropOperation.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 #include "Engine/Texture2D.h"
 #include "Inventory.h" 
 #include "InventoryItem.h"
@@ -62,17 +63,40 @@ void UInventorySlotWidget::HandleInventoryChanged()
 
 void UInventorySlotWidget::SetSlotData(const FInventorySlot& InSlot)
 {
-	if (InSlot.Item && InSlot.Item->HasValidData())
+	if (!ItemImage || !StackCountText)
 	{
-		ItemImage->SetBrushFromTexture(InSlot.Item->Definition->Icon.Get(), true);				
+		UE_LOGFMT(LogProjectA, Warning, "{0} - ItemImage or StackCountText is not set", FString(__FUNCTION__));
+		return;
+	}
+
+	const bool bHasValidItem = InSlot.Item && InSlot.Item->HasValidData();
+		
+	if (!bHasValidItem)
+	{
+		// Clear the slot if there's no valid item
+
+		ItemImage->SetBrushFromTexture(nullptr);
+		ItemImage->SetVisibility(ESlateVisibility::Visible);
+
+		StackCountText->SetText(FText::GetEmpty());
+		StackCountText->SetVisibility(ESlateVisibility::Collapsed);
+
+		return;
+	}
+
+	ItemImage->SetBrushFromTexture(InSlot.Item->Definition->Icon.Get(), true);
+	ItemImage->SetVisibility(ESlateVisibility::Visible);
+
+	if (ShouldShowStackCount(InSlot))
+	{
+		StackCountText->SetText(FText::AsNumber(InSlot.Item->StackCount));
+		StackCountText->SetVisibility(ESlateVisibility::HitTestInvisible);
 	}
 	else
 	{
-		//UE_LOGFMT(LogProjectA, Log, "{0} - No valid slot data found, clearing the image", FString(__FUNCTION__));
-		ItemImage->SetBrushFromTexture(nullptr);
-	}
-
-	ItemImage->SetVisibility(ESlateVisibility::Visible);
+		StackCountText->SetText(FText::GetEmpty());
+		StackCountText->SetVisibility(ESlateVisibility::Collapsed);
+	}	
 }
 
 FReply UInventorySlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
@@ -189,6 +213,11 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	}
 
 	return false;
+}
+
+bool UInventorySlotWidget::ShouldShowStackCount(const FInventorySlot& InSlot) const
+{
+	return InSlot.Item && InSlot.Item->StackCount > 1;
 }
 
 

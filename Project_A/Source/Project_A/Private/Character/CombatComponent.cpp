@@ -5,6 +5,7 @@
 #include "Animation/CharacterAnimInterface.h"
 #include "WeaponThrowable.h"
 #include "Character/NetPlayerCharacter.h"
+#include "InventoryComponent.h"
 //#include "Character/CustomLocomotionComponent.h"
 
 #include "ProjectALog.h"
@@ -60,6 +61,16 @@ void UCombatComponent::Initialise()
 	if (!OwnerWeaponComponent)
 	{
 		UE_LOGFMT(LogProjectA, Warning, "{0} - WeaponComponent = nullptr", FString(__FUNCTION__));        
+	}
+
+	UInventoryComponent* InventoryComponent = OwnerCharacter->GetComponentByClass<UInventoryComponent>();
+	if (InventoryComponent)
+	{
+		InventoryComponent->OnEquipmentChanged.AddUniqueDynamic(this, &UCombatComponent::HandleEquipmentChanged);
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - InventoryComponent = nullptr", FString(__FUNCTION__));
 	}
 }
 
@@ -232,6 +243,15 @@ void UCombatComponent::OnSpawnBombProjectile()
 	}
 
 	OwnerWeaponComponent->GetCurrentThrowableItem()->SpawnProjectile();
+
+	UInventoryComponent* InventoryComponent = OwnerCharacter ? OwnerCharacter->GetComponentByClass<UInventoryComponent>() : nullptr;
+	if (!InventoryComponent)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - InventoryComponent is null", FString(__FUNCTION__));
+		return;
+	}
+
+	InventoryComponent->UseEquippedItem(EEquipmentSlot::Throwable);
 }
 
 void UCombatComponent::StartAnimAttack()
@@ -345,17 +365,42 @@ void UCombatComponent::CleanCurrentMontage()
 			
 }
 
+const bool UCombatComponent::HasActiveCombatState() const
+{
+	return bIsFighting || (!CurrentAttackTags.IsEmpty())
+		|| (BattleState != E_CharacterBattleState::Normal);
+}
+
+void UCombatComponent::HandleEquipmentChanged()
+{
+	if (!IsRunningDedicatedServer() || !OwnerWeaponComponent) { return; }
+
+	const bool bHasThrowableInHand = OwnerWeaponComponent->IsCurrentThrowableItemEquiped();
+	if (bHasThrowableInHand) { return; }
+
+	if (HasActiveCombatState())
+	{
+		Server_StopAttack();
+	}
+}
+
 void UCombatComponent::Server_StopAttack_Implementation()
 {
 	UE_LOGFMT(LogProjectA, Log, "{0} - Server_StopAttack called", FString(__FUNCTION__));
 
-	if (!bIsFighting)
+	if (!HasActiveCombatState())
 	{
 		UE_LOGFMT(LogProjectA, Warning, "{0} - Character is not fighting", FString(__FUNCTION__));
 		return;
 	}
-		
-	OwnerWeaponComponent->StopAttack();
+
+	if (!OwnerWeaponComponent)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - OwnerWeaponComponent = nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	OwnerWeaponComponent->StopAttack();			
 	BattleState = E_CharacterBattleState::Normal;
 	CurrentAttackTags.Reset();
 	bIsFighting = false;

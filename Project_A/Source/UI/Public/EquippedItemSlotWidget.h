@@ -29,7 +29,14 @@ class UI_API UEquippedItemSlotWidget : public UInventorySlotWidget
 {
 	GENERATED_BODY()
 
+public:	
+	void InitialiseEquipmentSlot(UInventory* InInventory, EEquipmentSlot InEquipmentSlot, int32 InSlotIndex);
+
 protected:
+	/**
+	 * @brief For example, there is items that cannot be stacked in a equipment inventory. 
+	 */
+	virtual bool ShouldShowStackCount(const FInventorySlot& InSlot) const override;
 
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> SlotLabel{};

@@ -14,6 +14,7 @@
 
 class UInventory;
 class UInventoryItem;
+class UInventoryItemDefinition;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryChanged);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnInventoryMoveRequested,
@@ -55,14 +56,7 @@ public:
 	 * @return true if networking is supported; otherwise, false.
 	 */
 	virtual bool IsSupportedForNetworking() const override { return true; }
-
-	/**
-	 * @brief Should be called after creating an inventory object to initialise the number of slots.
-	 * 
-	 * @param[in] InSize The number of inventory slots to initialise.
-	 */
-	void Initialise(int32 InSize);
-	
+		
 	/**
 	 * @brief It is called on clients when inventory slots are added via replication.
 	 * @see FReplicatedSlotArray::PostReplicatedAdd
@@ -177,9 +171,58 @@ private:
 	 * @see MoveItemToOtherInventoryInternal
 	 */
 	void MoveLocalRuntimeItemToInventory(UInventory* TargetInventory, int32 FromIndex, int32 ToIndex);
+	
+	/**
+	 * @brief Checks if two items can be stacked together based on their definitions.
+	 */
+	bool IsStackable(const UInventoryItemDefinition* SourceItem, const UInventoryItemDefinition* TargetItem) const;
+
+	/**
+	 * @brief Gets the maximum stack count for a given item definition. If the item is not stackable, it returns 1.
+	 */
+	int32 GetMaxStackCount(const UInventoryItemDefinition* Definition) const;
+
+	/**
+	 * @brief Server function.
+	 * 
+	 * Attempts to stack an item into a specific slot in the inventory. If the slot contains a stackable item of the same type, it will increase the stack count up to the maximum allowed. 
+	 * 
+	 * @param[in] Item The item to stack.
+	 * @param[in] SlotIndex The index of the slot to stack the item into.
+	 * @return true if the item was successfully stacked; otherwise, false.
+	 */
+	bool TryStackItemIntoSlot(const UInventoryItem* Item, int32 SlotIndex);
+
+	/**
+	 * @brief Server function.
+	 * 
+	 * Attempts to stack an item from a source inventory slot into a target inventory slot. If the target slot contains a stackable item of the same type, it will increase the stack count up to the maximum allowed, and decrease the source stack count accordingly.
+	 * 
+	 * @param[in] SourceInventory The inventory containing the source item.
+	 * @param[in] SourceSlotIndex The index of the source slot.
+	 * @param[in] TargetInventory The inventory containing the target slot.
+	 * @param[in] TargetSlotIndex The index of the target slot.
+	 * @return true if the item was successfully stacked; otherwise, false.
+	 */
+	bool TryStackSourceIntoTarget(UInventory* SourceInventory, int32 SourceSlotIndex, UInventory* TargetInventory, int32 TargetSlotIndex);
+
+	/**
+	 * @brief Updates a local inventory slot based on the corresponding replicated slot data. It is used to keep the local inventory state in sync with the replicated data received from the server.
+	 * 
+	 * @param[in] SlotIndex The index of the slot to update.
+	 */
+	void RefreshLocalSlotFromReplicated(int32 SlotIndex);
 
 						/* === Unreal Engine UFUNCTION === */
 public:
+	/**
+	 * @brief Should be called after creating an inventory object to initialise the number of slots.
+	 *
+	 * @param[in] InSize The number of inventory slots to initialise.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	void Initialise(int32 InSize);
+
 	/**
 	 * @brief Server function.
 	 * 
@@ -276,7 +319,7 @@ protected:
 	/**
 	 * @brief It is used to store the actual inventory slots on the server and clients. It is not replicated directly, but is restored from the ReplicatedSlots (FFastArray).
 	 */
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	TArray<FInventorySlot> InventorySlots{};
 
 	/**

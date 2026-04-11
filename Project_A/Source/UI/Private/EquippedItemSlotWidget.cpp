@@ -3,16 +3,36 @@
 
 #include "EquippedItemSlotWidget.h"
 
-#include "Blueprint/DragDropOperation.h"
-#include "Blueprint/WidgetBlueprintLibrary.h"
-#include "Components/Image.h"
-#include "Components/TextBlock.h"
-#include "Engine/Texture2D.h"
+//#include "Blueprint/DragDropOperation.h"
+//#include "Blueprint/WidgetBlueprintLibrary.h"
+//#include "Components/Image.h"
+//#include "Components/TextBlock.h"
+//#include "Engine/Texture2D.h"
 #include "Inventory.h"
 #include "InventoryItem.h"
 
 #include "ProjectALog.h"
 
+void UEquippedItemSlotWidget::InitialiseEquipmentSlot(UInventory* InInventory, EEquipmentSlot InEquipmentSlot, int32 InSlotIndex)
+{
+	EquipmentSlot = InEquipmentSlot;
+	InitialiseSlot(InInventory, InSlotIndex);
+}
+
+bool UEquippedItemSlotWidget::ShouldShowStackCount(const FInventorySlot& InSlot) const
+{
+	if (EquipmentSlot == EEquipmentSlot::Weapon)
+	{
+		return false;
+	}
+
+	if (EquipmentSlot == EEquipmentSlot::Throwable)
+	{
+		return InSlot.Item && InSlot.Item->StackCount > 1;
+	}
+
+	return Super::ShouldShowStackCount(InSlot);
+}
 
 //void UEquippedItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InPointerEvent, UDragDropOperation*& OutOperation)
 //{

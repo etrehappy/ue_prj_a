@@ -17,9 +17,15 @@ void UEquippedItemWidget::InitialiseWithInventory(UInventoryComponent* InInvento
 	InventoryComponent = InInventoryComponent;
 	InventoryComponent->OnEquipmentChanged.AddDynamic(this, &UEquippedItemWidget::HandleEquipmentChanged);
 
-	if (PhysicalWeaponSlot)
+	if (WeaponSlot)
 	{
-		PhysicalWeaponSlot->InitialiseSlot(InventoryComponent.Get()->GetEquipmentInventory(), static_cast<int32>(EEquipmentSlot::Weapon));
+		const int32 WeaponIndex = InventoryComponent->GetEquipmentInventoryIndex(EEquipmentSlot::Weapon);
+		WeaponSlot->InitialiseEquipmentSlot(InventoryComponent.Get()->GetEquipmentInventory(), EEquipmentSlot::Weapon, WeaponIndex);
+	}
+	if (ThrowableSlot)
+	{
+		const int32 ThrowableIndex = InventoryComponent->GetEquipmentInventoryIndex(EEquipmentSlot::Throwable);
+		ThrowableSlot->InitialiseEquipmentSlot(InventoryComponent.Get()->GetEquipmentInventory(), EEquipmentSlot::Throwable, ThrowableIndex);
 	}
 
 	HandleEquipmentChanged();
@@ -34,10 +40,17 @@ void UEquippedItemWidget::HandleEquipmentChanged()
 		return;
 	}
 
-	if (PhysicalWeaponSlot)
+	if (WeaponSlot)
 	{
-		FInventorySlot WeaponSlot{};
-		WeaponSlot.Item = InventoryComponentPtr->GetEquippedItem(EEquipmentSlot::Weapon);
-		PhysicalWeaponSlot->SetSlotData(WeaponSlot);
+		FInventorySlot WeaponSlotData{};
+		WeaponSlotData.Item = InventoryComponentPtr->GetEquippedItem(EEquipmentSlot::Weapon);
+		WeaponSlot->SetSlotData(WeaponSlotData);
+	}
+
+	if (ThrowableSlot)
+	{
+		FInventorySlot ThrowableSlotData{};
+		ThrowableSlotData.Item = InventoryComponentPtr->GetEquippedItem(EEquipmentSlot::Throwable);
+		ThrowableSlot->SetSlotData(ThrowableSlotData);
 	}
 }

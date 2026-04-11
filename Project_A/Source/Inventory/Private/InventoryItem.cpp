@@ -5,6 +5,31 @@
 
 #include "ProjectALog.h"
 
+UInventoryItem* UInventoryItem::CreateItem(UObject* Outer, UInventoryItemDefinition* Definition, int32 StackCount)
+{
+	if (!Outer)
+	{
+		Outer = GetTransientPackage();
+	}
+
+	if(!Definition)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Definition is null", FString(__FUNCTION__));
+		return nullptr;
+	}
+
+	if(StackCount < 1)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - StackCount must be at least 1", FString(__FUNCTION__));
+		return nullptr;
+	}
+
+	UInventoryItem* NewItem = NewObject<UInventoryItem>(Outer);
+	NewItem->Definition = Definition;
+	NewItem->StackCount = StackCount;
+	return NewItem;
+}
+
 bool UInventoryItem::HasValidData() const
 {
 	bool bHasValidData = true;

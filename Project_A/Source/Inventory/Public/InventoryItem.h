@@ -29,6 +29,18 @@ class INVENTORY_API UInventoryItem : public UObject
 	GENERATED_BODY()
 
 public:
+	/**
+	 * @brief Creates a new inventory item.
+	 * 
+	 * @param[in] Outer The outer object for the new inventory item.
+	 * @param[in] Definition The definition of the inventory item.
+	 * @param[in] StackCount The initial stack count for the inventory item.
+	 * @return A pointer to the newly created inventory item.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (DisplayName = "Create Inventory Item"))
+	static UInventoryItem* CreateItem(UObject* Outer, UInventoryItemDefinition* Definition, int32 StackCount = 1);
+
+
 	UFUNCTION(BlueprintCallable)
 	bool HasValidData() const;
 
@@ -38,7 +50,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<UInventoryItemDefinition> Definition{};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = "1", ClampMax = "250"))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (ClampMin = "1", ClampMax = "250"))
 	int32 StackCount{1};
 };
 
@@ -66,6 +78,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	bool bConsumable{false};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stack")
+	bool bStackable{false};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Stack", meta = (ClampMin = "1", EditCondition = "bStackable"))
+	int32 MaxStackCount{1};
 
 	/**
 	 * @see FStatusEffectDef

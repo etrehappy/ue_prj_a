@@ -48,12 +48,27 @@ public:
 	void InitialiseWithInventory(UInventoryComponent* InInventoryComponent);
 
 private:
+	/**
+	 * @brief Updates the equipped item slots when the equipment changes.
+	 * 
+	 */
 	UFUNCTION()
 	void HandleEquipmentChanged();
 
 
 						/* === Unreal Engine UPROPERTY === */
 protected:
+	/**
+	 * @brief The widget representing the equipped weapon slot.
+	 * @see UWeaponComponent::CurrentWeapon
+	 */
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
-	TObjectPtr<UEquippedItemSlotWidget> PhysicalWeaponSlot{};
+	TObjectPtr<UEquippedItemSlotWidget> WeaponSlot{};
+
+	/**
+	 * @brief The widget representing the equipped throwable item slot.
+	 * @see UWeaponComponent::CurrentThrowableItem
+	 */
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+	TObjectPtr<UEquippedItemSlotWidget> ThrowableSlot{};
 };

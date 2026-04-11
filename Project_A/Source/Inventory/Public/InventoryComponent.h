@@ -28,8 +28,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipmentChanged);
 UENUM(BlueprintType)
 enum class EEquipmentSlot : uint8
 {
-	None	= 0	UMETA(DisplayName = "None"),
-	Weapon	= 1	UMETA(DisplayName = "Weapon"),
+	None		= 0	UMETA(Hidden)
+
+	, Weapon	= 1	UMETA(DisplayName = "Weapon")
+	, Throwable	= 2	UMETA(DisplayName = "Throwable")
+
+	, Max			UMETA(Hidden)
 };
 
 
@@ -80,6 +84,10 @@ public:
 	 */
 	void UnequipItem(EEquipmentSlot Slot);
 
+	/**
+	 * @brief Returns the inventory index corresponding to the equipment slot, or INDEX_NONE if the slot is invalid or empty.
+	 */
+	int32 GetEquipmentInventoryIndex(EEquipmentSlot Slot) const;
 
 private:
 	/**
@@ -109,6 +117,29 @@ private:
 	 * @param[in] InInventory The inventory to bind delegates for.
 	 */
 	void BindInventoryDelegates(UInventory* InInventory);
+
+	/**
+	 * @brief Returns the equipment slot corresponding to the inventory index, or EEquipmentSlot::None if the index is invalid.
+	 */
+	EEquipmentSlot GetEquipmentSlotFromInventoryIndex(int32 SlotIndex) const;
+
+	/**
+	 * @brief Checks if an item can be equipped in a slot based on the item's type and the slot's requirements.
+	 * 
+	 * @param[in] Slot The equipment slot to check.
+	 * @param[in] Item The item to check.
+	 * @return true if the item can be equipped in the slot; otherwise, false.
+	 */
+	bool CanEquipItemInSlot(EEquipmentSlot Slot, const UInventoryItem* Item) const;
+
+	/**
+	 * @brief Checks if an item can be placed in an equipment slot based on the item's type and the slot's requirements.
+	 * 
+	 * @param[in] TargetSlotIndex The index of the equipment slot to check.
+	 * @param[in] Item The item to check.
+	 * @return true if the item can be placed in the equipment slot; otherwise, false.
+	 */
+	bool CanPlaceItemIntoEquipmentSlot(int32 TargetSlotIndex, const UInventoryItem* Item) const;
 
 	
 						/* === C++ member variables === */
@@ -157,6 +188,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UseItem(int32 SlotIndex);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void SetInventory(UInventory* NewInventory);
+
+	/**
+	 * @brief If item is equipped in the Slot, it applies the item's effect to the owner and removes the item from the inventory. Otherwise, does nothing.
+	 * 
+	 * @param[in] Slot The equipment slot to use the item from.
+	 */
+	UFUNCTION(BlueprintCallable)
+	void UseEquippedItem(EEquipmentSlot Slot);
+	
 protected:
 	/**
 	 * @brief Only calls MoveItemToOtherInventory 
@@ -178,6 +220,16 @@ protected:
 	 */
 	UFUNCTION(Server, Reliable)
 	void Server_UseItem(int32 SlotIndex);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetInventory(UInventory* NewInventory);
+
+	/**
+	 * @brief Only calls UseEquippedItem
+	 * @see UseEquippedItem
+	 */
+	UFUNCTION(Server, Reliable)
+	void Server_UseEquippedItem(EEquipmentSlot Slot);
 
 private:
 	/**
@@ -219,9 +271,9 @@ private:
 	/**
 	 * @brief Inventory subobject (replicated as a subobject).
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = OnRep_Inventory, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = OnRep_Inventory, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInventory> Inventory{};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = OnRep_EquipmentInventory, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, ReplicatedUsing = OnRep_EquipmentInventory, Category = "Inventory", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UInventory> EquipmentInventory{};	
 };

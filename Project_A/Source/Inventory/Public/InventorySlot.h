@@ -32,7 +32,7 @@ public:
 	bool IsEmpty() const ;
 	void Clear();
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInventoryItem> Item{nullptr};
 };
 

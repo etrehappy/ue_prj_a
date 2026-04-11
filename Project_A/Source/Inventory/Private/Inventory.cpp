@@ -204,6 +204,15 @@ bool UInventory::AddItem(const UInventoryItem* Item)
 		return false;
 	}
 
+	for (int32 Index = 0; Index < ReplicatedSlots.Items.Num(); ++Index)
+	{
+		if (TryStackItemIntoSlot(Item, Index))
+		{
+			OnInventoryChanged.Broadcast();
+			return true;
+		}
+	}
+
 	if (!AddItemToReplicatedSlots(Item))
 	{
 		UE_LOGFMT(LogProjectA, Warning, "{0} - Failed to add item to replicated slots, inventory might be full", FString(__FUNCTION__));
@@ -216,6 +225,7 @@ bool UInventory::AddItem(const UInventoryItem* Item)
 		return false;
 	}
 
+	OnInventoryChanged.Broadcast();
 	return true;
 }
 
@@ -229,7 +239,46 @@ bool UInventory::AddItemToSlot(const UInventoryItem* Item, int32 SlotIndex)
 		return false;
 	}	
 
-	if (!AddItemToReplicatedSlot(Item, SlotIndex))
+	if (!Item || !Item->HasValidData())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Item is null or invalid", FString(__FUNCTION__));
+		return false;
+	}
+
+	if (!ReplicatedSlots.Items.IsValidIndex(SlotIndex) || !InventorySlots.IsValidIndex(SlotIndex))
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid SlotIndex {1}", FString(__FUNCTION__), SlotIndex);
+		return false;
+	}
+
+	if (ReplicatedSlots.Items[SlotIndex].IsEmpty())
+	{
+		if (!AddItemToReplicatedSlot(Item, SlotIndex))
+		{
+			return false;
+		}
+
+		if (!AddItemToLocalInventory(Item, SlotIndex))
+		{
+			return false;
+		}
+
+		OnInventoryChanged.Broadcast();
+		return true;
+	}
+
+	if (TryStackItemIntoSlot(Item, SlotIndex))
+	{
+		OnInventoryChanged.Broadcast();
+		return true;
+	}
+
+	UE_LOGFMT(LogProjectA, Warning, "{0} - Slot {1} is occupied and cannot stack", FString(__FUNCTION__), SlotIndex);
+	return false;
+
+
+
+	/*if (!AddItemToReplicatedSlot(Item, SlotIndex))
 	{
 		UE_LOGFMT(LogProjectA, Warning, "{0} - Failed to add item to replicated slots, inventory might be full", FString(__FUNCTION__));
 		return false;
@@ -241,7 +290,7 @@ bool UInventory::AddItemToSlot(const UInventoryItem* Item, int32 SlotIndex)
 		return false;
 	}
 
-	return true;
+	return true;*/
 }
 
 UInventoryItem* UInventory::FindItemBySlot(int32 SlotIndex) const
@@ -449,7 +498,13 @@ void UInventory::RelocateItemInInventoryInternal(int32 FromIndex, int32 ToIndex)
 
 	if (!TargetSlot.IsEmpty())
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Target slot {1} is not empty", FString(__FUNCTION__), ToIndex);
+		if (TryStackSourceIntoTarget(this, FromIndex, this, ToIndex))
+		{
+			OnInventoryChanged.Broadcast();
+			return;
+		}
+
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Target slot {1} is not empty and stack merge failed", FString(__FUNCTION__), ToIndex);
 		return;
 	}
 	
@@ -460,7 +515,11 @@ void UInventory::RelocateItemInInventoryInternal(int32 FromIndex, int32 ToIndex)
 	ReplicatedSlots.MarkItemDirty(TargetSlot);
 	ReplicatedSlots.MarkItemDirty(SourceSlot);
 	
-	CopyLocalRuntimeItem(FromIndex, ToIndex);	
+	RefreshLocalSlotFromReplicated(FromIndex);
+	RefreshLocalSlotFromReplicated(ToIndex);
+	OnInventoryChanged.Broadcast();
+
+	//CopyLocalRuntimeItem(FromIndex, ToIndex);	
 
 	//OnInventoryChanged.Broadcast();
 }
@@ -516,7 +575,14 @@ void UInventory::MoveItemToOtherInventoryInternal(UInventory* TargetInventory, i
 
 	if (!TargetInventory->ReplicatedSlots.Items[TargetSlotIndex].IsEmpty())
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Target slot {1} is not empty", FString(__FUNCTION__), TargetSlotIndex);
+		if (TryStackSourceIntoTarget(this, SourceSlotIndex, TargetInventory, TargetSlotIndex))
+		{
+			OnInventoryChanged.Broadcast();
+			TargetInventory->OnInventoryChanged.Broadcast();
+			return;
+		}
+
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Target slot {1} is not empty and stack merge failed", FString(__FUNCTION__), TargetSlotIndex);
 		return;
 	}
 
@@ -533,8 +599,8 @@ void UInventory::MoveItemToOtherInventoryInternal(UInventory* TargetInventory, i
 
 	MoveLocalRuntimeItemToInventory(TargetInventory, SourceSlotIndex, TargetSlotIndex);
 
-	/*OnInventoryChanged.Broadcast();
-	TargetInventory->OnInventoryChanged.Broadcast();*/
+	OnInventoryChanged.Broadcast();
+	TargetInventory->OnInventoryChanged.Broadcast();
 
 	return;
 }
@@ -576,4 +642,94 @@ void UInventory::UseItemFromSlot(int32 SlotIndex)
 
 	ReplicatedSlots.MarkItemDirty(ReplicatedSlot);
 	OnInventoryChanged.Broadcast();
+}
+
+int32 UInventory::GetMaxStackCount(const UInventoryItemDefinition* Definition) const
+{
+	if (!Definition) { return 1; }
+
+	if (!Definition->bStackable) { return 1; }
+
+	return FMath::Max(1, Definition->MaxStackCount);
+}
+
+bool UInventory::IsStackable(const UInventoryItemDefinition* SourceItem, const UInventoryItemDefinition* TargetItem) const
+{
+	if (!SourceItem || !TargetItem || (SourceItem != TargetItem))	{ return false;	}
+	
+	return SourceItem->bStackable;
+}
+
+void UInventory::RefreshLocalSlotFromReplicated(int32 SlotIndex)
+{
+	EnsureLocalSlotsMatchReplicated();
+
+	if (!ReplicatedSlots.Items.IsValidIndex(SlotIndex) || !InventorySlots.IsValidIndex(SlotIndex))
+	{
+		return;
+	}
+
+	UpdateLocalSlotFromReplicated(SlotIndex);
+}
+
+bool UInventory::TryStackItemIntoSlot(const UInventoryItem* Item, int32 SlotIndex)
+{
+	if (!Item || !Item->HasValidData())	{ return false;	}
+
+	if (!ReplicatedSlots.Items.IsValidIndex(SlotIndex))	{ return false;	}
+
+	FInventoryReplicatedSlot& TargetReplicatedSlot = ReplicatedSlots.Items[SlotIndex];
+	if (TargetReplicatedSlot.IsEmpty())	{ return false;	}
+
+	const UInventoryItemDefinition* SourceItemDefinition = Item->Definition;
+	const UInventoryItemDefinition* TargetItemDefinition = LoadItemDefinitionFromReplicatedSlot(TargetReplicatedSlot);
+
+	if (!IsStackable(SourceItemDefinition, TargetItemDefinition)) { return false; }
+
+	const int32 MaxStack = GetMaxStackCount(TargetItemDefinition);
+	const int32 NewCount = TargetReplicatedSlot.CurrentStackCount + Item->StackCount;
+	if (NewCount > MaxStack) { return false; }
+
+	TargetReplicatedSlot.CurrentStackCount = NewCount;
+	ReplicatedSlots.MarkItemDirty(TargetReplicatedSlot);
+	RefreshLocalSlotFromReplicated(SlotIndex);
+
+	return true;
+}
+
+bool UInventory::TryStackSourceIntoTarget(UInventory* SourceInventory, int32 SourceSlotIndex, UInventory* TargetInventory, int32 TargetSlotIndex)
+{
+	if (!SourceInventory || !TargetInventory) { return false; }
+
+	const bool bInvalidIndices = !SourceInventory->ReplicatedSlots.Items.IsValidIndex(SourceSlotIndex)
+		|| !TargetInventory->ReplicatedSlots.Items.IsValidIndex(TargetSlotIndex);
+	
+	if (bInvalidIndices) { return false; }
+
+	FInventoryReplicatedSlot& SourceReplicatedSlot = SourceInventory->ReplicatedSlots.Items[SourceSlotIndex];
+	FInventoryReplicatedSlot& TargetReplicatedSlot = TargetInventory->ReplicatedSlots.Items[TargetSlotIndex];
+
+	const bool bEmptySlots = SourceReplicatedSlot.IsEmpty() || TargetReplicatedSlot.IsEmpty();
+
+	if (bEmptySlots) { return false; }
+
+	UInventoryItemDefinition* SourceItemDefinition = SourceInventory->LoadItemDefinitionFromReplicatedSlot(SourceReplicatedSlot);
+	UInventoryItemDefinition* TargetItemDefinition = TargetInventory->LoadItemDefinitionFromReplicatedSlot(TargetReplicatedSlot);
+
+	if (!IsStackable(SourceItemDefinition, TargetItemDefinition)) { return false; }	
+
+	const int32 MaxStack = GetMaxStackCount(TargetItemDefinition);
+	const int32 NewCount = TargetReplicatedSlot.CurrentStackCount + SourceReplicatedSlot.CurrentStackCount;
+	if (NewCount > MaxStack) { return false; }
+
+	TargetReplicatedSlot.CurrentStackCount = NewCount;
+	SourceReplicatedSlot.Clear();
+
+	TargetInventory->ReplicatedSlots.MarkItemDirty(TargetReplicatedSlot);
+	SourceInventory->ReplicatedSlots.MarkItemDirty(SourceReplicatedSlot);
+
+	TargetInventory->RefreshLocalSlotFromReplicated(TargetSlotIndex);
+	SourceInventory->RefreshLocalSlotFromReplicated(SourceSlotIndex);
+
+	return true;
 }

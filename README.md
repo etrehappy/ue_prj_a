@@ -595,7 +595,7 @@
     - [UCombatComponent](https://github.com/etrehappy/ue_prj_a/blob/hw13/Project_A/Source/Project_A/Private/Character/CombatComponent.cpp) подписан на изменение инвентаря: если оружие в руке персонажа и его удаляют из ячейки, то [HandleEquipmentChanged()](https://github.com/etrehappy/ue_prj_a/blob/hw13/Project_A/Source/Project_A/Private/Character/CombatComponent.cpp) сбросит состояние к обычному.  
 </details>
 
-<details><summary id="task14"><p>Задание 14. Система способностей NPC</p></summary>
+<details><summary id="task14">Задание 14. Система способностей NPC<p></p></summary>
 
 **Что сделано**:
 
@@ -627,7 +627,7 @@
     - Модуль с врагами был реализован в задании 6 ([см. выше](#task6)). Но для <b>упрощения</b> дальнейшей работы существующий класс пересмотрен: теперь [NpcBase](./Project_A/Source/Npc/Public/NpcBase.h) наследуется от Character из-за Movement и готовой репликации.
     - [Ассет](https://www.fab.com/listings/0c7313ce-2bf8-4987-848b-6b38dbc38ee5) основного врага использует отдельные скелет и анимацию для оружия. Поэтому в классе *BP_LeadGoblin* (/Game/Project_A_Root/Character/Npc/Enemy/Goblin) пересмотрена логика атаки и работы с оружием — [NpcBattleComponent](./Project_A/Source/Npc/Public/NpcBattleComponent.h). Пока реализована атака только для ближнего боя. Стиль боя можно изменить, используя наследника от [NpcAttackLogicBase](./Project_A/Source/Npc/Public/NpcAttackLogicBase.h)(например, [NpcAttackLogicWeaponSweep](./Project_A/Source/Npc/Public/NpcAttackLogicWeaponSweep.h)).
     - Атака запускается через StateTree (например, [ST_Enemy_PatrolCombat](./Project_A/Content/Project_A_Root/Character/Npc/EnemyST_Enemy_PatrolCombat.uasset)). Состояние атаки использует собственную задачу [ST_GoblinStartAttackTask](./Project_A/Content/Project_A_Root/Character/Npc/ST_Enemy_ObserverCombat.uasset).
-    - В [логике ближнего боя](./Project_A/Source/Npc/Public/NpcAttackLogicWeaponSweep.h) у врага используется Tick. Он включается только в момент атаки UNpcBattleComponent::[BeginDamageWindow](./Project_A/Source/Npc/Private/NpcBattleComponent.cpp) -> UNpcAttackLogicWeaponSweep::[OnAttackStarted](./Project_A/Source/Npc/Private/UNpcAttackLogicWeaponSweep.cpp). Hit расчитывается по пересечению линии между рукояткой и остриём ближнего оружия. 
+    - В [логике ближнего боя](./Project_A/Source/Npc/Public/NpcAttackLogicWeaponSweep.h) у врага используется Tick. Он включается только в момент атаки UNpcBattleComponent::[BeginDamageWindow](./Project_A/Source/Npc/Private/NpcBattleComponent.cpp) -> UNpcAttackLogicWeaponSweep::[OnAttackStarted](./Project_A/Source/Npc/Private/NpcAttackLogicWeaponSweep.cpp). Hit расчитывается по пересечению линии между рукояткой и остриём ближнего оружия. 
     - Тип урона задаётся через настройки NpcBattleComponent (соответственно, для атаки по персонажу требуется тип урона реализованный в задании 6, [см. выше](#task6)).
     - Система здоровья у NPC такая же, как у игрока (реализовано в задании 8, [см. выше](#task8)).
     - В [NpcAIController](./Project_A/Source/Npc/Public/NpcAIController.h) обрабатывается зрение бота. Если игрок замечен, он назначается целью. 

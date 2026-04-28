@@ -198,6 +198,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	void UseEquippedItem(EEquipmentSlot Slot);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	int32 GetItemCountByTag(const FGameplayTag& ItemTypeTag) const;
+
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
+	bool ConsumeItemsByTag(const FGameplayTag& ItemTypeTag, int32 Count);
 	
 protected:
 	/**

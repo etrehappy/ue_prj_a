@@ -26,7 +26,7 @@ class UHealthComponent;
 class UInventoryComponent;
 class UInteractionComponent;
 class UStatusEffectComponent;
-
+class UQuestLogComponent;
 class UInventory;
 
 /**
@@ -238,6 +238,9 @@ protected:
 
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UStatusEffectComponent> StatusEffectComponent{};
+
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UQuestLogComponent> QuestLogComponent{};
 
     /**
      * @brief The temporary solution. 

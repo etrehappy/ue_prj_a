@@ -19,6 +19,7 @@
 #include "ItemPickup.h"
 #include "Net/UnrealNetwork.h"
 #include "StatusEffect/StatusEffectsComponent.h"
+#include "QuestLogComponent.h"
 
 #include "ProjectALog.h"
 
@@ -64,6 +65,9 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 
 	StatusEffectComponent = CreateDefaultSubobject<UStatusEffectComponent>(TEXT("StatusEffectComponent"));
 	StatusEffectComponent->SetComponentTickEnabled(false);
+
+	QuestLogComponent = CreateDefaultSubobject<UQuestLogComponent>(TEXT("QuestLogComponent"));
+	QuestLogComponent->SetComponentTickEnabled(false);
 
 	if (auto* Capsule = GetCapsuleComponent())
 	{

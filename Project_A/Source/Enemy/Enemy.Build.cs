@@ -10,6 +10,8 @@ public class Enemy: ModuleRules
             , "GameplayTags"
             , "Common"
             , "Logger"
-        });
+            , "Npc"
+			, "WeaponSystemPlugin"
+		});
     }
 }

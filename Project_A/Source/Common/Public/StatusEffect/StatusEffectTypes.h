@@ -18,6 +18,7 @@
 UENUM(BlueprintType)
 enum class EModifierType : uint8
 {
+	None,
 	Add        UMETA(DisplayName = "Add"),
 	Multiply   UMETA(DisplayName = "Multiply")	
 };
@@ -33,16 +34,16 @@ struct FEffectAction
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag TargetStat; // For example, Health/Speed
+	FGameplayTag TargetStat{}; // For example, Health/Speed
 
 	UPROPERTY(EditDefaultsOnly)
-	float Value;
+	float Value{0.f};
 
 	/**
 	 * @brief Type of modification applied by this action (Add, Multiply, etc.).
 	 */
 	UPROPERTY(EditDefaultsOnly)
-	EModifierType Type;
+	EModifierType Type{EModifierType::None};
 };
 
 

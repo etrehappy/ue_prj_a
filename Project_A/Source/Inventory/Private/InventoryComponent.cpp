@@ -595,6 +595,68 @@ void UInventoryComponent::Server_UseEquippedItem_Implementation(EEquipmentSlot S
 	UseEquippedItem(Slot);
 }
 
+int32 UInventoryComponent::GetItemCountByTag(const FGameplayTag& ItemTypeTag) const
+{
+	if (!Inventory || !ItemTypeTag.IsValid())
+	{
+		return 0;
+	}
+
+	int32 TotalCount = 0;
+	const int32 InventorySize = Inventory->GetSize();
+
+	for (int32 SlotIndex = 0; SlotIndex < InventorySize; ++SlotIndex)
+	{
+		const UInventoryItem* Item = Inventory->FindItemBySlot(SlotIndex);
+		if (!Item || !Item->HasValidData())
+		{
+			continue;
+		}
+
+		if (Item->GetItemType() == ItemTypeTag)
+		{
+			TotalCount += FMath::Max(0, Item->StackCount);
+		}
+	}
+
+	return TotalCount;
+}
+
+bool UInventoryComponent::ConsumeItemsByTag(const FGameplayTag& ItemTypeTag, int32 Count)
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		return false;
+	}
+
+	if (!Inventory || !ItemTypeTag.IsValid() || Count <= 0)
+	{
+		return false;
+	}
+
+	if (GetItemCountByTag(ItemTypeTag) < Count)
+	{
+		return false;
+	}
+
+	int32 RemainingCount = Count;
+	const int32 InventorySize = Inventory->GetSize();
+
+	for (int32 SlotIndex = 0; SlotIndex < InventorySize && RemainingCount > 0; ++SlotIndex)
+	{
+		UInventoryItem* Item = Inventory->FindItemBySlot(SlotIndex);
+
+		while (Item && Item->HasValidData() && Item->GetItemType() == ItemTypeTag && RemainingCount > 0)
+		{
+			Inventory->UseItemFromSlot(SlotIndex);
+			--RemainingCount;
+			Item = Inventory->FindItemBySlot(SlotIndex);
+		}
+	}
+
+	return RemainingCount == 0;
+}
+
 
 
 

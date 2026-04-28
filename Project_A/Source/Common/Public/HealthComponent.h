@@ -37,9 +37,7 @@ public:
 	virtual ~UHealthComponent() override = default;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
-	FORCEINLINE float GetMaxHealth() const;
-	FORCEINLINE float GetCurrentHealth() const;
+		
 	void SetMaxHealth(float NewHealth);
 
 	/**
@@ -91,6 +89,13 @@ private:
 
 
 						/* === Unreal Engine UFUNCTION === */
+public:
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetMaxHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	float GetCurrentHealth() const;
+
 private:
 	/**
 	 * @brief Server function.

@@ -1,10 +1,11 @@
-﻿
+
 
 #pragma once
 #include "CoreMinimal.h"
 
 #include "GameplayTagContainer.h"
 #include "Engine/DataTable.h"
+#include "NpcTypes.h"
 
 #include "EnemyRow.generated.h"
 
@@ -36,4 +37,8 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     float MoveSpeed{300};
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    bool bIsFriendly{false};
+
 };

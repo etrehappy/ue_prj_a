@@ -144,6 +144,7 @@ void UInteractionComponent::OtherBeginOverlap(AActor* OtherActor)
     
     if (OtherActor->Implements<UInteractable>())
     {
+		//UE_LOGFMT(LogProjectA, Log, "{0} - Actor implements UInteractable: {1}", FString(__FUNCTION__), *OtherActor->GetName());
         Candidates.Add(OtherActor);
     }
     else

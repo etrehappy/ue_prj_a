@@ -20,7 +20,8 @@ public class Project_A : ModuleRules
 			"UMG",
             "GameplayTags",
 			"WeaponSystemPlugin",
-			"Common"
+			"Common",
+			"Quest"
 	});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {

@@ -709,7 +709,7 @@
 5. Работа с динамическими материалами
     - Когда игрок взаимодействует с объектом (ставит кристалл на пъедестал), у объекта включается подсветка.
         <div style="text-align: center;">
-            <img src="./img_for_readme/сrystall.jpg" alt="crystall" width="234" height="165">   
+            <img src="./img_for_readme/crystall.jpg" alt="crystall" width="234" height="165">   
         </div>
         <div style="text-align: center;">
             <img src="./img_for_readme/mid.jpg" alt="mid" width="500" height="152">   

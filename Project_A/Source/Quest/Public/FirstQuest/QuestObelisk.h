@@ -21,6 +21,8 @@ class QUEST_API AQuestObelisk : public AActor, public IInteractable
 	GENERATED_BODY()
 
 public:
+	AQuestObelisk();
+	virtual ~AQuestObelisk() override = default;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual bool CanInteract(APawn* Interactor) const override;
@@ -33,6 +35,9 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Quest")
 	void OnObeliskActivated();
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_IsActivated)
+	bool bIsActivated{false};
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Quest")
 	FGameplayTag RequiredStoneItemTag{};
@@ -40,6 +45,5 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Quest", meta = (ClampMin = "1"))
 	int32 RequiredStoneCount{1};
 
-	UPROPERTY(ReplicatedUsing = OnRep_IsActivated)
-	bool bIsActivated{false};
+	
 };

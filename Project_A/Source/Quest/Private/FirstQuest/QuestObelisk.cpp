@@ -5,6 +5,12 @@
 
 #include "ProjectALog.h"
 
+AQuestObelisk::AQuestObelisk()
+{
+	PrimaryActorTick.bCanEverTick = true;
+	bReplicates = true;
+}
+
 void AQuestObelisk::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

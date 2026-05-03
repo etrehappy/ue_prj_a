@@ -76,32 +76,10 @@ Project_A/Plugins/**/Intermediate/*
 Project_A/DerivedDataCache/*
 
 Project_A/Content/*
-!Project_A/Content/Project_A_Root/
-
-Project_A/Content/Project_A_Root/Character/Npc/*
-!Project_A/Content/Project_A_Root/Character/Npc/Enemy/
-
-Project_A/Content/Project_A_Root/Character/Npc/Enemy/Goblin/*
-!Project_A/Content/Project_A_Root/Character/Npc/Enemy/Goblin/BP_LeadGoblin.uasset
-!Project_A/Content/Project_A_Root/Character/Npc/Enemy/Goblin/Animation/ABP_LeadGoblin.uasset
-
-Project_A/Content/Project_A_Root/Character/Player/Animation
-!Project_A/Content/Project_A_Root/Character/Player/Animation/*.uasset
-
-!Project_A/Content/ThirdPerson
-!Project_A/Content/__ExternalObjects__
-!Project_A/Content/__ExternalActors__
-
-Project_A/Content/__ExternalActors__/ComboSystem/
-Project_A/Content/__ExternalActors__/Demo/
-Project_A/Content/__ExternalActors__/FreeMeleeWeaps/
-Project_A/Content/__ExternalObjects__/ComboSystem/
-Project_A/Content/__ExternalObjects__/FreeMeleeWeaps/
 
 Project_A/Source/Project_A/Variant_Combat
 Project_A/Source/Project_A/Variant_Platforming
 Project_A/Source/Project_A/Variant_SideScrolling
-
 
 Project_A/PrjPackages
 Project_A/TestReports

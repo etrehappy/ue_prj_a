@@ -20,7 +20,8 @@ start %SERVER_NAME% %UE_EDITOR% %PROJECT_PATH% ^
         -abslog="%~dp0Logs\LogHubServer.txt"
 
 REM ---------- Second Server ----------
-set MAP_NAME=/Game/ThirdPerson/Lvl_ThirdPerson
+REM set MAP_NAME=/Game/ThirdPerson/Lvl_ThirdPerson
+set MAP_NAME=/Game/Project_A_Root/Levels/Map
 set SERVER_NAME="Project_A WorldServer"
 set SERVER_PORT=7778
 

@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw15' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив (416 MB)]() и распаковать с заменой в .\ue_prj_a\ 
+2. Скачать [архив (1,15 Гб)](https://drive.google.com/file/d/1bQqODpR0ojQ0fe8zMUOkDvtA2d9ArJkU/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A
@@ -709,7 +709,7 @@
 5. Работа с динамическими материалами
     - Когда игрок взаимодействует с объектом (ставит кристалл на пъедестал), у объекта включается подсветка.
         <div style="text-align: center;">
-            <img src="./img_for_readme/сrystall.jpg" alt="сrystall" width="234" height="165">   
+            <img src="./img_for_readme/сrystall.jpg" alt="crystall" width="234" height="165">   
         </div>
         <div style="text-align: center;">
             <img src="./img_for_readme/mid.jpg" alt="mid" width="500" height="152">   

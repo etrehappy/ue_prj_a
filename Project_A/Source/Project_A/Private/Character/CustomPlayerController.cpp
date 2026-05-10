@@ -4,13 +4,14 @@
 #include "Character/CustomPlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "EnhancedInputSubsystems.h"
-#include "GameInstanceBase.h"
-#include "HubGameMode.h"
+#include "Core/GameInstanceBase.h"
+#include "Core/HubGameMode.h"
 #include "EnemyFactory.h"
 #include "GeneralHud.h"
 #include "GameFramework/GameModeBase.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "DeathMenuWidget.h"
+#include "BaseHud.h"
 
 #include "ProjectALog.h"
 
@@ -85,28 +86,20 @@ void ACustomPlayerController::Client_OnConnected_Implementation(EServerWorldType
 {    
 	UE_LOGFMT(LogProjectA, Log, "{0} - Connected to the server successfully", FString(__FUNCTION__));
 
-	UGameInstanceBase* GameInstanceP = GetGameInstance<UGameInstanceBase>();
-	if (!GameInstanceP)
-	{   
-		UE_LOGFMT(LogProjectA, Warning, "{0} -  GameInstance is not found", FString(__FUNCTION__));
+	ABaseHud* BaseHud = Cast<ABaseHud>(GetHUD());
+	if (!BaseHud)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - BaseHud is not found", FString(__FUNCTION__));
 		return;
-	};
+	}
 
-	GameInstanceP->OnConnectedSuccessfully(World);
+	BaseHud->OnConnectedSuccessfully(World);
+	
+	if (World == EServerWorldType::Hub)
+	{
+		Server_RequestWorldServerList();
+	}
 }
-
-void ACustomPlayerController::Server_RequestEnterToWorld_Implementation()
-{   
-	AHubGameMode* GameModeP = GetWorld()->GetAuthGameMode<AHubGameMode>();
-	if (!GameModeP) 
-	{       
-		UE_LOGFMT(LogProjectA, Warning, "{0} -  GameModeP is not found", FString(__FUNCTION__));
-		return;
-	};    
-
-	GameModeP->EnterToWorld(this);
-}
-
 
 #if UE_BUILD_DEVELOPMENT
 
@@ -330,6 +323,118 @@ void ACustomPlayerController::SetDeathMenuVisible(bool bVisible)
 }
 
 
+
+///////////////////////////////////////////////////////////////////////////////
+void ACustomPlayerController::Server_RequestWorldServerList_Implementation()
+{
+	AHubGameMode* HubGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AHubGameMode>() : nullptr;
+	if (!HubGameMode)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HubGameMode is not found", FString(__FUNCTION__));
+		return;
+	}
+	const TArray<FWorldServerView> Servers = HubGameMode->BuildWorldServersSnapshot();
+	//UE_LOGFMT(LogProjectA, Log, "{0} - Sending server list to client, Count={1}", FString(__FUNCTION__), Servers.Num());
+	Client_ReceiveWorldServerList(HubGameMode->BuildWorldServersSnapshot());
+}
+
+void ACustomPlayerController::Client_ReceiveWorldServerList_Implementation(const TArray<FWorldServerView>& Servers)
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	PushWorldServerListToHud(Servers);
+}
+
+void ACustomPlayerController::PushWorldServerListToHud(const TArray<FWorldServerView>& Servers)
+{
+	ABaseHud* BaseHud = Cast<ABaseHud>(GetHUD());
+	if (!BaseHud)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - BaseHud is not found", FString(__FUNCTION__));
+		return;
+	}
+
+	BaseHud->UpdateServerSelectionTable(Servers);
+	UE_LOGFMT(LogProjectA, Log, "{0} - Push to HUD, Count={1}", FString(__FUNCTION__), Servers.Num());
+}
+
+void ACustomPlayerController::Server_RequestCharacterList_Implementation(FName ServerId)
+{
+	AHubGameMode* HubGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AHubGameMode>() : nullptr;
+	if (!HubGameMode || ServerId.IsNone())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HubGameMode is not found or ServerId is None", FString(__FUNCTION__));
+		return;
+	}
+
+	const TArray<FCharacterSelectionView> Characters = HubGameMode->BuildMockCharactersForServer(ServerId);
+
+	if(Characters.Num() == 0)
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - No characters found for ServerId={1}", FString(__FUNCTION__), ServerId.ToString());
+	}
+
+	Client_ReceiveCharacterList(/*ServerId,*/ Characters);
+}
+
+void ACustomPlayerController::Client_ReceiveCharacterList_Implementation(/*FName ServerId,*/ const TArray<FCharacterSelectionView>& Characters)
+{
+	if (IsRunningDedicatedServer())
+	{
+		return;
+	}
+
+	/*PendingSelectedServerId = ServerId;*/
+	PushCharacterListToHud(Characters);
+}
+
+void ACustomPlayerController::PushCharacterListToHud(const TArray<FCharacterSelectionView>& Characters)
+{
+	ABaseHud* BaseHud = Cast<ABaseHud>(GetHUD());
+	if (!BaseHud)
+	{
+		return;
+	}
+
+	CachedCharacterEntries.Reset();
+	for (const FCharacterSelectionView& Item : Characters)
+	{
+		UCharacterEntryObject* EntryObject = NewObject<UCharacterEntryObject>(this);
+		if (!EntryObject)
+		{
+			continue;
+		}
+
+		EntryObject->Data = Item;
+		CachedCharacterEntries.Add(EntryObject);
+	}
+
+	TArray<UCharacterEntryObject*> Entries{};
+	for (const TObjectPtr<UCharacterEntryObject>& Item : CachedCharacterEntries)
+	{
+		Entries.Add(Item.Get());
+	}
+
+	BaseHud->ShowCharacterSelectionScreen();
+	BaseHud->UpdateCharacterSelectionTable(Entries);
+}
+
+void ACustomPlayerController::Server_RequestTravelToWorldWithCharacter_Implementation(FName ServerId, FName CharacterId)
+{
+	AHubGameMode* HubGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AHubGameMode>() : nullptr;
+	if (!HubGameMode || ServerId.IsNone() || CharacterId.IsNone())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HubGameMode is not found or ServerId/CharacterId is None", FString(__FUNCTION__));
+		return;
+	}
+
+	HubGameMode->EnterToWorldWithCharacter(this, ServerId, CharacterId);
+}
+
+
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests
 
@@ -343,21 +448,22 @@ const TArray<FInputMappingContextWithPriority>& ACustomPlayerController::AutoTes
 #endif //WITH_DEV_AUTOMATION_TESTS
 
 
-//void ACustomPlayerController::OnPossess(APawn* APawn)
-//{
-//	Super::OnPossess(APawn);
-//
-//	UE_LOGFMT(LogProjectA, Log, "{0} is executed: PlayerControllerName - {1}, PawnName - {2} ", FString(__FUNCTION__), *GetNameSafe(this), *GetNameSafe(APawn));
-//}
-//
-//void ACustomPlayerController::OnUnPossess()
-//{
-//	Super::OnUnPossess();
-//
-//}
 
 
-//void ACustomPlayerController::RespawnPlayer()
+//void ACustomPlayerController::Server_RequestTravelToWorldServer_Implementation(FName ServerId)
 //{
-//	this->UnPossess();
+//	if (ServerId.IsNone())
+//	{
+//		UE_LOGFMT(LogProjectA, Warning, "{0} - ServerId is None", FString(__FUNCTION__));
+//		return;
+//	}
+//
+//	AHubGameMode* HubGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AHubGameMode>() : nullptr;
+//	if (!HubGameMode)
+//	{
+//		UE_LOGFMT(LogProjectA, Warning, "{0} - HubGameMode is not found", FString(__FUNCTION__));
+//		return;
+//	}
+//
+//	HubGameMode->EnterToWorld(this, ServerId);
 //}

@@ -27,6 +27,7 @@ set SERVER_PORT=7778
 
 echo Start server MainWorld...
 start %SERVER_NAME% %UE_EDITOR% %PROJECT_PATH% ^
-     %MAP_NAME% -server -log -nosteam -port=%SERVER_PORT% ^
-        -abslog="%~dp0Logs\LogWorldServer.txt"
+     %MAP_NAME% -server -log -nosteam ^
+     -ServerId=MainWorld01 -ServerName=Galadriel -PublicAddress=127.0.0.1:7778 ^
+     -port=%SERVER_PORT% -abslog="%~dp0Logs\LogWorldServer.txt"
 

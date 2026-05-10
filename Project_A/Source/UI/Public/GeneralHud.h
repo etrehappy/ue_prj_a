@@ -9,6 +9,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "BaseHud.h"
 
 #include "GeneralHud.generated.h"
 
@@ -19,7 +20,7 @@ class UGeneralWidget;
  * @brief A HUD class that manages the general widget, which includes the inventory and other UI elements.
  */
 UCLASS()
-class UI_API AGeneralHud : public AHUD
+class UI_API AGeneralHud : public ABaseHud
 {
 	GENERATED_BODY()
 

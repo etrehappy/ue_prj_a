@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw18' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив ()]() и распаковать с заменой в .\ue_prj_a\ 
+2. Скачать [архив (1,2 Гб)](https://drive.google.com/file/d/190XjQwFQnS3DDiqJ6iCCu6NDYfO6FieY/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A
@@ -728,7 +728,7 @@
 
 <b>Основное</b>
 <br>
-<br> [ <--- ВИДЕО ---> ]()
+<br> [ <--- ВИДЕО ---> ](https://drive.google.com/file/d/1lmuwfW5ZIQt8AL0fEX6iDVZAnosOh1og/view?usp=sharing)
 
 - [x] Добавьте меню для запуска игры и подключения по сети;
 - [ ] Создайте лобби
@@ -748,7 +748,7 @@
     - изложено ниже по каждому этапу подключения отдельно. 
 
 2. Меню для запуска игры
-    - При запуске игры открывается первая (локальная) карта — /Game/Project_A_Root/Levels/StartMap/ClientDefaultMap — с собственными HUD (/Game/Project_A_Root/Levels/StartMap/ClienFirstMapHUD), [GameMode](./Project_A/Source/Core/Public/ClientStartGameMode.h) и виджетом (/Game/Project_A_Root/Levels/StartMap/Widgets/WBP_MainClientWindow)
+    - При запуске игры открывается первая (локальная) карта — /Game/Project_A_Root/Levels/StartMap/ClientDefaultMap — с собственными HUD (/Game/Project_A_Root/Levels/StartMap/ClienFirstMapHUD), [GameMode](./Project_A/Source/Project_A/Public/Core/ClientStartGameMode.h) и виджетом (/Game/Project_A_Root/Levels/StartMap/Widgets/WBP_MainClientWindow)
         <div style="text-align: center;">
             <img src="./img_for_readme/start_map.jpg" alt="start_map" width="500" height="272">   
         </div>
@@ -759,11 +759,11 @@
             <img src="./img_for_readme/loading_widget.jpg" alt="loading_widget" width="343" height="179">   
         </div>
     
-    <br> и выполняется подключение к промежуточному серверу через AClientStartGameMode::[ConnectToHubServer()](./Project_A/Source/Core/Private/ClientStartGameMode.cpp)
-    - Далее клиент попадает на карту Hub-сервера (/Game/Project_A_Root/Levels/StartMap/ServerHubMap), который также имеет свои HUD (/Game/Project_A_Root/Levels/StartMap/HubHUD) и [GameMode](./Project_A/Source/Core/Public/HubGameMode.h).
+    <br> и выполняется подключение к промежуточному серверу через AClientStartGameMode::[ConnectToHubServer()](./Project_A/Source/Project_A/Private/Core/ClientStartGameMode.cpp)
+    - Далее клиент попадает на карту Hub-сервера (/Game/Project_A_Root/Levels/StartMap/ServerHubMap), который также имеет свои HUD (/Game/Project_A_Root/Levels/StartMap/HubHUD) и [GameMode](./Project_A/Source/Project_A/Public/Core/HubGameMode.h).
     - HUD промежуточного сервера показывает локально виджет WBP_ServerSelectionStartMenu со списком серверов. 
-        - Для этого через контроллер — ACustomPlayerController::[Server_RequestWorldServerList()](./Project_A/Source/Project_A/Private/Character/CustomPlayerController.cpp) — отправляется запрос на сервер. На севрере AHubGameMode::[BuildWorldServersSnapshot()](./Project_A/Source/Core/Privte/HubGameMode.cpp) даёт информацию о том, какие игровые серверы доступны.
-        - Игровой сервер периодически посылает информацию о себе на Hub-сервер через AWorldGameMode::[SendHeartbeat()](./Project_A/Source/Core/Private/WorldGameMode.cpp). Для этого используется структура [FWorldServerView](./Project_A/Source/Common/Public/WorldServerView.h).
+        - Для этого через контроллер — ACustomPlayerController::[Server_RequestWorldServerList()](./Project_A/Source/Project_A/Private/Character/CustomPlayerController.cpp) — отправляется запрос на сервер. На севрере AHubGameMode::[BuildWorldServersSnapshot()](./Project_A/Source/Project_A/Private/Core/HubGameMode.cpp) даёт информацию о том, какие игровые серверы доступны.
+        - Игровой сервер периодически посылает информацию о себе на Hub-сервер через AWorldGameMode::[SendHeartbeat()](./Project_A/Source/Project_A/Private/Core/WorldGameMode.cpp). Для этого используется структура [FWorldServerView](./Project_A/Source/Common/Public/WorldServerView.h).
         - Далее в BP HubHUD (/Game/Project_A_Root/Levels/StartMap) обрабатывается Event UpdateServerSelectionTable.
         - Сам список серверов реализован на клиенте через ListView.    
         - Для ListView используется виджет WBP_RowServer (/Game/Project_A_Root/Levels/StartMap/Widgets). Он требует интерфейс <i>ObjectListEntry</i> и реализует <i>Event OnListItemObectSet</i>, для которого необходим Object-reference, из-за чего используется обёртка [UWorldServerEntryObject](./Project_A/Source/Common/Public/WorldServerView.h) для структуры [FWorldServerView](./Project_A/Source/Common/Public/WorldServerView.h)
@@ -776,20 +776,18 @@
         
 
 4. Меню выбора персонажа
-    - НЕ реализованы системы авторизации и сохранения прогресса пользователя, поэтому далее с персонажами используются простые схемы (заглушки), чтобы отобразить общую идею. 
-    <br>
-    <br> 
+    - НЕ реализованы системы авторизации и сохранения прогресса пользователя, поэтому далее с персонажами используются простые схемы (заглушки), чтобы отобразить общую идею. <br><br> 
     - После получении списка персонажей BP HUD (/Game/Project_A_Root/Levels/StartMap/HubHUD) показывает локально виджет — WBP_CharacterSelectionScreen (/Game/Project_A_Root/Levels/StartMap/Widgets) — и сцену с персонажами игрока.
     - Список персонажей реализован по той же схеме, что и список серверов в пункте 3 выше: 
         - ListView, 
         - WBP_RowCharacter (/Game/Project_A_Root/Levels/StartMap/Widgets),
-        - AHubGameMode::[BuildMockCharactersForServer()](./Project_A/Source/Core/Privte/HubGameMode.cpp) — здесь просто заглушка из текстовых данных.
+        - AHubGameMode::[BuildMockCharactersForServer()](./Project_A/Source/Project_A/Private/Core/HubGameMode.cpp) — здесь просто заглушка из текстовых данных.
     - Переключение персонажей — переключение уже размещенного актора на сцене, чтобы не удлинять по времени работу над текущим заданием по UI.
         <div style="text-align: center;">
             <img src="./img_for_readme/character_widget.jpg" alt="character_widget" width="500" height="312">   
         </div>
-    - Но выбор персонажа всё-таки влияет на то, какой Character будет загружен в игровом мире. Это реализовано также простым способом через временное TMap AWorldGameMode::[CharacterDefinitionById](./Project_A/Source/Core/Public/WorldGameMode.h). 
-    - По кнопке «StartGame» доходим до AHubGameMode::[EnterToWorldWithCharacter](./Project_A/Source/Core/Privte/HubGameMode.cpp), передавая информация о кокнретном персонаже и сервере. 
+    - Но выбор персонажа всё-таки влияет на то, какой Character будет загружен в игровом мире. Это реализовано также простым способом через временное TMap AWorldGameMode::[CharacterDefinitionById](./Project_A/Source/Project_A/Public/Core/WorldGameMode.h). 
+    - По кнопке «StartGame» доходим до AHubGameMode::[EnterToWorldWithCharacter](./Project_A/Source/Project_A/Private/Core/HubGameMode.cpp), передавая информация о кокнретном персонаже и сервере. 
     - Если подключение успешно, персонаж появляется в мире. Если нет — пока информаци только в консоли.
 
 </details>

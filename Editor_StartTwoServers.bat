@@ -10,14 +10,14 @@ if not exist %UE_EDITOR% (
 )
 
 REM ---------- Ferst Server ----------
-set MAP_NAME=/Game/Project_A_Root/Levels/StartMap/ServerHubMap
-set SERVER_NAME="Project_A HubServer"
-set SERVER_PORT=7777
+set MAP_NAME=/Game/Project_A_Root/Levels/Lobby/LobbyMap
+set SERVER_NAME="Project_A LobbyServer"
+set SERVER_PORT=7781
 
-echo Start server HUB...
+echo Start server LobbyServer...
 start %SERVER_NAME% %UE_EDITOR% %PROJECT_PATH% ^
      %MAP_NAME% -server -log -nosteam -port=%SERVER_PORT% ^
-        -abslog="%~dp0Logs\LogHubServer.txt"
+        -abslog="%~dp0Logs\LogLobbyServer.txt"
 
 REM ---------- Second Server ----------
 REM set MAP_NAME=/Game/ThirdPerson/Lvl_ThirdPerson

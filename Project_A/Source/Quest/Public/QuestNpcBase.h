@@ -32,10 +32,16 @@ public:
 	virtual float GetInteractionDistance() const override { return InteractionDistance; }
 	virtual float GetInteractionAngle() const override { return InteractionAngle; }
 
+	virtual void BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const override;
+	virtual bool ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag) override;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Quest")
 	float InteractionDistance{250.f};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Quest")
 	float InteractionAngle{70.f};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	TArray<TObjectPtr<UInteractionActionDefinition>> InteractionActions{};
 };

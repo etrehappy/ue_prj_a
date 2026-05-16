@@ -12,6 +12,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "DeathMenuWidget.h"
 #include "BaseHud.h"
+#include "InteractionActionTypes.h"
+#include "InteractionComponent.h"
+#include "Character/NetPlayerCharacter.h"
 
 #include "ProjectALog.h"
 
@@ -307,8 +310,6 @@ void ACustomPlayerController::HandleDeathMenuRespawnRequested()
 void ACustomPlayerController::HandleDeathMenuExitRequested()
 {
 	UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
-
-	//ConsoleCommand(TEXT("disconnect"));
 }
 
 void ACustomPlayerController::SetDeathMenuVisible(bool bVisible)
@@ -434,6 +435,22 @@ void ACustomPlayerController::Server_RequestTravelToWorldWithCharacter_Implement
 	HubGameMode->EnterToWorldWithCharacter(this, ServerId, CharacterId);
 }
 
+void ACustomPlayerController::Client_UpdatePartyMembers_Implementation(const TArray<APawn*>& PartyPawns)
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	AGeneralHud* GeneralHud = Cast<AGeneralHud>(GetHUD());
+	if (!GeneralHud)
+	{
+		return;
+	}
+
+	GeneralHud->UpdatePartyMembers(PartyPawns);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests
@@ -448,22 +465,3 @@ const TArray<FInputMappingContextWithPriority>& ACustomPlayerController::AutoTes
 #endif //WITH_DEV_AUTOMATION_TESTS
 
 
-
-
-//void ACustomPlayerController::Server_RequestTravelToWorldServer_Implementation(FName ServerId)
-//{
-//	if (ServerId.IsNone())
-//	{
-//		UE_LOGFMT(LogProjectA, Warning, "{0} - ServerId is None", FString(__FUNCTION__));
-//		return;
-//	}
-//
-//	AHubGameMode* HubGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AHubGameMode>() : nullptr;
-//	if (!HubGameMode)
-//	{
-//		UE_LOGFMT(LogProjectA, Warning, "{0} - HubGameMode is not found", FString(__FUNCTION__));
-//		return;
-//	}
-//
-//	HubGameMode->EnterToWorld(this, ServerId);
-//}

@@ -80,7 +80,12 @@ bool AWeaponBase::InitialiseMeshComponent(UStreamableRenderAsset* NewMesh)
 		return false;
 	}
 		
-	MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	//MeshComponent->SetCollisionProfileName(TEXT("BlockAll"));
+	//MeshComponent->SetIsReplicated(true);
+
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	MeshComponent->SetGenerateOverlapEvents(false);
 	MeshComponent->SetIsReplicated(true);
 
 	return true;

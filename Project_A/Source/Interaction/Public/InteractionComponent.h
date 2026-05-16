@@ -9,6 +9,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "InteractionActionTypes.h"
+
 #include "InteractionComponent.generated.h"
 
 class IInteractable;
@@ -17,6 +19,7 @@ class IInteractable;
  * @param NewActor The new actor that has become the focus of interaction.
  */
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnInteractableFocusChanged, AActor* /*NewActor*/);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnInteractionReceived, AActor* /*TargetActor*/, const TArray<FInteractionActionType>& /*Actions*/);
 
 /**
  * @class UInteractionComponent
@@ -63,6 +66,10 @@ public:
 	 */
 	void OtherEndOverlap(AActor* OtherActor);	
 
+	//void RequestInteractionMenu(/*IInteractable* Interactable,*/ /*APawn* Interactor,*/ AActor* TargetActor); // клиентская, пока не используется
+	UFUNCTION(BlueprintCallable)
+	void SubmitInteractionAction(AActor* TargetActor, FGameplayTag ActionId);  // клиентская, 
+
 protected:	
 	virtual void BeginPlay() override;
 
@@ -85,6 +92,7 @@ private:
 						/* === C++ member variables === */
 public:
 	FOnInteractableFocusChanged OnFocusChanged{};
+	FOnInteractionReceived OnInteractionReceived{};
 
 protected:
 	/**
@@ -106,7 +114,15 @@ protected:
 	 */
 	UPROPERTY()
 	TWeakObjectPtr<AActor> FocusedActor{};
-	
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestInteraction(/*AActor* TargetActor,*/ /*APawn* Interactor,*/ AActor* TargetActor);
+
+	UFUNCTION(Client, Reliable)
+	void Client_InteractionAvailable(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SubmitInteractionAction(AActor* TargetActor, FGameplayTag ActionId);
 
 						/* === Additional === */	
 protected:

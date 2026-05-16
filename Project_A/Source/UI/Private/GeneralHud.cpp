@@ -75,3 +75,16 @@ void AGeneralHud::InitialiseMainWidgetForPawn()
 		
 	MainWidget->EnsureHealthInitialised();
 }
+
+void AGeneralHud::UpdatePartyMembers(const TArray<APawn*>& PartyPawns)
+{
+	if (!MainWidget)
+	{
+		if (!CreateMainWidget())
+		{
+			return;
+		}
+	}
+
+	MainWidget->UpdatePartyMembers(PartyPawns);
+}

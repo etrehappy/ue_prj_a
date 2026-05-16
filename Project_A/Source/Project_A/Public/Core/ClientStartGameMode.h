@@ -29,5 +29,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void ConnectToHubServer();
+
+	UFUNCTION(BlueprintCallable)
+	void ConnectToLobbyServer();
 	
 };

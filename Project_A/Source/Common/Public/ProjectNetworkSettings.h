@@ -10,6 +10,9 @@ namespace NetSet
 	inline constexpr TCHAR HubHeartbeatAddress[] = TEXT("127.0.0.1");
 	inline constexpr int32 HubHeartbeatPort = 7780;
 
+	inline constexpr TCHAR LobbyServerAddress[] = TEXT("127.0.0.1:7781");
+	//inline constexpr TCHAR LobbyTargetWorldAddress[] = TEXT("127.0.0.1:7778");
+
 } // namespace NetSet
 
 UENUM(BlueprintType)
@@ -19,5 +22,6 @@ enum class EServerWorldType : uint8
 	, Test			UMETA(DisplayName = "Test")
 	, ClientStart	UMETA(DisplayName = "ClientStart")
 	, Hub			UMETA(DisplayName = "Hub")
+	, Lobby			UMETA(DisplayName = "Lobby")
 	, MainWorld		UMETA(DisplayName = "MainWorld")
 };

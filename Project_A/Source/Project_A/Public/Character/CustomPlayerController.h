@@ -17,6 +17,7 @@
 
 class UInputMappingContext;
 class UDeathMenuWidget;
+struct FInteractionActionType;
 
 /**
  * @struct FInputMappingContextWithPriority
@@ -176,7 +177,13 @@ public:
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_RequestTravelToWorldWithCharacter(FName ServerId, FName CharacterId);
 
-
+	/**
+	 * @brief Party
+	 * 
+	 * @param[in,out] PartyPawns
+	 */
+	UFUNCTION(Client, Reliable)
+	void Client_UpdatePartyMembers(const TArray<APawn*>& PartyPawns);
 
 protected:
 	/**
@@ -196,6 +203,15 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
 	void HidePopup();
+
+	/*UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
+	void ShowInteractionMenu(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);*/
+
+	/*UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
+	void HideInteractionMenu();*/
+
+	/*UFUNCTION(Client, Reliable)
+	void Client_ShowInteractionMenu(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);*/
 
 private:
 	UFUNCTION()
@@ -220,6 +236,16 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UDeathMenuWidget> DeathMenuWidget{};
 
+
+//public:
+//	//void ShowInteractionMenuLocal(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);
+//
+//	UFUNCTION(BlueprintCallable)
+//	void SubmitInteractionMenuAction(FGameplayTag ActionId);
+
+private:
+	UPROPERTY(Transient)
+	TWeakObjectPtr<AActor> InteractionMenuTarget{};
 
 
 								/** === Additional === */

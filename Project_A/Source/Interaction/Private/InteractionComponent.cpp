@@ -10,6 +10,7 @@
 UInteractionComponent::UInteractionComponent()
 {	
 	PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.TickInterval = 0.2f;
     SetIsReplicatedByDefault(false);
 }
 
@@ -62,7 +63,8 @@ void UInteractionComponent::Server_TryInteract_Implementation()
         return;
     }
 
-    Interactable->Interact(Interactor);
+    Server_RequestInteraction(BestCandidate);
+    //Interactable->Interact(Interactor);
 }
 
 APawn* UInteractionComponent::GetInteractor() const
@@ -132,6 +134,127 @@ bool UInteractionComponent::IsWithinInteractionRange(APawn* Interactor, AActor* 
     return true;
 }
 
+void UInteractionComponent::Server_SubmitInteractionAction_Implementation(AActor* TargetActor, FGameplayTag ActionId)
+{
+    if (!TargetActor || !ActionId.IsValid())
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid TargetActor or ActionId", FString(__FUNCTION__));
+        return;
+    }
+
+    APawn* Interactor = GetInteractor();
+    if (!Interactor)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Interactor is empty", FString(__FUNCTION__));
+        return;
+    }
+
+    if (FocusedActor.Get() != TargetActor)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - TargetActor is not focused", FString(__FUNCTION__));
+        return;
+    }
+
+    IInteractable* Interactable = Cast<IInteractable>(TargetActor);
+    if (!Interactable)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - TargetActor is not interactable", FString(__FUNCTION__));
+        return;
+    }
+
+    if (!Interactable->CanInteract(Interactor))
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Can't interact with {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        return;
+    }
+
+    if (!IsWithinInteractionRange(Interactor, TargetActor, Interactable))
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Not within interaction range of {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        return;
+    }
+
+    TArray<FInteractionActionType> Actions{};
+    Interactable->BuildInteractionActions(Interactor, Actions);
+
+    bool bActionAllowed = false;
+    for (const FInteractionActionType& Action : Actions)
+    {
+        if (Action.Definition->ActionTag.MatchesTagExact(ActionId))
+        {
+            bActionAllowed = Action.bIsEnabled;
+            break;
+        }
+    }
+
+    if (!bActionAllowed)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Action is not allowed: {1}", FString(__FUNCTION__), ActionId.ToString());
+        return;
+    }
+
+    Interactable->ExecuteInteractionAction(Interactor, ActionId);
+}
+
+void UInteractionComponent::Client_InteractionAvailable_Implementation(AActor* TargetActor, const TArray<FInteractionActionType>& Actions)
+{
+    if (!TargetActor)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - TargetActor is empty", FString(__FUNCTION__));
+        return;
+    }
+
+    OnInteractionReceived.Broadcast(TargetActor, Actions);
+}
+
+void UInteractionComponent::Server_RequestInteraction_Implementation(AActor* TargetActor)
+{
+
+    APawn* Interactor = GetInteractor();
+    if (!Interactor)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Interactor is empty", FString(__FUNCTION__));
+        return;
+    }
+
+    if (!TargetActor)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid parameters TargetActor", FString(__FUNCTION__));
+		return;
+    }
+
+    IInteractable* Interactable = Cast<IInteractable>(TargetActor);
+    if (!Interactable)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - TargetActor is not interactable: {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        return;
+    }
+
+    if (!Interactable->CanInteract(Interactor))
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Can't interact with {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        return;
+    }
+
+    if (!IsWithinInteractionRange(Interactor, TargetActor, Interactable))
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - Not within interaction range of {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        return;
+    }
+
+
+    TArray<FInteractionActionType> Actions{};
+    Interactable->BuildInteractionActions(Interactor, Actions);
+
+    if (Actions.Num() == 0)
+    {
+        UE_LOGFMT(LogProjectA, Warning, "{0} - No interaction actions available for {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        return;
+	}    
+
+    Client_InteractionAvailable(TargetActor, Actions);
+}
+
 void UInteractionComponent::OtherBeginOverlap(AActor* OtherActor)
 {	
     //UE_LOGFMT(LogProjectA, Log, "{0} - is called", FString(__FUNCTION__));
@@ -161,6 +284,12 @@ void UInteractionComponent::OtherEndOverlap(AActor* OtherActor)
 	Candidates.Remove(OtherActor);
 }
 
+
+void UInteractionComponent::SubmitInteractionAction(AActor* TargetActor, FGameplayTag ActionId)
+{
+    Server_SubmitInteractionAction(TargetActor, ActionId);
+}
+
 AActor* UInteractionComponent::FindBestCandidate()
 {   
 	APawn* Interactor = GetInteractor();
@@ -185,7 +314,7 @@ AActor* UInteractionComponent::FindBestCandidate()
         if (!Candidate) continue;
         if (Candidate == Interactor)
         {
-			UE_LOGFMT(LogProjectA, Log, "{0} - Skipping self candidate", FString(__FUNCTION__));
+			//UE_LOGFMT(LogProjectA, Log, "{0} - Skipping self candidate", FString(__FUNCTION__));
             continue;
         }
         
@@ -204,8 +333,7 @@ AActor* UInteractionComponent::FindBestCandidate()
         // 2.f and 0.01f - empirical weighting coefficients.
         float Score = Dot * 2.f - Dist * 0.01f;
 
-        UE_LOGFMT(LogProjectA, Verbose, "{0} - Candidate {1}: Dot={2:.3f}, Dist={3:.1f}, Score={4:.3f}", FString(__FUNCTION__), *Candidate->GetName(), Dot, Dist, Score);
-
+        //UE_LOGFMT(LogProjectA, Verbose, "{0} - Candidate {1}: Dot={2:.3f}, Dist={3:.1f}, Score={4:.3f}", FString(__FUNCTION__), *Candidate->GetName(), Dot, Dist, Score);
 
         if (Score > BestScore)
         {

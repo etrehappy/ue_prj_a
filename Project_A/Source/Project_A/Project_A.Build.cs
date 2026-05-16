@@ -23,13 +23,13 @@ public class Project_A : ModuleRules
 			"Sockets",
 			"WeaponSystemPlugin",
 			"Common",
+			"Interaction",
 			"Quest"
 	});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {
             "Logger"
-			, "Enemy"
-			, "Interaction"
+			, "Enemy"			
 			, "Inventory"
 			, "UI"
 

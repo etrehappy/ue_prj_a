@@ -61,6 +61,9 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	void EnsureHealthInitialised();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Party")
+	void UpdatePartyMembers(const TArray<APawn*>& PartyPawns);
 	
 protected:
 

@@ -15,13 +15,17 @@
 #include "Misc/Parse.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "NetPlayerState.h"
+#include "Character/CustomPlayerController.h"
+
 #include "ProjectALog.h"
 
 AWorldGameMode::AWorldGameMode()
-	// TODO: These default values are only for testing, they should be overridden by command line arguments or config file
-	:ServerId{TEXT("MainWorld01")},	ServerName{TEXT("Main World #1")}, PublicAddress{TEXT("127.0.0.1:7778")},MaxPlayers{100}
+	// These default values are only for testing, they should be overridden by command line arguments or config file
+	:ServerId{TEXT("MainWorld01")},	ServerName{TEXT("Main World #1")}, PublicAddress{TEXT("127.0.0.1:7778")}, MaxPlayers{100}
 {
 	PlayerControllerClass = ACustomPlayerController::StaticClass();
+	PlayerStateClass = ANetPlayerState::StaticClass();
 }
 
 EServerWorldType AWorldGameMode::GetMapIdentifier() const
@@ -221,3 +225,111 @@ UClass* AWorldGameMode::GetDefaultPawnClassForController_Implementation(AControl
 	//2. Return Pawn class based on the character selected by a player in the character selection screen on the Hub-server.
 	return Definition->PawnClass.Get();
 }
+
+void AWorldGameMode::TryJoinParty(APawn* RequesterPawn, APawn* TargetPawn)
+{
+	// 1. Validation
+	if (!RequesterPawn || !TargetPawn || RequesterPawn == TargetPawn)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid RequesterPawn or TargetPawn", FString(__FUNCTION__));
+		return;
+	}
+
+	ANetPlayerState* RequesterPlayerState = RequesterPawn->GetPlayerState<ANetPlayerState>();
+	ANetPlayerState* TargetPlayerState = TargetPawn->GetPlayerState<ANetPlayerState>();
+	if (!RequesterPlayerState || !TargetPlayerState)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - RequesterPawn or TargetPawn does not have a valid ANetPlayerState", FString(__FUNCTION__));
+		return;
+	}
+
+	// 2. Preparation
+	const FName RequesterPartyId = RequesterPlayerState->GetPartyId();
+	const FName TargetPartyId = TargetPlayerState->GetPartyId();
+
+	FName ResolvedPartyId{NAME_None};
+
+	bool bRequestPlayerInParty = !RequesterPartyId.IsNone();
+	bool bTargetPlayerInParty = !TargetPartyId.IsNone();
+	bool bBothPlayersNotInParty = RequesterPartyId.IsNone() && TargetPartyId.IsNone();
+
+	// 3. Party logic
+	if (bBothPlayersNotInParty)
+	{
+		ResolvedPartyId = FName(*FString::Printf(TEXT("Party_%d"), NextPartyNumericId++));
+		RequesterPlayerState->SetPartyId(ResolvedPartyId);
+		TargetPlayerState->SetPartyId(ResolvedPartyId);
+	}
+	else if (bRequestPlayerInParty && !bTargetPlayerInParty)
+	{
+		ResolvedPartyId = RequesterPartyId;
+		TargetPlayerState->SetPartyId(ResolvedPartyId);
+	}
+	else if (!bRequestPlayerInParty && bTargetPlayerInParty)
+	{
+		ResolvedPartyId = TargetPartyId;
+		RequesterPlayerState->SetPartyId(ResolvedPartyId);
+	}
+	else // both in partys
+	{		
+		if (RequesterPartyId == TargetPartyId)
+		{
+			ResolvedPartyId = RequesterPartyId;
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	PushPartyMembersToClients(ResolvedPartyId);
+}
+
+
+
+void AWorldGameMode::PushPartyMembersToClients(FName PartyId)
+{
+	if (!GameState)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - GameState is not valid", FString(__FUNCTION__));
+		return;
+	}
+
+	if(PartyId.IsNone())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PartyId is not valid", FString(__FUNCTION__));
+		return;
+	}
+
+	TArray<APawn*> PartyPawns{};
+	TArray<ACustomPlayerController*> PartyControllers{};
+
+	for (APlayerState* PlayerStateBase : GameState->PlayerArray) // TODO: it can be optimized by keeping track of parties in the GameMode and updating them on player join/leave instead of iterating through all players in the GameState every time
+	{
+		ANetPlayerState* Ps = Cast<ANetPlayerState>(PlayerStateBase);
+		if (!Ps || Ps->GetPartyId() != PartyId)
+		{
+			continue;
+		}
+
+		AController* OwnerController = Cast<AController>(Ps->GetOwner());
+		ACustomPlayerController* Pc = Cast<ACustomPlayerController>(OwnerController);
+		if (!Pc)
+		{
+			continue;
+		}
+
+		if (APawn* Pawn = Pc->GetPawn())
+		{
+			PartyPawns.Add(Pawn);
+		}
+
+		PartyControllers.Add(Pc);
+	}
+
+	for (ACustomPlayerController* Pc : PartyControllers)
+	{
+		Pc->Client_UpdatePartyMembers(PartyPawns);
+	}
+}
+

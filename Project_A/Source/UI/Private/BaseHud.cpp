@@ -32,6 +32,11 @@ void ABaseHud::OnConnectedSuccessfully(EServerWorldType World)
 		UE_LOGFMT(LogProjectA, Log, "{0} - EServerWorldType::MainWorld", FString(__FUNCTION__));
 		break;
 
+	case EServerWorldType::Lobby:
+		UE_LOGFMT(LogProjectA, Log, "{0} - EServerWorldType::Lobby", FString(__FUNCTION__));
+		ShowMouse();
+		break;
+
 	default:
 		UE_LOGFMT(LogProjectA, Warning, "{0} - EServerWorldType is not set", FString(__FUNCTION__));
 		break;

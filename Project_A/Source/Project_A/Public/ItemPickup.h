@@ -32,6 +32,9 @@ public:
 
 	UInventoryItemDefinition* GetItemDefinition() const { return ItemDefinition; }
 
+	virtual void BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const override;
+	virtual bool ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag) override;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -58,4 +61,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item")
 	TObjectPtr<UInventoryItemDefinition> ItemDefinition;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+	TArray<TObjectPtr<UInteractionActionDefinition>> InteractionActions{};
 };

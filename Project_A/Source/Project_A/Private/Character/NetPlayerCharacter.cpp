@@ -20,6 +20,8 @@
 #include "Net/UnrealNetwork.h"
 #include "StatusEffect/StatusEffectsComponent.h"
 #include "QuestLogComponent.h"
+#include "Core/WorldGameMode.h"
+#include "TagList.h"
 
 #include "ProjectALog.h"
 
@@ -159,6 +161,7 @@ void ANetPlayerCharacter::BeginPlay()
 	if (InteractionComponent)
 	{
 		InteractionComponent->OnFocusChanged.AddUObject(this,&ANetPlayerCharacter::HandleFocusChanged);
+		InteractionComponent->OnInteractionReceived.AddUObject(this, &ANetPlayerCharacter::HandleInteractionReceived);
 	}
 
 	RestoreCollision();	
@@ -395,4 +398,119 @@ bool ANetPlayerCharacter::PickUpItem_Implementation(AItemPickup* Item)
 	}
 
 	return bWasPickedUp;
+}
+
+bool ANetPlayerCharacter::CanInteract(APawn* RequestInteractor) const
+{
+	bool bCanInteractWithRequester = RequestInteractor && (RequestInteractor != this);
+
+	return bCanInteractWithRequester;
+}
+
+void ANetPlayerCharacter::Interact(APawn* Interactor)
+{	
+}
+
+
+void ANetPlayerCharacter::BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const
+{
+	OutActions.Reset();
+
+	if (!CanInteract(Interactor))
+	{
+		return;
+	}
+
+	for (const TObjectPtr<UInteractionActionDefinition>& ActionDef : InteractionActions)
+	{
+		if (!ActionDef || !ActionDef->ActionTag.IsValid())
+		{
+			continue;
+		}
+
+		FInteractionActionType ActionView{};
+		ActionView.bIsEnabled = ActionDef->bEnabledByDefault; 
+		ActionView.Definition = ActionDef;
+
+		OutActions.Add(ActionView);
+	}
+}
+
+bool ANetPlayerCharacter::ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag)
+{
+	if (!CanInteract(Interactor) || !ActionTag.IsValid())
+	{
+		return false;
+	}
+
+	// 1. Check if the action tag matches any of the defined interaction actions. 
+	const UInteractionActionDefinition* MatchedActionDef = nullptr;
+
+	for (const TObjectPtr<UInteractionActionDefinition>& ActionDef : InteractionActions)
+	{
+		if (!ActionDef || !ActionDef->ActionTag.IsValid())
+		{
+			continue;
+		}
+
+		if (ActionDef->ActionTag.MatchesTagExact(ActionTag))
+		{
+			MatchedActionDef = ActionDef;
+			break;
+		}
+	}
+
+	if (!MatchedActionDef || !MatchedActionDef->bEnabledByDefault)
+	{
+		return false;
+	}
+
+	// 2. Execute the corresponding logic based on the matched action tag. 
+	// For example, if the tag is "PartyInvite", attempt to join the party of the interactor.
+	if (ActionTag.MatchesTagExact(TagListInteraction::PartyInvite))
+	{
+
+		AWorldGameMode* WorldGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AWorldGameMode>() : nullptr;
+		if (!WorldGameMode)
+		{
+			return false;
+		}
+
+		WorldGameMode->TryJoinParty(Interactor, this);
+		return true;
+	}
+
+	UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported interaction action tag: {1}", FString(__FUNCTION__), ActionTag.ToString());
+	return false;
+}
+
+void ANetPlayerCharacter::HandleInteractionReceived(AActor* TargetActor, const TArray<FInteractionActionType>& Actions)
+{
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - called on a dedicated server, skipping ", FString(__FUNCTION__));
+		return;
+	}
+
+	if (!TargetActor || Actions.Num() == 0)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid target actor or empty actions array", FString(__FUNCTION__));
+		return;
+	}
+
+	ACustomPlayerController* PlayerController = Cast<ACustomPlayerController>(GetController());
+	if (!PlayerController)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	AGeneralHud* HUD = Cast<AGeneralHud>(PlayerController->GetHUD());
+	if (!HUD)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HUD is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	HUD->ShowInteractionMenu(TargetActor, Actions);
 }

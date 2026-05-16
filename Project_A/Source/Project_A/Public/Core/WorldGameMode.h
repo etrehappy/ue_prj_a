@@ -51,6 +51,14 @@ public:
 	 */
 	virtual UClass* GetDefaultPawnClassForController_Implementation(AController* InController) override; // Unreal AGameModeBase
 
+	/**
+	 * @brief Party
+	 * 
+	 * @param[in,out] RequesterPawn
+	 * @param[in,out] TargetPawn
+	 */
+	void TryJoinParty(APawn* RequesterPawn, APawn* TargetPawn);
+
 protected:
 	/**
 	 * @brief It is overridden to get a character information provided by a player from the character selection screen on the Hub-server.
@@ -74,6 +82,14 @@ private:
 	 * @brief PlayerCount is used in a WorldListScreen.
 	 */
 	int32 GetPlayerCount() const;
+	
+	/**
+	 * @brief Party
+	 * 
+	 * @param[in,out] PartyId
+	 */
+	void PushPartyMembersToClients(FName PartyId);
+
 
 
 						/* === C++ member variables === */
@@ -84,6 +100,8 @@ private:
 	 */
 	FSocket* HeartbeatSendSocket = nullptr;
 	FTimerHandle HeartbeatSendTimerHandle{};
+
+	int32 NextPartyNumericId{1};
 
 	
 						/* === Unreal Engine UPROPERTY === */

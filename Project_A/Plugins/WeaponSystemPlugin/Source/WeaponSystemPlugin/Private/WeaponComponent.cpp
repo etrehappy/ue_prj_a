@@ -197,10 +197,13 @@ void UWeaponComponent::SetCurrentWeapon(AWeaponBase* NewWeapon, const FGameplayT
 	}
 #endif // UE_BUILD_DEVELOPMENT
 
-	if (bIsCollisionDesabled)
+	/*if (bIsCollisionDesabled)
 	{
 		CurrentWeapon->SetCollision(ECollisionEnabled::NoCollision, ECR_Ignore);
-	}
+	}*/
+
+	CurrentWeapon->SetCollision(ECollisionEnabled::NoCollision, ECR_Ignore);
+	CurrentWeapon->SetActorEnableCollision(false);
 
 	if (!InProjectileSocketName.IsNone())
 	{
@@ -241,10 +244,13 @@ void UWeaponComponent::SetCurrentThrowableItem(AWeaponThrowable* InThrowableItem
 	}
 #endif // UE_BUILD_DEVELOPMENT
 
-	if (bIsCollisionDesabled)
-	{
-		CurrentThrowableItem->SetCollision(ECollisionEnabled::NoCollision, ECR_Ignore); // TODO check net
-	}
+	//if (bIsCollisionDesabled)
+	//{
+	//	CurrentThrowableItem->SetCollision(ECollisionEnabled::NoCollision, ECR_Ignore); // TODO check net
+	//}
+
+	CurrentThrowableItem->SetCollision(ECollisionEnabled::NoCollision, ECR_Ignore);
+	CurrentThrowableItem->SetActorEnableCollision(false);
 
 	if (!InProjectileSocketName.IsNone())
 	{

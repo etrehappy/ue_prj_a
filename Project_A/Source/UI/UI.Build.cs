@@ -18,6 +18,7 @@ public class UI: ModuleRules
             , "SlateCore"
             , "InputCore"
             , "Common"
+            , "Interaction"
 		});
     }
 }

@@ -30,3 +30,15 @@ void AClientStartGameMode::ConnectToHubServer()
 
 	UGameplayStatics::OpenLevel(this, FName(NetSet::HubServerAddress), true);
 }
+
+void AClientStartGameMode::ConnectToLobbyServer()
+{
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - Running Dedicated Server, skipping this", FString(__FUNCTION__));
+		return;
+	}
+
+	UE_LOGFMT(LogProjectA, Log, "{0} - Connecting to lobby server...", FString(__FUNCTION__));
+	UGameplayStatics::OpenLevel(this, FName(NetSet::LobbyServerAddress), true);
+}

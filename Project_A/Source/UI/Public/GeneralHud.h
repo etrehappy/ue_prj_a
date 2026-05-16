@@ -14,6 +14,7 @@
 #include "GeneralHud.generated.h"
 
 class UGeneralWidget;
+struct FInteractionActionType;
 
 /**
  * @class AGeneralHud
@@ -51,6 +52,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable)
 	void InitialiseMainWidgetForPawn();
+
+	UFUNCTION(BlueprintCallable)
+	void UpdatePartyMembers(const TArray<APawn*>& PartyPawns);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ShowInteractionMenu(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);
 
 protected:
 	/**

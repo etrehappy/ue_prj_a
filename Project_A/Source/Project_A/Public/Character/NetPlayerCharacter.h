@@ -16,6 +16,7 @@
 #include "Character/CustomPlayerController.h"
 #include "WeaponComponent.h"
 #include "PickUpInterface.h"
+#include "Interactable.h"
 
 #include "NetPlayerCharacter.generated.h"
 
@@ -39,7 +40,7 @@ class UInventory;
  * 
  */
 UCLASS()
-class PROJECT_A_API ANetPlayerCharacter : public ABaseCharacter, public  IPickUpInterface
+class PROJECT_A_API ANetPlayerCharacter : public ABaseCharacter, public  IPickUpInterface, public IInteractable
 {
     GENERATED_BODY()
 
@@ -76,6 +77,16 @@ public:
      */
     void ToggleInventory();
 
+    /**
+     * @see IInteractable
+     */
+    virtual bool CanInteract(APawn* Interactor) const override;
+
+    /**
+    * @see IInteractable
+    */
+    virtual void Interact(APawn* Interactor) override;
+
 protected:
 
     virtual void BeginPlay() override;
@@ -96,6 +107,9 @@ protected:
      */
     virtual void HandleFocusChanged(AActor* NewFocusedActor);
 
+	//client function
+    void HandleInteractionReceived(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);
+
     /**
      * @brief Disables the character's control, preventing any input actions from being processed.
      */
@@ -107,7 +121,15 @@ protected:
      */
     void RestoreCollision();
 
+
+    virtual void BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const override;
+    virtual bool ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag) override;
+
                         /* === Unreal Engine UFUNCTION === */
+public:
+    UFUNCTION(BlueprintPure)
+    UInteractionComponent* GetInteractionComponent() const { return InteractionComponent; }
+
 protected:
 
     UFUNCTION()
@@ -248,6 +270,9 @@ protected:
      */
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "Interaction")
     TObjectPtr<AActor> CurrentInteractable{};
+
+    UPROPERTY(EditDefaultsOnly, Category = "Interaction")
+    TArray<TObjectPtr<UInteractionActionDefinition>> InteractionActions{};
 
 };
 

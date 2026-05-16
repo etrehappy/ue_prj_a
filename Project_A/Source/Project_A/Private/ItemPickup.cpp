@@ -94,4 +94,56 @@ void AItemPickup::OtherEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 {	
 }
 
+void AItemPickup::BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const
+{
+	OutActions.Reset();
 
+	if (!CanInteract(Interactor))
+	{
+		return;
+	}
+
+	for (const TObjectPtr<UInteractionActionDefinition>& ActionDef : InteractionActions)
+	{
+		if (!ActionDef || !ActionDef->ActionTag.IsValid())
+		{
+			continue;
+		}
+
+		FInteractionActionType ActionView{};	
+		ActionView.bIsEnabled = ActionDef->bEnabledByDefault; 
+		ActionView.Definition = ActionDef;
+
+		OutActions.Add(ActionView);
+	}
+}
+
+bool AItemPickup::ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag)
+{
+	if (!CanInteract(Interactor) || !ActionTag.IsValid())
+	{
+		return false;
+	}
+
+	// 1. Check if the action tag matches any of the defined interaction actions.
+	for (const TObjectPtr<UInteractionActionDefinition>& ActionDef : InteractionActions)
+	{
+		if (!ActionDef || !ActionDef->ActionTag.IsValid())
+		{
+			continue;
+		}
+
+		if (ActionDef->ActionTag.MatchesTagExact(ActionTag))
+		{
+			if (!ActionDef->bEnabledByDefault)
+			{
+				return false;
+			}
+			
+			Interact(Interactor);
+			return true;
+		}
+	}
+
+	return false;
+}

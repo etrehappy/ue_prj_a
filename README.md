@@ -1,6 +1,6 @@
 # Сборка
 1. git clone -b 'hw19' --single-branch https://github.com/etrehappy/ue_prj_a.git
-2. Скачать [архив (1,2 Гб)]() и распаковать с заменой в .\ue_prj_a\ 
+2. Скачать [архив (1,2 Гб)](https://drive.google.com/file/d/1gLvce04C5wf7nTlRgqTNThuLWY_2tnt9/view?usp=sharing) и распаковать с заменой в .\ue_prj_a\ 
 3. Выполнить Generate Visual Studio project files для  ".\ue_prj_a\Project_A\Project_A.uproject"
 4. Открыть ".\ue_prj_a\Project_A\Project_A.sln"
 5. Build Project_A
@@ -799,7 +799,7 @@
 
 <b>Основное</b>
 <br>
-<br> [ <--- ВИДЕО ---> ]()
+<br> [ <--- ВИДЕО ---> ](https://drive.google.com/file/d/13rykV2rNU3rsQFWds7rZ8VnaCQwhky3d/view?usp=sharing)
 
 - [x] Добавлена возможность подключения игроков к лобби.
 - [x] Из лобби игроки способны подключиться к игровой сцене.
@@ -812,7 +812,7 @@
     - объединение в группу. 
 
 Исправления по комментариями к прошлому ДЗ: 
-- <i>Нет конфигурируемости через .ini для подключения к серверу</i> — добавлено поле LobbyTargetWorldAddress в [LobbyGameMode]() и соответсвующее поле [DefaultNetSetCustom.ini]()
+- <i>Нет конфигурируемости через .ini для подключения к серверу</i> — добавлено поле LobbyTargetWorldAddress в [LobbyGameMode](./Project_A/Source/Project_A/Public/Core/LobbyGameMode.h) и соответсвующее поле [DefaultNetSetCustom.ini](./Project_A/Config/DefaultNetSetCustom.ini)
 - <i>Не выполнено "Создайте лобби"</i> — теперь открыть меню лобби можно через соответсвующую кнопку.
 
 Не реализовано: 

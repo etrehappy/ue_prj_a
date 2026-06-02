@@ -9,15 +9,22 @@ if not exist %UE_EDITOR% (
     exit /b
 )
 
-REM ---------- Ferst Server ----------
-set MAP_NAME=/Game/Project_A_Root/Levels/Lobby/LobbyMap
-set SERVER_NAME="Project_A LobbyServer"
-set SERVER_PORT=7781
+set NO_PROXY=127.0.0.1,localhost
+set no_proxy=127.0.0.1,localhost
+set HTTP_PROXY=
+set HTTPS_PROXY=
+set http_proxy=
+set https_proxy=
 
-echo Start server LobbyServer...
+REM ---------- Ferst Server ----------
+set MAP_NAME=/Game/Project_A_Root/Levels/StartMap/ServerHubMap
+set SERVER_NAME="Project_A HubServer"
+set SERVER_PORT=7777
+
+echo Start server HubServer...
 start %SERVER_NAME% %UE_EDITOR% %PROJECT_PATH% ^
      %MAP_NAME% -server -log -nosteam -port=%SERVER_PORT% ^
-        -abslog="%~dp0Logs\LogLobbyServer.txt"
+        -abslog="%~dp0Logs\LogHubServer.txt"
 
 REM ---------- Second Server ----------
 REM set MAP_NAME=/Game/ThirdPerson/Lvl_ThirdPerson

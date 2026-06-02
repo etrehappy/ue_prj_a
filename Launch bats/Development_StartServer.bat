@@ -1,2 +1,0 @@
-start "Project_A Server" "%~dp0..\Project_A\Archive\Development\Server\WindowsServer\Project_AServer.exe" -log -port=7777 ^
--abslog="%~dp0..\Project_A\Archive\Development\Server\WindowsServer\Log.txt" 

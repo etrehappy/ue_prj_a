@@ -29,6 +29,8 @@ class UInteractionComponent;
 class UStatusEffectComponent;
 class UQuestLogComponent;
 class UInventory;
+class UPlayerDialogueComponent;
+struct FDialogueNodeRuntime;
 
 /**
  * @class ANetPlayerCharacter
@@ -78,6 +80,13 @@ public:
     void ToggleInventory();
 
     /**
+     * @brief Client function.
+     *
+     * For input action
+     */
+    void ToggleMainMenu();
+
+    /**
      * @see IInteractable
      */
     virtual bool CanInteract(APawn* Interactor) const override;
@@ -85,7 +94,7 @@ public:
     /**
     * @see IInteractable
     */
-    virtual void Interact(APawn* Interactor) override;
+    //virtual void Interact(APawn* Interactor) override;
 
 protected:
 
@@ -124,6 +133,9 @@ protected:
 
     virtual void BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const override;
     virtual bool ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag) override;
+
+    void HandleDialogueNodeReceived(const FDialogueNodeRuntime& Node);
+    void HandleDialogueClosed();
 
                         /* === Unreal Engine UFUNCTION === */
 public:
@@ -176,6 +188,9 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic, Category = "Events")
     void OnPlayDeathFX();
+        
+    UFUNCTION(BlueprintImplementableEvent, BlueprintAuthorityOnly, Category = "Interaction")
+    bool BP_ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag);
 
     /**
      * @brief Client function.
@@ -263,6 +278,9 @@ protected:
 
     UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
     TObjectPtr<UQuestLogComponent> QuestLogComponent{};
+
+    UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Components")
+    TObjectPtr<UPlayerDialogueComponent> PlayerDialogueComponent{};
 
     /**
      * @brief The temporary solution. 

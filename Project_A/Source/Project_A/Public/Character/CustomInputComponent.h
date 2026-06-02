@@ -65,6 +65,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Menu")
 	TObjectPtr<UInputAction> ToggleInventory{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Menu")
+	TObjectPtr<UInputAction> ToggleMainMenu{};
 };
 
 
@@ -144,6 +147,8 @@ private:
 	 * 	
 	 */
 	void ToggleInventory(const FInputActionValue& Value);
+
+	void ToggleMainMenu(const FInputActionValue& Value);
 
 						/* === C++ member === */
 

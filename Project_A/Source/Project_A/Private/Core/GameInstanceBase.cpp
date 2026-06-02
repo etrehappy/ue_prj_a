@@ -135,6 +135,16 @@ void UGameInstanceBase::HandleEngineTravelFailure(UWorld* /*World*/, ETravelFail
 }
 
 
+bool UGameInstanceBase::IsAuthenticated() const
+{ 
+	return !AccountId.IsEmpty() && !SessionToken.IsEmpty(); 
+}
+
+void UGameInstanceBase::ClearSession()
+{
+	AccountId.Empty(); 
+	SessionToken.Empty();
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////

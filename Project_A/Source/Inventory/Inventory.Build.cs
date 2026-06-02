@@ -10,6 +10,7 @@ public class Inventory: ModuleRules
             , "Logger"
 		    , "NetCore"
             , "Common"
+            
         });
     }
 }

@@ -39,6 +39,7 @@ void UHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 
 	DOREPLIFETIME(UHealthComponent, MaxHealth);
 	DOREPLIFETIME(UHealthComponent, CurrentHealth);
+	DOREPLIFETIME(UHealthComponent, bIsDead);
 }
 
 void UHealthComponent::Initialise()
@@ -159,6 +160,7 @@ void UHealthComponent::IncreaseHealth(float HealAmount)
 
 void UHealthComponent::ToKill()
 {
+	bIsDead = true;
 	OnDeath.Broadcast();
 }
 
@@ -185,11 +187,9 @@ void UHealthComponent::ApplyStatusEffectAction(const FEffectAction& Action)
 		return;
 	}
 
-	/* simple implementation */
-
 	const float EffectiveValue = Action.Value;
 
-	if (Action.TargetStat == StatusEffectsTags::DefenseTag)
+	if (Action.TargetStat == StatusEffectsTags::DefenseTag())
 	{
 		switch (Action.Type)
 		{
@@ -210,9 +210,8 @@ void UHealthComponent::ApplyStatusEffectAction(const FEffectAction& Action)
 		return;
 	}
 
-	if (Action.TargetStat == StatusEffectsTags::HealthTag)
+	if (Action.TargetStat == StatusEffectsTags::HealthTag())
 	{
-
 		switch (Action.Type)
 		{
 		case EModifierType::Add:
@@ -234,16 +233,15 @@ void UHealthComponent::ApplyStatusEffectAction(const FEffectAction& Action)
 			UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported modifier type", FString(__FUNCTION__));
 			break;
 		}
+
+		return;
 	}
 
 	UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported TargetStat {1}", FString(__FUNCTION__), Action.TargetStat.ToString());
-	return;
-
 }
-
 void UHealthComponent::RemoveStatusEffectAction(const FEffectAction& Action)
 {
-	if (Action.TargetStat == StatusEffectsTags::DefenseTag)
+	if (Action.TargetStat == StatusEffectsTags::DefenseTag())
 	{	
 		switch (Action.Type)
 		{

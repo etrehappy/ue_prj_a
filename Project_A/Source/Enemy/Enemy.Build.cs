@@ -12,6 +12,7 @@ public class Enemy: ModuleRules
             , "Logger"
             , "Npc"
 			, "WeaponSystemPlugin"
+            , "Interaction"
 		});
     }
 }

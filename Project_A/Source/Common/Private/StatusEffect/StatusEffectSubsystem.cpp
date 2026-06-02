@@ -7,74 +7,88 @@
 
 void UStatusEffectSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-    Super::Initialize(Collection);
+	Super::Initialize(Collection);
 
-    BuildEffectMap();
+	LoadEffectDefinitionsFromConfig();
+	BuildEffectMap();
 }
 
 const FStatusEffectDef* UStatusEffectSubsystem::GetEffectByTag(const FGameplayTag& Tag) const
 {
-    if (const FStatusEffectDef* Found = EffectMap.Find(Tag))
-    {
-        return Found;
-    }
-    return nullptr;
+	if (const FStatusEffectDef* Found = EffectMap.Find(Tag))
+	{
+		return Found;
+	}
+	return nullptr;
+}
+
+void UStatusEffectSubsystem::LoadEffectDefinitionsFromConfig()
+{
+	for (const TSoftObjectPtr<UStatusEffectData>& DataSoft : StartupStatusEffectDefinitions)
+	{
+		if (DataSoft.IsNull())
+		{
+			continue;
+		}
+
+		UStatusEffectData* Data = DataSoft.LoadSynchronous();
+		if (!Data)
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Failed to load status effect data asset from config", *FString(__FUNCTION__));
+			continue;
+		}
+
+		RegisterEffectDataAsset(Data);
+	}
+}
+
+void UStatusEffectSubsystem::RegisterEffectDataAsset(UStatusEffectData* DataAsset)
+{
+	if (!DataAsset)
+	{
+		return;
+	}
+
+	for (const FStatusEffectDef& Spec : DataAsset->GetEffectSpecs())
+	{
+		if (!Spec.EffectTag.IsValid())
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid EffectTag in asset {1}", *FString(__FUNCTION__), DataAsset->GetName());
+			continue;
+		}
+
+		if (!EffectMap.Contains(Spec.EffectTag))
+		{
+			EffectMap.Add(Spec.EffectTag, Spec);
+		}
+	}
 }
 
 void UStatusEffectSubsystem::BuildEffectMap()
 {
-    if (!EffectMap.IsEmpty())
-    {
-		UE_LOGFMT(LogProjectA, Warning, "{0} - EffectMap is not empty, skipping BuildEffectMap to avoid overwriting existing data", *FString(__FUNCTION__));
-        return;
-    }
-    
-    UAssetManager& Manager = UAssetManager::Get();
+	UAssetManager& Manager = UAssetManager::Get();
 
-    TArray<FPrimaryAssetId> AssetIds;
-    Manager.GetPrimaryAssetIdList(FPrimaryAssetType(TEXT("StatusEffect")), AssetIds);
+	TArray<FPrimaryAssetId> AssetIds;
+	Manager.GetPrimaryAssetIdList(FPrimaryAssetType(TEXT("StatusEffect")), AssetIds);
 
-    for (const FPrimaryAssetId& Id : AssetIds)
-    {
+	for (const FPrimaryAssetId& Id : AssetIds)
+	{
+		UObject* LoadedObj = Manager.GetPrimaryAssetObject(Id);
 
-        UObject* LoadedObj = Manager.GetPrimaryAssetObject(Id);
-
-        if (!LoadedObj)
-        {
-            FSoftObjectPath Path = Manager.GetPrimaryAssetPath(Id);
-            LoadedObj = Path.TryLoad();
-        }
-
-        if (!LoadedObj)
-        {
-            UE_LOGFMT(LogProjectA, Warning, "{0} - Could not load asset for {1}", *FString(__FUNCTION__), Id.ToString());
-            continue;
+		if (!LoadedObj)
+		{
+			const FSoftObjectPath Path = Manager.GetPrimaryAssetPath(Id);
+			LoadedObj = Path.TryLoad();
 		}
 
-        UStatusEffectData* Data = Cast<UStatusEffectData>(LoadedObj);
-        if(!Data)
-        {
-            UE_LOGFMT(LogProjectA, Warning, "{0} - Could not load UStatusEffectData for asset {1}", *FString(__FUNCTION__), Id.ToString());
+		UStatusEffectData* Data = Cast<UStatusEffectData>(LoadedObj);
+		if (!Data)
+		{
 			continue;
-        }
+		}
 
-     
-        for (const FStatusEffectDef& Spec : Data->GetEffectSpecs())
-        {
-            if (!Spec.EffectTag.IsValid())
-            {
-                UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid EffectTag in UStatusEffectData {1}", *FString(__FUNCTION__), Id.ToString());
-				continue;
-            }
+		RegisterEffectDataAsset(Data);
+	}
 
-            if (!EffectMap.Contains(Spec.EffectTag))
-            {
-                EffectMap.Add(Spec.EffectTag, Spec);
-				//UE_LOGFMT(LogProjectA, Log, "{0} - Added effect with tag {1} from asset {2}", *FString(__FUNCTION__), Spec.EffectTag.ToString(), Id.ToString());
-            }
-            
-        }
-       
-    }
+	UE_LOGFMT(LogProjectA, Log, "{0} - Loaded status effects: {1}", *FString(__FUNCTION__), EffectMap.Num());
 }
-

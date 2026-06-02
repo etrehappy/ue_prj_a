@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "Core/GameInstanceBase.h"
 #include "Core/HubGameMode.h"
+#include "Core/WorldGameMode.h"
 #include "EnemyFactory.h"
 #include "GeneralHud.h"
 #include "GameFramework/GameModeBase.h"
@@ -15,6 +16,7 @@
 #include "InteractionActionTypes.h"
 #include "InteractionComponent.h"
 #include "Character/NetPlayerCharacter.h"
+#include "QuestLogComponent.h"
 
 #include "ProjectALog.h"
 
@@ -42,6 +44,7 @@ void ACustomPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	RestoreQuestProgressToPawn(InPawn);
 	TryInitialiseHudForPawn();
 
 	SetIgnoreMoveInput(false);
@@ -58,7 +61,13 @@ void ACustomPlayerController::AcknowledgePossession(APawn* P)
 void ACustomPlayerController::OnRep_Pawn()
 {
 	Super::OnRep_Pawn();
-	TryInitialiseHudForPawn();
+	auto Pawnm = GetPawn();
+	if(Pawnm)
+	{
+		PawnWasChanged();
+		TryInitialiseHudForPawn();
+	}
+	
 }
 
 
@@ -238,6 +247,7 @@ void ACustomPlayerController::Server_RequestRespawn_Implementation()
 	DeadPawn->SetActorHiddenInGame(true);
 	DeadPawn->SetActorEnableCollision(false);
 	DeadPawn->DetachFromControllerPendingDestroy();
+	CacheQuestProgressFromPawn(DeadPawn);
 	DeadPawn->Destroy();
 	
 	GameMode->RestartPlayer(this);
@@ -276,11 +286,18 @@ void ACustomPlayerController::ShowDeathMenu()
 
 	DeathMenuWidget->SetVisibility(ESlateVisibility::Visible);
 
+	if (AGeneralHud* HUD = Cast<AGeneralHud>(GetHUD()))
+	{
+		HUD->SetDeathMenuVisibleState(true);
+	}
+
 	SetShowMouseCursor(true);
 	FInputModeUIOnly InputMode;
 	SetInputMode(InputMode);
 	SetIgnoreMoveInput(true);
 	SetIgnoreLookInput(true);
+
+
 }
 
 void ACustomPlayerController::HideDeathMenu()
@@ -293,6 +310,11 @@ void ACustomPlayerController::HideDeathMenu()
 	if (DeathMenuWidget && DeathMenuWidget->IsInViewport())
 	{
 		DeathMenuWidget->RemoveFromParent();
+	}
+
+	if (AGeneralHud* HUD = Cast<AGeneralHud>(GetHUD()))
+	{
+		HUD->SetDeathMenuVisibleState(false);
 	}
 
 	SetShowMouseCursor(false);
@@ -309,7 +331,12 @@ void ACustomPlayerController::HandleDeathMenuRespawnRequested()
 
 void ACustomPlayerController::HandleDeathMenuExitRequested()
 {
-	UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	Server_RequestSaveBeforeExit();
 }
 
 void ACustomPlayerController::SetDeathMenuVisible(bool bVisible)
@@ -321,6 +348,26 @@ void ACustomPlayerController::SetDeathMenuVisible(bool bVisible)
 	}
 
 	HideDeathMenu();
+}
+
+void ACustomPlayerController::Server_RequestSaveBeforeExit_Implementation()
+{
+	AWorldGameMode* WorldGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AWorldGameMode>() : nullptr;
+	if (WorldGameMode)
+	{
+		WorldGameMode->SaveCharacterFromPawn(this);
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: AWorldGameMode not found. Quit without pre-save.", FString(__FUNCTION__));
+	}
+
+	Client_ExitGameAfterSave();
+}
+
+void ACustomPlayerController::Client_ExitGameAfterSave_Implementation()
+{
+	UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
 }
 
 
@@ -360,25 +407,6 @@ void ACustomPlayerController::PushWorldServerListToHud(const TArray<FWorldServer
 
 	BaseHud->UpdateServerSelectionTable(Servers);
 	UE_LOGFMT(LogProjectA, Log, "{0} - Push to HUD, Count={1}", FString(__FUNCTION__), Servers.Num());
-}
-
-void ACustomPlayerController::Server_RequestCharacterList_Implementation(FName ServerId)
-{
-	AHubGameMode* HubGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AHubGameMode>() : nullptr;
-	if (!HubGameMode || ServerId.IsNone())
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - HubGameMode is not found or ServerId is None", FString(__FUNCTION__));
-		return;
-	}
-
-	const TArray<FCharacterSelectionView> Characters = HubGameMode->BuildMockCharactersForServer(ServerId);
-
-	if(Characters.Num() == 0)
-	{
-		UE_LOGFMT(LogProjectA, Log, "{0} - No characters found for ServerId={1}", FString(__FUNCTION__), ServerId.ToString());
-	}
-
-	Client_ReceiveCharacterList(/*ServerId,*/ Characters);
 }
 
 void ACustomPlayerController::Client_ReceiveCharacterList_Implementation(/*FName ServerId,*/ const TArray<FCharacterSelectionView>& Characters)
@@ -451,6 +479,70 @@ void ACustomPlayerController::Client_UpdatePartyMembers_Implementation(const TAr
 	GeneralHud->UpdatePartyMembers(PartyPawns);
 }
 
+bool ACustomPlayerController::IsDeathMenuVisible() const
+{
+	if (!DeathMenuWidget || !DeathMenuWidget->IsInViewport())
+	{
+		return false;
+	}
+
+	const ESlateVisibility Visibility = DeathMenuWidget->GetVisibility();
+	return Visibility != ESlateVisibility::Hidden && Visibility != ESlateVisibility::Collapsed;
+}
+
+void ACustomPlayerController::CacheQuestProgressFromPawn(APawn* SourcePawn)
+{
+	if (!HasAuthority() || !SourcePawn)
+	{
+		return;
+	}
+
+	UQuestLogComponent* QuestLogComponent = SourcePawn->FindComponentByClass<UQuestLogComponent>();
+	if (!QuestLogComponent)
+	{
+		CachedQuestProgress.Reset();
+		bHasCachedQuestProgress = false;
+		return;
+	}
+
+	CachedQuestProgress = QuestLogComponent->GetQuestInstances();
+	bHasCachedQuestProgress = CachedQuestProgress.Num() > 0;
+}
+
+void ACustomPlayerController::RestoreQuestProgressToPawn(APawn* TargetPawn)
+{
+	if (!HasAuthority() || !TargetPawn || !bHasCachedQuestProgress)
+	{
+		return;
+	}
+
+	UQuestLogComponent* QuestLogComponent = TargetPawn->FindComponentByClass<UQuestLogComponent>();
+	if (!QuestLogComponent)
+	{
+		return;
+	}
+
+	QuestLogComponent->RestoreFromSnapshot(CachedQuestProgress);
+
+	CachedQuestProgress.Reset();
+	bHasCachedQuestProgress = false;
+}
+
+void ACustomPlayerController::Server_RequestCharacterList_Implementation(FName ServerId)
+{
+	// ServerId is no used — character list is fetched per AccountId from CharacterService.
+	// @see AHubGameMode::FetchAndSendCharacterListToPlayer
+
+	AHubGameMode* HubGM = Cast<AHubGameMode>(GetWorld()->GetAuthGameMode());
+	if (HubGM)
+	{
+		HubGM->FetchAndSendCharacterListToPlayer(this);
+	}
+	else
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: AHubGameMode not found.", FString(__FUNCTION__));
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 //AutoTests

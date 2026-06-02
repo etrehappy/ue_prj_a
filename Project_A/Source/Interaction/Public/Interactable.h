@@ -30,9 +30,13 @@ class INTERACTION_API IInteractable
 public:
 	
     virtual bool CanInteract(APawn* Interactor) const { return false; };
-
-    virtual void Interact(APawn* Interactor) = 0;
-
+     
+    /**
+     * @brief Builds the list of interaction actions available for this object.
+     * 
+     * @param[in,out] Interactor The actor attempting to interact with this object.
+     * @param[in,out] OutActions The array to populate with available interaction actions.
+     */
     virtual void BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const
     {
         OutActions.Reset();

@@ -4,7 +4,6 @@
 #include "ProjectALog.h"
 
 IMPLEMENT_MODULE(FInventory, Inventory);
-DEFINE_LOG_CATEGORY(LogProjectA);
 
 
 

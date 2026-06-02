@@ -28,7 +28,7 @@ public:
 
 	virtual bool CanInteract(APawn* Interactor) const override;
 
-	virtual void Interact(APawn* Interactor) override;
+	//virtual void Interact(APawn* Interactor) override;
 
 	UInventoryItemDefinition* GetItemDefinition() const { return ItemDefinition; }
 
@@ -41,6 +41,10 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable)
 	void PickUp(APawn* Picker);
+
+protected:
+	UFUNCTION(BlueprintImplementableEvent, BlueprintAuthorityOnly, Category = "Interaction")
+	bool BP_ExecuteInteractionAction(APawn* Interactor, FGameplayTag ActionTag);
 
 private:
 

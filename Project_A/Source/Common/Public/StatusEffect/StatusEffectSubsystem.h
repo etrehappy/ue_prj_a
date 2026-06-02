@@ -14,11 +14,13 @@
 
 #include "StatusEffectSubsystem.generated.h"
 
+class UStatusEffectData;
+
 /**
  * @class UStatusEffectSubsystem
  * @brief Subsystem responsible for managing status effects in the game.
  */
-UCLASS()
+UCLASS(Config = Game)
 class COMMON_API UStatusEffectSubsystem : public UGameInstanceSubsystem
 {
     GENERATED_BODY()
@@ -32,6 +34,13 @@ private:
      * @brief Builds the map of status effects for quick lookup by gameplay tag.
      */
     void BuildEffectMap();
+
+    void LoadEffectDefinitionsFromConfig();
+    void RegisterEffectDataAsset(UStatusEffectData* DataAsset);
+
+    UPROPERTY(Config, EditDefaultsOnly, Category = "StatusEffects")
+    TArray<TSoftObjectPtr<UStatusEffectData>> StartupStatusEffectDefinitions{};
+
     
     /**
 	 * @brief There is a effect's primary data asset. The subsystem loads all assets of this type and builds a map for quick access to effect definitions by their gameplay tags.

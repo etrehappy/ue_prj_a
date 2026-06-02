@@ -12,17 +12,19 @@
 #include "GeneralGameMode.h"
 #include "ClientStartGameMode.generated.h"
 
+class ULoginWidget;
+
 /**
  * @class AClientStartGameMode
  * @brief
  */
-UCLASS()
+UCLASS(Config = NetSetCustom)
 class PROJECT_A_API AClientStartGameMode : public AGeneralGameMode
 {
 	GENERATED_BODY()
 	
 public:
-	AClientStartGameMode();
+	AClientStartGameMode() = default;
 	virtual ~AClientStartGameMode() = default;
 	
 	virtual EServerWorldType GetMapIdentifier() const override;
@@ -31,6 +33,9 @@ public:
 	void ConnectToHubServer();
 
 	UFUNCTION(BlueprintCallable)
-	void ConnectToLobbyServer();
-	
+	void ConnectToLobbyServer();	
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Config, Category = "Network")
+	FString HubServerAddress{};
 };

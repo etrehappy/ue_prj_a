@@ -16,7 +16,12 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "NetPlayerState.h"
-#include "Character/CustomPlayerController.h"
+#include "QuestManagerSubsystem.h"
+#include "QuestDefinition.h"
+
+#include "CharacterService.h"
+#include "Core/GameInstanceBase.h"
+#include "HealthComponent.h"
 
 #include "ProjectALog.h"
 
@@ -36,7 +41,7 @@ EServerWorldType AWorldGameMode::GetMapIdentifier() const
 void AWorldGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-
+		
 	InitialiseHeartbeat();	
 }
 
@@ -103,18 +108,18 @@ void AWorldGameMode::SendHeartbeat()
 	// 1. Network preparations
 
 	FIPv4Address HubIp{};
-	const bool bParseResult = FIPv4Address::Parse(NetSet::HubHeartbeatAddress, HubIp);
+	const bool bParseResult = FIPv4Address::Parse(HubHeartbeatAddress, HubIp);
 
 	if (!bParseResult)
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid HubHeartbeatAddress: {1}", FString(__FUNCTION__), FString(NetSet::HubHeartbeatAddress));
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid HubHeartbeatAddress: {1}", FString(__FUNCTION__), FString(HubHeartbeatAddress));
 		return;
 	}
 	
 	const FString Payload = BuildHeartbeatPayload();
 	TSharedRef<FInternetAddr> HubAddr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
 	HubAddr->SetIp(HubIp.Value);
-	HubAddr->SetPort(NetSet::HubHeartbeatPort);
+	HubAddr->SetPort(HubHeartbeatPort);
 
 	FTCHARToUTF8 Converter(*Payload);
 	int32 BytesSent = 0;
@@ -122,7 +127,7 @@ void AWorldGameMode::SendHeartbeat()
 	// 2. Send heartbeat
 	HeartbeatSendSocket->SendTo(reinterpret_cast<const uint8*>(Converter.Get()), Converter.Length(), BytesSent, *HubAddr);
 
-	UE_LOGFMT(LogProjectA, Log, "{0} - Heartbeat sent, BytesSent={1}", FString(__FUNCTION__), BytesSent);
+	//UE_LOGFMT(LogProjectA, Log, "{0} - Heartbeat sent, BytesSent={1}", FString(__FUNCTION__), BytesSent);
 }
 
 
@@ -167,62 +172,279 @@ int32 AWorldGameMode::GetPlayerCount() const
 	return PlayerCount;
 }
 
-FString AWorldGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
-	const FString& Options, const FString& Portal)
+FString AWorldGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
+{
+	const FString Result = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+	if (!Result.IsEmpty())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: Super::InitNewPlayer failed: {1}", FString(__FUNCTION__), *Result);
+		return Result;
+	}
+
+	// 1. Parsing
+	const FString CharacterIdStr = UGameplayStatics::ParseOption(Options, TEXT("SelectedCharacterId"));
+	const FName SelectedCharacterId = CharacterIdStr.IsEmpty() ? NAME_None : FName(*CharacterIdStr);
+
+	FPlayerSessionData SessionData;
+	SessionData.AccountId = UGameplayStatics::ParseOption(Options, TEXT("AccountId"));
+	SessionData.SessionToken = UGameplayStatics::ParseOption(Options, TEXT("SessionToken"));
+	SessionData.CharacterId = SelectedCharacterId;
+
+	// 2. Keep data
+	PlayerSessionDataMap.Add(NewPlayerController, SessionData);
+		
+	if (ANetPlayerState* PS = NewPlayerController ? NewPlayerController->GetPlayerState<ANetPlayerState>() : nullptr)
+	{
+		PS->SetAccountId(SessionData.AccountId);
+		PS->SetSessionToken(SessionData.SessionToken);
+		PS->SetCharacterId(SessionData.CharacterId);
+	}
+
+	if (SessionData.AccountId.IsEmpty())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: Player connected without AccountId. Options={1}", FString(__FUNCTION__), *Options);
+	}
+
+	// 3. Logging
+
+	return Result;
+}
+void AWorldGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	if (!NewPlayer)
+	{
+		return;
+	}
+
+	LoadAndApplyCharacterData(NewPlayer);
+}
+
+void AWorldGameMode::Logout(AController* Exiting)
+{
+	if (APlayerController* PC = Cast<APlayerController>(Exiting))
+	{
+		SaveCharacterFromPawn(PC);
+		PlayerSessionDataMap.Remove(PC);
+		UE_LOGFMT(LogProjectA, Log, "{0}: Player disconnected, session data cleared.", FString(__FUNCTION__));
+	}
+
+	Super::Logout(Exiting);
+}
+
+void AWorldGameMode::LoadAndApplyCharacterData(APlayerController* PC)
+{
+	// 1. Validate and extract
+	FString AccountId;
+	FString SessionToken;
+	FName CharacterId;
+	if (!TryGetSessionForPlayer(PC, AccountId, SessionToken, CharacterId))
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: Missing session data for PC — skipping character load.", FString(__FUNCTION__));
+		return;
+	}
+	UCharacterService* CharacterService = GetGameInstance()->GetSubsystem<UCharacterService>();
+	if (!CharacterService)
+	{
+		UE_LOGFMT(LogProjectA, Error, "{0}: UCharacterService subsystem not found.", FString(__FUNCTION__));
+		return;
+	}
+
+	// 2. async load
+	CharacterService->LoadCharacter(
+		AccountId,
+		CharacterId,
+		SessionToken,
+		FOnCharacterLoaded::CreateLambda([this, PC, AccountId, CharacterId](const FCharacterSaveData& SaveData)
+			{
+				HandleCharacterLoaded(PC, AccountId, CharacterId, SaveData);
+			}),
+		FOnCharacterServiceError::CreateLambda([this, AccountId, CharacterId](const FString& Error)
+			{
+				HandleCharacterLoadError(AccountId, CharacterId, Error);
+			})
+	);
+}
+
+bool AWorldGameMode::TryGetSessionForPlayer(APlayerController* PC, FString& OutAccountId, FString& OutSessionToken, FName& OutCharacterId) const
+{
+	const FPlayerSessionData* SessionData = GetSessionData(PC);
+	if (!SessionData || SessionData->AccountId.IsEmpty() || SessionData->CharacterId.IsNone())
+	{
+		return false;
+	}
+
+	OutAccountId = SessionData->AccountId;
+	OutSessionToken = SessionData->SessionToken;
+	OutCharacterId = SessionData->CharacterId;
+	return true;
+}
+
+void AWorldGameMode::HandleCharacterLoaded(APlayerController* PC, const FString& AccountId, FName CharacterId, const FCharacterSaveData& SaveData)
+{
+	// UE_LOGFMT(LogProjectA, Log, "{0}: Loaded character {1} for AccountId={2}.", FString(__FUNCTION__), *CharacterId.ToString(), *AccountId);
+
+	// 1. Update fields
+	if (PC)
+	{
+		if (ANetPlayerState* PS = PC->GetPlayerState<ANetPlayerState>())
+		{
+			PS->SetCharacterName(SaveData.CharacterName);
+			PS->SetLevel(SaveData.Level);
+			PS->SetClassName(SaveData.ClassName);
+		}
+	}
+
+	// 2. Apply data to pawn if ready, otherwise retry once after a short delay
+	APawn* Pawn = PC ? PC->GetPawn() : nullptr;
+	if (Pawn)
+	{
+		ApplySaveDataToPawn(Pawn, SaveData);
+		return;
+	}
+
+	// 3. Pawn not yet spawned — retry once after a short delay.
+	FTimerHandle RetryHandle;
+	const FCharacterSaveData SaveCopy = SaveData;	
+	TWeakObjectPtr<APlayerController> WeakPC(PC);
+		
+	FTimerDelegate RetryDelegate = FTimerDelegate::CreateLambda([this, WeakPC, SaveCopy]()
+		{
+			APlayerController* RetryPC = WeakPC.Get();
+			if (!RetryPC)
+			{
+				// PlayerController no longer valid — nothing to do.
+				return;
+			}
+
+			APawn* RetryPawn = RetryPC->GetPawn();
+			if (RetryPawn)
+			{
+				ApplySaveDataToPawn(RetryPawn, SaveCopy);
+			}
+		});
+
+	// Schedule a single retry after 0.5 seconds.
+	GetWorldTimerManager().SetTimer(RetryHandle, RetryDelegate, 0.5f, false);
+}
+
+void AWorldGameMode::HandleCharacterLoadError(const FString& AccountId, FName CharacterId, const FString& Error)
+{
+	UE_LOGFMT(LogProjectA, Warning, "{0}: Failed to load character {1} for AccountId={2}. Error={3}. Using defaults.", FString(__FUNCTION__), *CharacterId.ToString(), *AccountId, *Error);
+	// Fallback: spawn defaults (no further action needed here)
+}
+void AWorldGameMode::ApplySaveDataToPawn(APawn* InPawn, const FCharacterSaveData& SaveData)
+{
+	if (!InPawn || !SaveData.IsValid())	{ return; }
+
+	// Restore last known position
+	if (!SaveData.LastPosition.IsZero())
+	{
+		InPawn->SetActorLocationAndRotation(SaveData.LastPosition, SaveData.LastRotation, false, nullptr, ETeleportType::TeleportPhysics);
+	}
+
+	/*UE_LOGFMT(LogProjectA, Log, "{0}: Applied save data to pawn. Position={1} Health={2}/{3}",
+		FString(__FUNCTION__),
+		*SaveData.LastPosition.ToString(),
+		SaveData.CurrentHealth,
+		SaveData.MaxHealth);*/
+}
+
+
+void AWorldGameMode::SaveCharacterFromPawn(APlayerController* PC)
 {
 	// 1. Validation
-	const FString ErrorMessage = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
 
-	if (!ErrorMessage.IsEmpty())
+	if (!PC)
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Super::InitNewPlayer failed with error: {1}", FString(__FUNCTION__), ErrorMessage);
-		return ErrorMessage;
+		UE_LOGFMT(LogProjectA, Warning, "{0}: Invalid PlayerController, cannot save character.", FString(__FUNCTION__));
+		return;
 	}
 
-	ACustomPlayerController* CustomPlayerController = Cast<ACustomPlayerController>(NewPlayerController);
-	if (!CustomPlayerController)
+	const FPlayerSessionData* SessionData = GetSessionData(PC);
+	if (!SessionData || SessionData->AccountId.IsEmpty() || SessionData->CharacterId.IsNone())
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - NewPlayerController is not of type ACustomPlayerController", FString(__FUNCTION__));
-		return ErrorMessage;
+		UE_LOGFMT(LogProjectA, Warning, "{0}: Missing session data for PlayerController={1}, cannot save character.",
+			FString(__FUNCTION__), *GetNameSafe(PC));
+		return;
 	}
 
-	// 2. Get data from URL options
-	const FString CharacterIdStr = UGameplayStatics::ParseOption(Options, TEXT("SelectedCharacterId"));
-	const FName CharacterId = CharacterIdStr.IsEmpty() ? NAME_None : FName(*CharacterIdStr);
-
-	const FCharacterSpawnDefinition* Definition = CharacterDefinitionById.Find(CharacterId);
-	if (!Definition || !Definition->PawnClass)
+	APawn* Pawn = PC->GetPawn();
+	if (!Pawn)
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid SelectedCharacterId={1}", FString(__FUNCTION__), CharacterId.ToString());
-		return TEXT("Invalid character selection");
+		UE_LOGFMT(LogProjectA, Warning, "{0}: PlayerController={1} has no pawn, cannot save character.",
+			FString(__FUNCTION__), *GetNameSafe(PC));
+		return;
 	}
 
-	//3. Store selected character data in PlayerController for later use in GetDefaultPawnClassForController
-	CustomPlayerController->SetSelectedCharacterId(CharacterId);
-	CustomPlayerController->SetSelectedCharacterLevel(Definition->Level);
+	UCharacterService* CharacterService = GetGameInstance()->GetSubsystem<UCharacterService>();
+	if (!CharacterService)
+	{
+		UE_LOGFMT(LogProjectA, Error, "{0}: UCharacterService subsystem not found, cannot save character.", FString(__FUNCTION__));
+		return;
+	}
 
-	//UE_LOGFMT(LogProjectA, Log, "{0} - Character resolved: Id={1}, Level={2}", FString(__FUNCTION__), CharacterId.ToString(), Definition->Level);
+	// 2. Build save snapshot from current pawn state
+	FCharacterSaveData SaveData;
+	SaveData.CharacterId = SessionData->CharacterId;
+	SaveData.LastPosition = Pawn->GetActorLocation();
+	SaveData.LastRotation = Pawn->GetActorRotation();
+	SaveData.LastMapId = FName(*GetWorld()->GetMapName());
 
-	return ErrorMessage; // Return empty string to indicate success
+	if (ANetPlayerState* PS = PC->GetPlayerState<ANetPlayerState>())
+	{
+		SaveData.CharacterName = PS->GetCharacterName();
+		SaveData.Level = PS->GetLevel();
+		SaveData.ClassName = PS->GetClassName();
+	}
+
+	const FString AccountId = SessionData->AccountId;
+	const FString SessionToken = SessionData->SessionToken;
+
+	// 3. async save
+	CharacterService->SaveCharacter(
+		AccountId,
+		SessionToken,
+		SaveData,
+		FOnCharacterSaved::CreateLambda([AccountId, CharacterId = SessionData->CharacterId]()
+			{
+				UE_LOGFMT(LogProjectA, Log, "{0}: Character {1} saved for AccountId={2}.",
+					FString(__FUNCTION__), *CharacterId.ToString(), *AccountId);
+			}),
+		FOnCharacterServiceError::CreateLambda([AccountId](const FString& Error)
+			{
+				UE_LOGFMT(LogProjectA, Warning, "{0}: Failed to save character for AccountId={1}. Error={2}",
+					FString(__FUNCTION__), *AccountId, *Error);
+			})
+	);
+}
+
+const FPlayerSessionData* AWorldGameMode::GetSessionData(APlayerController* PC) const
+{
+	return PlayerSessionDataMap.Find(PC);
 }
 
 UClass* AWorldGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
-	//1. Validation
-	const ACustomPlayerController* CustomPlayerController = Cast<ACustomPlayerController>(InController);
-	if (!CustomPlayerController)
+	APlayerController* PC = Cast<APlayerController>(InController);
+	if (!PC)
 	{
 		return Super::GetDefaultPawnClassForController_Implementation(InController);
 	}
 
-	const FName CharacterId = CustomPlayerController->GetSelectedCharacterId();
-	const FCharacterSpawnDefinition* Definition = CharacterDefinitionById.Find(CharacterId);
+	const FPlayerSessionData* SessionData = GetSessionData(PC);
+	if (!SessionData || SessionData->CharacterId.IsNone())
+	{
+		return Super::GetDefaultPawnClassForController_Implementation(InController);
+	}
+
+	const FCharacterSpawnDefinition* Definition = CharacterDefinitionById.Find(SessionData->CharacterId);
 	if (!Definition || !Definition->PawnClass)
 	{
 		return Super::GetDefaultPawnClassForController_Implementation(InController);
 	}
-	
-	//2. Return Pawn class based on the character selected by a player in the character selection screen on the Hub-server.
+
 	return Definition->PawnClass.Get();
 }
 

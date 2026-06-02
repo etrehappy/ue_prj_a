@@ -4,8 +4,14 @@ public class Common: ModuleRules
 {
     public Common(ReadOnlyTargetRules Target) : base(Target)
     {
-        PrivateDependencyModuleNames.AddRange(new string[] {"Core", "CoreUObject", "Engine"
-            , "Logger"
+		PublicDependencyModuleNames.AddRange(new string[]
+			 {
+				"Logger"
+			 }
+		);
+
+		PrivateDependencyModuleNames.AddRange(new string[] {"Core", "CoreUObject", "Engine"
+            //, "Logger"
 			, "WeaponSystemPlugin"
 			, "GameplayTags"
 		});

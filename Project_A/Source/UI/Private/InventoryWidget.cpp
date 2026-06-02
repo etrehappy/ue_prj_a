@@ -16,12 +16,18 @@ void UInventoryWidget::InitialiseWithInventory(UInventory* InInventory)
 		return;
 	}
 
+	UInventory* CurrentInventory = Inventory.Get();
+	if (CurrentInventory && CurrentInventory != InInventory)
+	{
+		CurrentInventory->OnInventoryChanged.RemoveAll(this);
+	}
+
 	Inventory = InInventory;
-	Inventory->OnInventoryChanged.AddDynamic(this, &UInventoryWidget::HandleInventoryChanged);
+	InInventory->OnInventoryChanged.RemoveAll(this);
+	InInventory->OnInventoryChanged.AddUniqueDynamic(this, &UInventoryWidget::HandleInventoryChanged);
 
 	RebuildSlots();
 }
-
 void UInventoryWidget::HandleInventoryChanged()
 {
 	RebuildSlots();

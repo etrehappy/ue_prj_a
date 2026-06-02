@@ -48,18 +48,18 @@ bool AItemPickup::CanInteract(APawn* Interactor) const
 	return true;
 }
 
-void AItemPickup::Interact(APawn* Interactor)
-{
-	UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
-
-	if(!Interactor)
-	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Interactor is nullptr", FString(__FUNCTION__));
-		return;
-	}
-
-	PickUp(Interactor);
-}
+//void AItemPickup::Interact(APawn* Interactor)
+//{
+//	UE_LOGFMT(LogProjectA, Log, "{0} - called", FString(__FUNCTION__));
+//
+//	if(!Interactor)
+//	{
+//		UE_LOGFMT(LogProjectA, Warning, "{0} - Interactor is nullptr", FString(__FUNCTION__));
+//		return;
+//	}
+//
+//	PickUp(Interactor);
+//}
 
 void AItemPickup::PickUp(APawn* Picker)
 {
@@ -126,6 +126,8 @@ bool AItemPickup::ExecuteInteractionAction(APawn* Interactor, FGameplayTag Actio
 	}
 
 	// 1. Check if the action tag matches any of the defined interaction actions.
+	const UInteractionActionDefinition* MatchedActionDef = nullptr;
+
 	for (const TObjectPtr<UInteractionActionDefinition>& ActionDef : InteractionActions)
 	{
 		if (!ActionDef || !ActionDef->ActionTag.IsValid())
@@ -135,15 +137,15 @@ bool AItemPickup::ExecuteInteractionAction(APawn* Interactor, FGameplayTag Actio
 
 		if (ActionDef->ActionTag.MatchesTagExact(ActionTag))
 		{
-			if (!ActionDef->bEnabledByDefault)
-			{
-				return false;
-			}
-			
-			Interact(Interactor);
-			return true;
+			MatchedActionDef = ActionDef;
+			break;
 		}
 	}
 
-	return false;
+	if (!MatchedActionDef || !MatchedActionDef->bEnabledByDefault)
+	{
+		return false;
+	}
+
+	return BP_ExecuteInteractionAction(Interactor, ActionTag);
 }

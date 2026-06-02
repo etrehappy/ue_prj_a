@@ -17,8 +17,12 @@ class UInventoryItem;
 class UActorChannel;
 class FOutBunch;
 struct FReplicationFlags;
+class APawn;
+class AActor;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipmentChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnOpenTargetInventoryRequested, AActor*, TargetActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloseTargetInventoryRequested);
 
 /**
  * @enum EEquipmentSlot
@@ -186,7 +190,7 @@ public:
 	 * @see UInventory::UseItemFromSlot
 	 */
 	UFUNCTION(BlueprintCallable)
-	void UseItem(int32 SlotIndex);
+	void UseItem(int32 SlotIndex, int32 UseCount = 1);
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory")
 	void SetInventory(UInventory* NewInventory);
@@ -204,6 +208,16 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	bool ConsumeItemsByTag(const FGameplayTag& ItemTypeTag, int32 Count);
+
+	/**
+	 * @brief Server entrypoint. Requests opening target inventory for a specific interactor.
+	 * Should be called on server (e.g. from NPC interaction logic).
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory|Interaction")
+	void RequestOpenTargetInventory(APawn* InteractorPawn, AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory")
+	void RequestMoveBetweenInventories(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex);
 	
 protected:
 	/**
@@ -225,7 +239,7 @@ protected:
 	 * @see UseItem
 	 */
 	UFUNCTION(Server, Reliable)
-	void Server_UseItem(int32 SlotIndex);
+	void Server_UseItem(int32 SlotIndex, int32 UseCount);
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetInventory(UInventory* NewInventory);
@@ -236,6 +250,15 @@ protected:
 	 */
 	UFUNCTION(Server, Reliable)
 	void Server_UseEquippedItem(EEquipmentSlot Slot);
+
+	UFUNCTION(Client, Reliable)
+	void Client_OpenTargetInventory(AActor* TargetActor);
+
+	UFUNCTION(Client, Reliable)
+	void Client_CloseTargetInventory();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestMoveBetweenInventories(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex);
 
 private:
 	/**
@@ -272,6 +295,18 @@ public:
 	 */
 	UPROPERTY(BlueprintAssignable, Category = "Inventory")
 	FOnEquipmentChanged OnEquipmentChanged{};
+
+	/**
+ * @brief Client-side UI signal to open inventory window for target actor.
+ */
+	UPROPERTY(BlueprintAssignable, Category = "Inventory|Interaction")
+	FOnOpenTargetInventoryRequested OnOpenTargetInventoryRequested{};
+
+	/**
+	 * @brief Client-side UI signal to close target inventory window.
+	 */
+	UPROPERTY(BlueprintAssignable, Category = "Inventory|Interaction")
+	FOnCloseTargetInventoryRequested OnCloseTargetInventoryRequested{};
 
 private:
 	/**

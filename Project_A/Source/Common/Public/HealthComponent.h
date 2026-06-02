@@ -134,6 +134,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "StatusEffect")
 	FGameplayTagContainer SupportedStatTags{};
 
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "Health")
+	bool bIsDead{false};
+
 private:
 	UPROPERTY(EditDefaultsOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Health")
 	float MaxHealth{100.f};

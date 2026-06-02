@@ -21,7 +21,7 @@
 #include "StatusEffect/StatusEffectsComponent.h"
 #include "QuestLogComponent.h"
 #include "Core/WorldGameMode.h"
-#include "TagList.h"
+#include "PlayerDialogueComponent.h"
 
 #include "ProjectALog.h"
 
@@ -71,6 +71,9 @@ ANetPlayerCharacter::ANetPlayerCharacter()
 	QuestLogComponent = CreateDefaultSubobject<UQuestLogComponent>(TEXT("QuestLogComponent"));
 	QuestLogComponent->SetComponentTickEnabled(false);
 
+	PlayerDialogueComponent = CreateDefaultSubobject<UPlayerDialogueComponent>(TEXT("PlayerDialogueComponent"));
+	PlayerDialogueComponent->SetComponentTickEnabled(false);
+
 	if (auto* Capsule = GetCapsuleComponent())
 	{
 		Capsule->SetGenerateOverlapEvents(true);
@@ -104,7 +107,19 @@ void ANetPlayerCharacter::Destroyed()
 
 void ANetPlayerCharacter::Interact()
 {
-	InteractionComponent->TryInteract();
+	// It is called by "E" on client
+
+	// If  an object has interaction actions, we want to open interaction menu.
+	if (InteractionComponent)
+	{
+		InteractionComponent->TryInteract();
+	}
+
+	// If an object hasn't interaction actions, but it has dialogue, we want to open dialogue widget. 
+	if (PlayerDialogueComponent)
+	{
+		PlayerDialogueComponent->RequestDialogueSnapshot();
+	}
 }
 
 void ANetPlayerCharacter::ToggleInventory()
@@ -139,6 +154,37 @@ void ANetPlayerCharacter::ToggleInventory()
 }
 
 
+void ANetPlayerCharacter::ToggleMainMenu()
+{
+	if (IsRunningDedicatedServer())
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - Running on dedicated server, skip", FString(__FUNCTION__));
+		return;
+	}
+
+	AController* PController = GetController();
+	if (!PController)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PController = nullptr", FString(__FUNCTION__));
+		return;
+	}
+	ACustomPlayerController* PlayerController = Cast<ACustomPlayerController>(PController);
+	if (!PlayerController)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	AGeneralHud* HUD = Cast<AGeneralHud>(PlayerController->GetHUD());
+	if (!HUD)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - HUD is nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	HUD->ToggleMainMenu();
+}
+
 void ANetPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
@@ -158,10 +204,17 @@ void ANetPlayerCharacter::BeginPlay()
 		HandleHealthChanged(HealthComponent->GetCurrentHealth(), HealthComponent->GetMaxHealth());
 	}	
 
+
 	if (InteractionComponent)
 	{
-		InteractionComponent->OnFocusChanged.AddUObject(this,&ANetPlayerCharacter::HandleFocusChanged);
+		InteractionComponent->OnFocusChanged.AddUObject(this, &ANetPlayerCharacter::HandleFocusChanged);
 		InteractionComponent->OnInteractionReceived.AddUObject(this, &ANetPlayerCharacter::HandleInteractionReceived);
+	}
+
+	if (PlayerDialogueComponent)
+	{
+		PlayerDialogueComponent->OnDialogueNodeReceived.AddUObject(this, &ANetPlayerCharacter::HandleDialogueNodeReceived);
+		PlayerDialogueComponent->OnDialogueClosed.AddUObject(this, &ANetPlayerCharacter::HandleDialogueClosed);
 	}
 
 	RestoreCollision();	
@@ -400,6 +453,7 @@ bool ANetPlayerCharacter::PickUpItem_Implementation(AItemPickup* Item)
 	return bWasPickedUp;
 }
 
+
 bool ANetPlayerCharacter::CanInteract(APawn* RequestInteractor) const
 {
 	bool bCanInteractWithRequester = RequestInteractor && (RequestInteractor != this);
@@ -407,9 +461,9 @@ bool ANetPlayerCharacter::CanInteract(APawn* RequestInteractor) const
 	return bCanInteractWithRequester;
 }
 
-void ANetPlayerCharacter::Interact(APawn* Interactor)
-{	
-}
+//void ANetPlayerCharacter::Interact(APawn* Interactor)
+//{	
+//}
 
 
 void ANetPlayerCharacter::BuildInteractionActions(APawn* Interactor, TArray<FInteractionActionType>& OutActions) const
@@ -465,23 +519,7 @@ bool ANetPlayerCharacter::ExecuteInteractionAction(APawn* Interactor, FGameplayT
 		return false;
 	}
 
-	// 2. Execute the corresponding logic based on the matched action tag. 
-	// For example, if the tag is "PartyInvite", attempt to join the party of the interactor.
-	if (ActionTag.MatchesTagExact(TagListInteraction::PartyInvite))
-	{
-
-		AWorldGameMode* WorldGameMode = GetWorld() ? GetWorld()->GetAuthGameMode<AWorldGameMode>() : nullptr;
-		if (!WorldGameMode)
-		{
-			return false;
-		}
-
-		WorldGameMode->TryJoinParty(Interactor, this);
-		return true;
-	}
-
-	UE_LOGFMT(LogProjectA, Warning, "{0} - Unsupported interaction action tag: {1}", FString(__FUNCTION__), ActionTag.ToString());
-	return false;
+	return BP_ExecuteInteractionAction(Interactor, ActionTag);
 }
 
 void ANetPlayerCharacter::HandleInteractionReceived(AActor* TargetActor, const TArray<FInteractionActionType>& Actions)
@@ -513,4 +551,48 @@ void ANetPlayerCharacter::HandleInteractionReceived(AActor* TargetActor, const T
 	}
 
 	HUD->ShowInteractionMenu(TargetActor, Actions);
+}
+
+void ANetPlayerCharacter::HandleDialogueNodeReceived(const FDialogueNodeRuntime& Node)
+{
+	if (IsRunningDedicatedServer())
+	{
+		return;
+	}
+
+	ACustomPlayerController* PlayerController = Cast<ACustomPlayerController>(GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	AGeneralHud* HUD = Cast<AGeneralHud>(PlayerController->GetHUD());
+	if (!HUD)
+	{
+		return;
+	}
+
+	HUD->ShowDialogueNode(Node);
+}
+
+void ANetPlayerCharacter::HandleDialogueClosed()
+{
+	if (IsRunningDedicatedServer())
+	{
+		return;
+	}
+
+	ACustomPlayerController* PlayerController = Cast<ACustomPlayerController>(GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+
+	AGeneralHud* HUD = Cast<AGeneralHud>(PlayerController->GetHUD());
+	if (!HUD)
+	{
+		return;
+	}
+
+	HUD->HideDialogue();
 }

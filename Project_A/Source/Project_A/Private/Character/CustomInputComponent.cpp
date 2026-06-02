@@ -84,6 +84,11 @@ void UCustomInputComponent::BindActions(UEnhancedInputComponent* EIC)
 		EIC->BindAction(InputActions.ToggleInventory, ETriggerEvent::Completed, this, &UCustomInputComponent::ToggleInventory);
 	}
 
+	if (InputActions.ToggleMainMenu)
+	{
+		EIC->BindAction(InputActions.ToggleMainMenu, ETriggerEvent::Completed, this, &UCustomInputComponent::ToggleMainMenu);
+	}
+
 }
 
 void UCustomInputComponent::EquipWeapon(const FInputActionValue& Value)
@@ -99,14 +104,6 @@ void UCustomInputComponent::EquipThrowableItem(const FInputActionInstance& Insta
 
 void UCustomInputComponent::HandleAbility(const FInputActionInstance& Instance)
 {
-	//const auto Action = Instance.GetSourceAction();
-
-	//if(!Action)
-	//{   
-	//    UE_LOGFMT(LogProjectA, Warning, "{0} - Action = nullptr", FString(__FUNCTION__));
-	//    return;
-	//}
-
 	const auto CombatComponent = Owner->GetComponentByClass<UCombatComponent>();
 	if(!CombatComponent)
 	{   
@@ -146,6 +143,17 @@ void UCustomInputComponent::ToggleInventory(const FInputActionValue& Value)
 	}
 
 	Owner->ToggleInventory();
+}
+
+void UCustomInputComponent::ToggleMainMenu(const FInputActionValue& Value)
+{
+	if (!Owner)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Owner = nullptr", FString(__FUNCTION__));
+		return;
+	}
+
+	Owner->ToggleMainMenu();
 }
 
 

@@ -19,6 +19,8 @@ public class UI: ModuleRules
             , "InputCore"
             , "Common"
             , "Interaction"
+			, "Quest"
+			, "Dialogue"
 		});
     }
 }

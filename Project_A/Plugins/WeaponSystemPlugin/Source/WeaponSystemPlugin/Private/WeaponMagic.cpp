@@ -57,7 +57,7 @@ void AWeaponMagic::Server_SpawnProjectile_Implementation(const FVector AimOrigin
 #if WITH_EDITOR
     if (bHitSomething)
     {
-        DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.f, 16, FColor::Red, false, 1.f);
+        //DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 10.f, 16, FColor::Red, false, 1.f);
     }
 #endif
 
@@ -72,7 +72,7 @@ void AWeaponMagic::Server_SpawnProjectile_Implementation(const FVector AimOrigin
     }
 
 #if WITH_EDITOR
-    DrawDebugLine(GetWorld(), SpawnLocation, SpawnLocation + Direction * 2000.f, FColor::Green, false, 1.f);
+    //DrawDebugLine(GetWorld(), SpawnLocation, SpawnLocation + Direction * 2000.f, FColor::Green, false, 1.f);
 #endif
 
     // Step 4.
@@ -207,7 +207,7 @@ void AWeaponMagic::SpawnProjectile()
     // Step 3.
 #if WITH_EDITOR
     const FVector TraceEnd = ComputeTraceEnd(WorldOrigin, WorldDirection);
-    DrawDebugLine(GetWorld(), WorldOrigin, TraceEnd, FColor::Green, false, 1.f);
+    //DrawDebugLine(GetWorld(), WorldOrigin, TraceEnd, FColor::Green, false, 1.f);
 #endif
 
 }

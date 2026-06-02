@@ -55,7 +55,7 @@ void ATargetIndicator::UpdateIndicator(const FVector& StartLocation, const FVect
 	//UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
 	ComputeArc(StartLocation, InitialVelocity, GravityZ, MaxSteps, TimeStep);
 
-	UpdateSplineMeshes();
+	//UpdateSplineMeshes();
 
 	UpdateExplosionDecal(ExplosionRadius);
 }
@@ -114,7 +114,7 @@ void ATargetIndicator::ComputeArc(const FVector& StartLocation, const FVector& I
 		}
 
 #if WITH_EDITOR
-		DrawDebugSphere(World, NextPos, 6.f, 6, FColor::Green, false, 0.1f);
+		//DrawDebugSphere(World, NextPos, 6.f, 6, FColor::Green, false, 0.1f);
 #endif
 
 		// advance state
@@ -208,7 +208,7 @@ void ATargetIndicator::UpdateExplosionDecal(float ExplosionRadius)
 		ExplosionDecal->SetWorldRotation(DecalRot);
 
 #if WITH_EDITOR || UE_BUILD_DEBUG
-		DrawDebugDirectionalArrow(
+		/*DrawDebugDirectionalArrow(
 			GetWorld(),
 			FinalHitLocation,
 			FinalHitLocation + FinalHitNormal * 50.f,
@@ -218,7 +218,7 @@ void ATargetIndicator::UpdateExplosionDecal(float ExplosionRadius)
 			0.1f,
 			0,
 			2.f
-		);
+		);*/
 #endif
 	}
 	else

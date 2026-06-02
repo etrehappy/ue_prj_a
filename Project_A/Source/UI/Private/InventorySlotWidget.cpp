@@ -7,6 +7,8 @@
 #include "Engine/Texture2D.h"
 #include "Inventory.h" 
 #include "InventoryItem.h"
+#include "InventoryComponent.h"
+#include "GameFramework/Pawn.h"
 
 #include "ProjectALog.h"
 
@@ -204,7 +206,21 @@ bool UInventorySlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDrag
 	}
 	else if (bIsDifferentInventory)
 	{
-		SourceInventory->MoveItemToOtherInventory(SourceSlotIndex, TargetInventory, TargetSlotIndex);
+		APawn* OwningPawn = GetOwningPlayerPawn();
+		if (!OwningPawn)
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - OwningPawn is null", FString(__FUNCTION__));
+			return false;
+		}
+
+		UInventoryComponent* PlayerInventoryComponent = OwningPawn->FindComponentByClass<UInventoryComponent>();
+		if (!PlayerInventoryComponent)
+		{
+			UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerInventoryComponent is null", FString(__FUNCTION__));
+			return false;
+		}
+
+		PlayerInventoryComponent->RequestMoveBetweenInventories(SourceInventory, TargetInventory, SourceSlotIndex, TargetSlotIndex);
 		return true;
 	}
 	else

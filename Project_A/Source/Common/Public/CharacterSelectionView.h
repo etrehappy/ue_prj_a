@@ -30,7 +30,7 @@ struct FCharacterSelectionView
 	int32 Level = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FString ClassName{};
+	FName ClassName{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool bCanEnter = true;

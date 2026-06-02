@@ -13,10 +13,10 @@ struct FInteractionActionType
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsEnabled{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<const UInteractionActionDefinition> Definition{};
 };
 

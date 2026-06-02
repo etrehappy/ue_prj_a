@@ -7,7 +7,9 @@
 #include "SocketSubsystem.h"
 #include "IPAddress.h"
 #include "TimerManager.h"
-#include "HAL/PlatformTime.h"
+#include "CharacterService.h"
+#include "GameFramework/GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
 
 
 #include "ProjectALog.h"
@@ -45,6 +47,28 @@ void AHubGameMode::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	Super::EndPlay(EndPlayReason);
 }
 
+FString AHubGameMode::InitNewPlayer(APlayerController* NewPlayerController,
+	const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
+{
+	const FString Result = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+
+	const FString AccountId = UGameplayStatics::ParseOption(Options, TEXT("AccountId"));
+	const FString SessionToken = UGameplayStatics::ParseOption(Options, TEXT("SessionToken"));
+
+	if (AccountId.IsEmpty())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: Player connected without AccountId. Options={1}", FString(__FUNCTION__), *Options);
+	}
+	else
+	{
+		PlayerAccountIds.Add(NewPlayerController, AccountId);
+		PlayerSessionTokens.Add(NewPlayerController, SessionToken);
+		UE_LOGFMT(LogProjectA, Log, "{0}: Player connected. AccountId={1}", FString(__FUNCTION__), *AccountId);
+	}
+
+	return Result;
+}
+
 TArray<FWorldServerView> AHubGameMode::BuildWorldServersSnapshot() const
 {
 	TMap<FName, FWorldServerView> SnapshotMap{};
@@ -67,12 +91,12 @@ void AHubGameMode::InitHeartbeatListener()
 	HeartbeatSocket = FUdpSocketBuilder(TEXT("HubHeartbeatListener"))
 		.AsNonBlocking()
 		.AsReusable()
-		.BoundToPort(NetSet::HubHeartbeatPort)
+		.BoundToPort(HubHeartbeatPort)
 		.WithReceiveBufferSize(2 * 1024 * 1024);
 
 	if (!HeartbeatSocket)
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - Failed to bind heartbeat socket on port {1}", FString(__FUNCTION__), NetSet::HubHeartbeatPort);
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Failed to bind heartbeat socket on port {1}", FString(__FUNCTION__), HubHeartbeatPort);
 	}
 }
 
@@ -217,87 +241,133 @@ bool AHubGameMode::TryProcessHeartbeatKV(const TMap<FString, FString>& ServerDat
 
 	LastSeenByServerId.Add(ServerId, FPlatformTime::Seconds());
 
-	//UE_LOGFMT(LogProjectA, Log, "{0} - Updated heartbeat for ServerId={1}, Name={2}, Address={3}, Players={4}/{5}",
-	//	FString(__FUNCTION__), ServerId.ToString(), Item.ServerName, Item.Address, Item.CurrentPlayers, Item.MaxPlayers);
+	//UE_LOGFMT(LogProjectA, Log, "{0} - Updated heartbeat for ServerId={1}, Name={2}, Address={3}, Players={4}/{5}", FString(__FUNCTION__), ServerId.ToString(), Item.ServerName, Item.Address, Item.CurrentPlayers, Item.MaxPlayers);
 
 	return true;
 
 }
 
-
-TArray<FCharacterSelectionView> AHubGameMode::BuildMockCharactersForServer(FName ServerId) const
-{
-	// Simple temporary solution
-	// @see ACustomPlayerController::Server_RequestCharacterList_Implementation
-
-	TArray<FCharacterSelectionView> Result{};
-
-	FCharacterSelectionView C1{};
-	C1.CharacterId = FName(TEXT("Warrior_01"));
-	C1.CharacterName = TEXT("Ragnar");
-	C1.Level = 12;
-	C1.ClassName = TEXT("Warrior");
-
-	FCharacterSelectionView C2{};
-	C2.CharacterId = FName(TEXT("Mage_01"));
-	C2.CharacterName = TEXT("Arlen");
-	C2.Level = 9;
-	C2.ClassName = TEXT("Mage");
-
-	Result.Add(C1);
-	Result.Add(C2);
-
-	return Result;
-}
-
 void AHubGameMode::EnterToWorldWithCharacter(APlayerController* PlayerControllerP, FName ServerId, FName CharacterId)
 {
+	// 1. Build a snapshot to avoid concurrent-modification issues.
 	const TArray<FWorldServerView> Servers = BuildWorldServersSnapshot();
 
+	// 2. Find the target server entry
 	auto ServerIdPredicate = [ServerId](const FWorldServerView& Item) { return Item.ServerId == ServerId; };
 	const FWorldServerView* Server = Servers.FindByPredicate(ServerIdPredicate);
 
+	// 3. Validate
 	if (!PlayerControllerP || !Server || !Server->bIsOnline || Server->Address.IsEmpty())
 	{
 		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid parameters or server is unavailable.", FString(__FUNCTION__));
 		return;
 	}
 
-	// SelectedCharacterId — a simple way to pass the selected character info to the world server. 
-	const FString TravelUrl = FString::Printf(TEXT("%s?SelectedCharacterId=%s"), *Server->Address, *CharacterId.ToString());
+	const FString AccountId = PlayerAccountIds.FindRef(PlayerControllerP);
+	const FString SessionToken = PlayerSessionTokens.FindRef(PlayerControllerP);
+
+	if (AccountId.IsEmpty())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - No AccountId found for PlayerController. Travel aborted.", FString(__FUNCTION__));
+		return;
+	}
+
+	// 4. Construct a travel URL
+	const FString TravelUrl = FString::Printf(
+		TEXT("%s?SelectedCharacterId=%s?AccountId=%s?SessionToken=%s"),
+		*Server->Address,
+		*CharacterId.ToString(),
+		*AccountId,
+		*SessionToken
+	);
+
+	//UE_LOGFMT(LogProjectA, Log, "{0} - Travelling AccountId={1} to {2} with character={3}", FString(__FUNCTION__), *AccountId, *Server->Address, *CharacterId.ToString());
+
+	// 5. Travel
 
 	PlayerControllerP->ClientTravel(*TravelUrl, ETravelType::TRAVEL_Absolute);
 }
 
+void AHubGameMode::FetchAndSendCharacterListToPlayer(APlayerController* PC)
+{	
+	// 1. Validate
+	if (!PC) { return; }
 
-//void AHubGameMode::EnterToWorld(APlayerController* PlayerControllerP, FName ServerId)
-//{
-//	if (!PlayerControllerP)
-//	{
-//		UE_LOGFMT(LogProjectA, Warning, "{0} - PlayerController is empty", FString(__FUNCTION__));   
-//		return;
-//	}
-//
-//	/*PlayerControllerP->ClientTravel(NetSet::MainWorldServerAddress, ETravelType::TRAVEL_Absolute);*/
-//
-//	const TArray<FWorldServerView> Servers = BuildWorldServersSnapshot();
-//	const FWorldServerView* Server = Servers.FindByPredicate(
-//		[ServerId](const FWorldServerView& Item)
-//		{
-//			return Item.ServerId == ServerId;
-//		});
-//
-//	if (!Server)
-//	{
-//		UE_LOGFMT(LogProjectA, Warning, "{0} - ServerId not found: {1}", FString(__FUNCTION__), ServerId.ToString());
-//		return;
-//	}
-//
-//	if (!Server->bIsOnline || Server->Address.IsEmpty())
-//	{
-//		UE_LOGFMT(LogProjectA, Warning, "{0} - Server is unavailable: {1}", FString(__FUNCTION__), ServerId.ToString());
-//		return;
-//	}
-//
-//	PlayerControllerP->ClientTravel(*Server->Address, ETravelType::TRAVEL_Absolute);
-//}
+	FString AccountId, SessionToken;
+	if (!TryGetPlayerAuthData(PC, AccountId, SessionToken))
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0}: No AccountId for PlayerController. Cannot fetch characters.", FString(__FUNCTION__));
+		return;
+	}
+	
+	UCharacterService* CharacterService = GetGameInstance()->GetSubsystem<UCharacterService>();
+	if (!CharacterService)
+	{
+		UE_LOGFMT(LogProjectA, Error, "{0}: UCharacterService subsystem not found.", FString(__FUNCTION__));
+		return;
+	}
+
+	// 2. async fetch 
+	const FString TokenCopy = SessionToken;
+	const FString AccountIdCopy = AccountId;
+
+	CharacterService->FetchCharacterList(
+		AccountIdCopy,
+		TokenCopy,
+		FOnCharacterListReceived::CreateLambda([this, PC, AccountIdCopy](const TArray<FCharacterSelectionView>& Characters)
+			{
+				HandleCharacterListSuccess(PC, AccountIdCopy, Characters);
+			}),
+		FOnCharacterServiceError::CreateLambda([this, PC](const FString& Error)
+			{
+				HandleCharacterListError(PC, Error);
+			})
+	);
+}
+
+bool AHubGameMode::TryGetPlayerAuthData(APlayerController* PC, FString& OutAccountId, FString& OutSessionToken) const
+{
+	const FString* AccountPtr = PlayerAccountIds.Find(PC);
+	if (!AccountPtr || AccountPtr->IsEmpty())
+	{
+		return false;
+	}
+
+	const FString* TokenPtr = PlayerSessionTokens.Find(PC);
+	OutAccountId = *AccountPtr;
+	OutSessionToken = TokenPtr ? *TokenPtr : FString{};
+	return true;
+}
+
+void AHubGameMode::HandleCharacterListSuccess(APlayerController* PC, const FString& AccountId, const TArray<FCharacterSelectionView>& Characters)
+{
+	//UE_LOGFMT(LogProjectA, Log, "{0}: Sending {1} character(s) to AccountId={2}.", FString(__FUNCTION__), Characters.Num(), *AccountId);
+
+	ACustomPlayerController* CustomPC = Cast<ACustomPlayerController>(PC);
+	if (CustomPC)
+	{
+		CustomPC->Client_ReceiveCharacterList(Characters);
+	}
+}
+
+void AHubGameMode::HandleCharacterListError(APlayerController* PC, const FString& Error)
+{
+	UE_LOGFMT(LogProjectA, Warning, "{0}: Failed to fetch character list: {1}", FString(__FUNCTION__), *Error);
+	ACustomPlayerController* CustomPC = Cast<ACustomPlayerController>(PC);
+	if (CustomPC)
+	{
+		CustomPC->Client_ReceiveCharacterList({});
+	}
+}
+
+void AHubGameMode::Logout(AController* Exiting)
+{
+	Super::Logout(Exiting);
+
+	if (APlayerController* PC = Cast<APlayerController>(Exiting))
+	{
+		PlayerAccountIds.Remove(PC);
+		PlayerSessionTokens.Remove(PC);
+		UE_LOGFMT(LogProjectA, Log, "{0}: Player disconnected, session data cleared.", FString(__FUNCTION__));
+	}
+}

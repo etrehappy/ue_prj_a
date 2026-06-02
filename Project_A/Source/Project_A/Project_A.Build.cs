@@ -21,6 +21,9 @@ public class Project_A : ModuleRules
             "GameplayTags",
 			"Networking",
 			"Sockets",
+			"HTTP",
+			"Json",
+			"JsonUtilities",
 			"WeaponSystemPlugin",
 			"Common",
 			"Interaction",
@@ -32,7 +35,7 @@ public class Project_A : ModuleRules
 			, "Enemy"			
 			, "Inventory"
 			, "UI"
-
+			, "Dialogue"
 		});
 
 		PublicIncludePaths.AddRange(new string[] {

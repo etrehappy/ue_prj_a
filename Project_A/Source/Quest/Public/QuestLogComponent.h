@@ -1,34 +1,27 @@
 /*****************************************************************//**
  * \file   QuestLogComponent.h
- * \brief  Default quest log component for tracking quest states and broadcasting changes to the UI.
+ * \brief  
  * 
- * \date   April 2026
+ * \date   May 2026
  *********************************************************************/
 #pragma once
 
 #include "CoreMinimal.h"
+
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
+#include "QuestDefinition.h"
+#include "QuestTypes.h"
+
 #include "QuestLogComponent.generated.h"
 
-/**
- * @enum EQuestState
- * @brief Represents the different states a quest can be in. A simple implementation.
- */
-UENUM(BlueprintType)
-enum class EQuestState : uint8
-{
-	None UMETA(DisplayName = "None"),
-	Accepted_InsertStone UMETA(DisplayName = "Accepted_InsertStone"),
-	Completed_InsertStone UMETA(DisplayName = "Completed_InsertStone")
-};
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnQuestLogUpdated);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnQuestStateChanged, EQuestState, NewState, FText, Description);
+class UInventoryComponent;
 
 /**
- * @class UQuestLogComponent 
- * @brief Can be added to the player character to track quest. A base and simple implementation.
- *  
- * @todo In this example, we only have one quest. It can be extended to support multiple quests by using a TMap<EQuestID, EQuestState> or similar data structure to track the state of each quest separately.
+ * @class UQuestLogComponent
+ * @brief Component that stores runtime quest instances for the owner actor.
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class QUEST_API UQuestLogComponent : public UActorComponent
@@ -41,42 +34,131 @@ public:
 	virtual ~UQuestLogComponent() = default;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	/**
+	 * @brief Returns a runtime struct that contains the current state of a quest for a specific player.
+	 * @see FQuestInstance
+	 */
+	const FQuestInstance* GetQuestInstance(FName QuestId) const;
+
 protected:
 	virtual void BeginPlay() override;
+
+private:
 	void BroadcastQuestState() const;
+	void ValidateTrackedQuest();
+
+	const FQuestInstance* FindQuestInstance(FName QuestId) const;
+	FQuestInstance* FindQuestInstanceMutable(FName QuestId);
+
+	/**
+	 * @see OwnerInventoryComponent
+	 */
+	void BindInventoryEvents();
+	void SyncInventoryBackedObjectives();
+	void StartInventoryBindRetry();
+
+	const FQuestObjectiveDefinition* FindObjectiveDefinitionByTag(const UQuestDefinition* QuestDefinition, const FGameplayTag& ObjectiveTag);
+	
 
 						/* === Unreal Engine UFUNCTION === */
 public:
+	/**
+	 * @brief Returns an array of runtime structs that contain the current state of all quests for a specific player.
+	 * @see FQuestInstance	 
+	 */
+	UFUNCTION(BlueprintPure, Category = "Quest")
+	const TArray<FQuestInstance>& GetQuestInstances() const { return QuestInstances; }
 
-// A temporary solution
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Quest")
-	void AcceptInsertStoneQuest();
+	void AcceptQuestFromDefinition(const FQuestInstance& InitialInstance);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Quest")
-	void CompleteInsertStoneQuest();
+	bool UpdateObjectiveProgress(FName QuestId, FGameplayTag ObjectiveTag, int32 Delta);
 
 	UFUNCTION(BlueprintPure, Category = "Quest")
-	bool IsInsertStoneQuestAccepted() const { return CurrentQuestState == EQuestState::Accepted_InsertStone; }
+	bool IsQuestAccepted(FName QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "Quest")
-	bool IsInsertStoneQuestCompleted() const { return CurrentQuestState == EQuestState::Completed_InsertStone; }
+	bool IsQuestCompleted(FName QuestId) const;
+		
+	/**
+	 * @brief A client's preference. Determines which quest's objectives are shown in the UI tracker.
+	 * @see UQuestJournalWidget
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintCosmetic, Category = "Quest")
+	void SetTrackedQuestId(FName InQuestId);
+
+	/**
+	 * @brief It is required for UI.
+	 * @see UQuestJournalWidget
+	 */
+	UFUNCTION(BlueprintPure, Category = "Quest")
+	FName GetTrackedQuestId() const { return TrackedQuestId; }
+
+	/**
+	 * @brief Returns an any quest for tracking via UI.
+	 */
+	UFUNCTION(BlueprintPure, Category = "Quest")
+	FName GetTrackedOrFirstAcceptedQuestId() const;
+
+	
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Quest")
+	bool TryTurnInQuest(FName QuestId);
 
 	UFUNCTION(BlueprintPure, Category = "Quest")
-	EQuestState GetQuestState() const { return CurrentQuestState; }
+	bool IsQuestReadyToTurnIn(FName QuestId) const;
 
 	UFUNCTION(BlueprintPure, Category = "Quest")
-	FText GetCurrentQuestText() const;
+	bool IsQuestTurnedIn(FName QuestId) const;
+
+	/**
+	 * @brief A simple solution to restore a character's state in a quest when he died.
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Quest")
+	void RestoreFromSnapshot(const TArray<FQuestInstance>& Snapshot);
 
 private:
 	UFUNCTION()
-	void OnRep_CurrentQuestState();
-		
+	void OnRep_QuestInstances();
+
+	/**
+	 * @see OwnerInventoryComponent
+	 */
+	UFUNCTION()
+	void RetryBindInventoryEvents();
+
+	/**
+	 * @see OwnerInventoryComponent	 
+	 */
+	UFUNCTION()
+	void HandleOwnedInventoryChanged();
+
+
 						/* === Unreal Engine UPROPERTY === */
 public:
 	UPROPERTY(BlueprintAssignable, Category = "Quest")
-	FOnQuestStateChanged OnQuestStateChanged{};	
+	FOnQuestLogUpdated OnQuestLogUpdated{};
 
 private:
-	UPROPERTY(ReplicatedUsing = OnRep_CurrentQuestState)
-	EQuestState CurrentQuestState{EQuestState::None};
+	UPROPERTY(ReplicatedUsing = OnRep_QuestInstances)
+	TArray<FQuestInstance> QuestInstances{};
+
+	/**
+	 * @brief Local UI preference (not replicated) 
+	 * @see UQuestJournalWidget
+	 */
+	UPROPERTY()
+	FName TrackedQuestId{NAME_None};
+	
+	/**
+	 * @brief When quest objectives are backed by inventory items, we need to bind to inventory events to keep them in sync.
+	 */
+	UPROPERTY()
+	TObjectPtr<UInventoryComponent> OwnerInventoryComponent{};
+	
+	/**
+	 * @brief If the inventory component isn't ready when we try to bind to it, we'll retry after a short delay. 
+	 */
+	UPROPERTY()
+	FTimerHandle InventoryBindRetryTimer{};
 };

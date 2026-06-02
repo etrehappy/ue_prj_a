@@ -14,8 +14,14 @@ void UEquippedItemWidget::InitialiseWithInventory(UInventoryComponent* InInvento
 		return;
 	}
 
+	if (InventoryComponent.IsValid() && InventoryComponent.Get() != InInventoryComponent)
+	{
+		InventoryComponent->OnEquipmentChanged.RemoveAll(this);
+	}
+
 	InventoryComponent = InInventoryComponent;
-	InventoryComponent->OnEquipmentChanged.AddDynamic(this, &UEquippedItemWidget::HandleEquipmentChanged);
+	InventoryComponent->OnEquipmentChanged.RemoveAll(this);
+	InventoryComponent->OnEquipmentChanged.AddUniqueDynamic(this, &UEquippedItemWidget::HandleEquipmentChanged);
 
 	if (WeaponSlot)
 	{

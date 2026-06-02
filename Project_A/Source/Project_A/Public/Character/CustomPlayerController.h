@@ -12,6 +12,7 @@
 #include "GameplayTagContainer.h"
 #include "WorldServerView.h"
 #include "CharacterSelectionView.h"
+#include "QuestTypes.h"
 
 #include "CustomPlayerController.generated.h"
 
@@ -53,6 +54,7 @@ public:
 		
 	void OnFocusChanged(AActor* NewFocusedActor);
 	void SetDeathMenuVisible(bool bVisible);
+	bool IsDeathMenuVisible() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -98,21 +100,10 @@ private:
 	 */
 	void PushCharacterListToHud(const TArray<FCharacterSelectionView>& Characters);
 
-
-////// A simple way to store the selected character's information.
-// see AWorldGameMode::CharacterDefinitionById
-public:
-	void SetSelectedCharacterId(FName CharacterId) { SelectedCharacterId = CharacterId; }
-	FName GetSelectedCharacterId() const { return SelectedCharacterId; }
-	void SetSelectedCharacterLevel(int32 Level) { SelectedCharacterLevel = Level; }
-	int32 GetSelectedCharacterLevel() const { return SelectedCharacterLevel; }
 private:
-	FName SelectedCharacterId = NAME_None;
-	int32 SelectedCharacterLevel = 1;
-	UPROPERTY(Transient)
-	TArray<TObjectPtr<UCharacterEntryObject>> CachedCharacterEntries{};
-//////
-
+	// A simple implementation of caching and restoring quest progress
+	void CacheQuestProgressFromPawn(APawn* SourcePawn);
+	void RestoreQuestProgressToPawn(APawn* TargetPawn);
 
 						/* === Unreal Engine UFUNCTIONs === */
 public:
@@ -185,6 +176,18 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdatePartyMembers(const TArray<APawn*>& PartyPawns);
 
+	/**
+	 * @brief Client asks server to save character state before quitting the game.
+	 */
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_RequestSaveBeforeExit();
+
+	/**
+	 * @brief Server confirms that save request has been processed; client can quit now.
+	 */
+	UFUNCTION(Client, Reliable)
+	void Client_ExitGameAfterSave();
+
 protected:
 	/**
 	 * @brief Draws debug visualization for enemy spawn location and rotation on the client. Used for testing purposes only.
@@ -204,15 +207,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
 	void HidePopup();
 
-	/*UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
-	void ShowInteractionMenu(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);*/
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
+	void PawnWasChanged();
 
-	/*UFUNCTION(BlueprintImplementableEvent, BlueprintCosmetic)
-	void HideInteractionMenu();*/
-
-	/*UFUNCTION(Client, Reliable)
-	void Client_ShowInteractionMenu(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);*/
-
+private:
+	TArray<FQuestInstance> CachedQuestProgress{};
+	bool bHasCachedQuestProgress{false};
 private:
 	UFUNCTION()
 	void HandleDeathMenuRespawnRequested();
@@ -236,16 +236,12 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<UDeathMenuWidget> DeathMenuWidget{};
 
-
-//public:
-//	//void ShowInteractionMenuLocal(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);
-//
-//	UFUNCTION(BlueprintCallable)
-//	void SubmitInteractionMenuAction(FGameplayTag ActionId);
-
 private:
 	UPROPERTY(Transient)
 	TWeakObjectPtr<AActor> InteractionMenuTarget{};
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UCharacterEntryObject>> CachedCharacterEntries{};
 
 
 								/** === Additional === */
@@ -257,26 +253,3 @@ public:
 	
 
 };
-
-
-//virtual void OnUnPossess() override;
-
-///**
-//	 * @brief Server function.
-//	 *
-//	 */
-//void RespawnPlayer();
-
-///**
-// * @see AHubGameMode
-// */
-//UFUNCTION(Server, Reliable, BlueprintCallable)
-//void Server_RequestTravelToWorldServer(FName ServerId);
-
-///**
-// * @brief Client requests to enter the game world on the Hub-server.
-// * @note This function is called from Blueprint. Next step -> connect to the GameWorld server.
-// * @see AHubGameMode::EnterToWorld
-// */
-//UFUNCTION(Server, Reliable, BlueprintCallable)
-//void Server_RequestEnterToWorld();

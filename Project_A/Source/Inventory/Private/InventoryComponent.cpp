@@ -8,6 +8,7 @@
 #include "InventoryItem.h"
 #include "StatusEffect/StatusEffectsComponent.h"
 #include "WeaponComponent.h"
+#include "GameFramework/Pawn.h"
 #include "ProjectALog.h"
 
 UInventoryComponent::UInventoryComponent()
@@ -132,13 +133,19 @@ void UInventoryComponent::AddItemToEquipment(EEquipmentSlot Slot, UInventoryItem
 	EquipmentInventory->AddItemToSlot(Item, SlotIndex);	
 }
 
-void UInventoryComponent::UseItem(int32 SlotIndex)
+void UInventoryComponent::UseItem(int32 SlotIndex, int32 UseCount)
 {
-	UE_LOGFMT(LogProjectA, Log, "{0} - called with SlotIndex: {1}", FString(__FUNCTION__), SlotIndex);
+	//UE_LOGFMT(LogProjectA, Log, "{0} - called with SlotIndex: {1}", FString(__FUNCTION__), SlotIndex);
+
+	if (UseCount <= 0)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - UseCount must be > 0", FString(__FUNCTION__));
+		return;
+	}
 
 	if (!IsRunningDedicatedServer())
 	{
-		Server_UseItem(SlotIndex);
+		Server_UseItem(SlotIndex, UseCount);
 		return;
 	}
 
@@ -169,8 +176,25 @@ void UInventoryComponent::UseItem(int32 SlotIndex)
 		return;
 	}
 
-	StatusEffectComponent->ApplyEffectByTag(Definition->EffectTagOnUse);
-	Inventory->UseItemFromSlot(SlotIndex);
+	const int32 AvailableCount = FMath::Max(0, Item->StackCount);
+	const int32 ActualUseCount = FMath::Min(UseCount, AvailableCount);
+	if (ActualUseCount <= 0)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - No items available in slot {1}", FString(__FUNCTION__), SlotIndex);
+		return;
+	}
+
+	for (int32 Index = 0; Index < ActualUseCount; ++Index)
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - Using item from slot {1} (use {2} of {3})", FString(__FUNCTION__), SlotIndex, Index + 1, ActualUseCount);
+		StatusEffectComponent->ApplyEffectByTag(Definition->EffectTagOnUse);
+		Inventory->UseItemFromSlot(SlotIndex);
+	}
+
+	if (ActualUseCount < UseCount)
+	{
+		UE_LOGFMT(LogProjectA, Log, "{0} - Requested {1}, used {2} (not enough items in stack)", FString(__FUNCTION__), UseCount, ActualUseCount);
+	}
 }
 
 void UInventoryComponent::SetInventory(UInventory* NewInventory)
@@ -328,21 +352,24 @@ void UInventoryComponent::BindInventoryDelegates(UInventory* InInventory)
 	InInventory->OnMoveItemRequested.AddUniqueDynamic(this, &UInventoryComponent::MoveItemToOtherInventory);
 
 	InInventory->OnRelocateItemRequested.RemoveAll(this);
-	InInventory->OnRelocateItemRequested.AddUniqueDynamic(this, &UInventoryComponent::RelocateItemInInventory);
+	InInventory->OnRelocateItemRequested.AddUniqueDynamic(this, &UInventoryComponent::RelocateItemInInventory);	
 }
 
-void UInventoryComponent::Server_UseItem_Implementation(int32 SlotIndex)
+void UInventoryComponent::Server_UseItem_Implementation(int32 SlotIndex, int32 UseCount)
 {
-	UE_LOGFMT(LogProjectA, Log, "{0} - called with SlotIndex: {1}", FString(__FUNCTION__), SlotIndex);
+	//UE_LOGFMT(LogProjectA, Log, "{0} - called with SlotIndex: {1}, UseCount: {2}", FString(__FUNCTION__), SlotIndex, UseCount);
 
-	UseItem(SlotIndex);
+	UseItem(SlotIndex, UseCount);
 }
 
 void UInventoryComponent::MoveItemToOtherInventory(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex)
 {
-	if (SourceInventory != Inventory && SourceInventory != EquipmentInventory)
+	const bool bSourceBelongsToThis = (SourceInventory == Inventory || SourceInventory == EquipmentInventory);
+	const bool bTargetBelongsToThis = (TargetInventory == Inventory || TargetInventory == EquipmentInventory);
+
+	if (!bSourceBelongsToThis && !bTargetBelongsToThis)
 	{
-		UE_LOGFMT(LogProjectA, Warning, "{0} - SourceInventory does not belong to this component", FString(__FUNCTION__));
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Neither source nor target inventory belongs to this component", FString(__FUNCTION__));
 		return;
 	}
 
@@ -657,6 +684,69 @@ bool UInventoryComponent::ConsumeItemsByTag(const FGameplayTag& ItemTypeTag, int
 	return RemainingCount == 0;
 }
 
+void UInventoryComponent::RequestOpenTargetInventory(APawn* InteractorPawn, AActor* TargetActor)
+{
+	if (!GetOwner() || !GetOwner()->HasAuthority())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Must be called on server", FString(__FUNCTION__));
+		return;
+	}
 
+	if (!InteractorPawn || !TargetActor)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Invalid InteractorPawn or TargetActor", FString(__FUNCTION__));
+		return;
+	}
 
+	if (InteractorPawn != GetOwner())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - InteractorPawn does not match component owner", FString(__FUNCTION__));
+		return;
+	}
 
+	Client_OpenTargetInventory(TargetActor);
+}
+
+void UInventoryComponent::Client_OpenTargetInventory_Implementation(AActor* TargetActor)
+{
+	if (!TargetActor)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - TargetActor is null", FString(__FUNCTION__));
+		return;
+	}
+
+	OnOpenTargetInventoryRequested.Broadcast(TargetActor);
+}
+
+void UInventoryComponent::Client_CloseTargetInventory_Implementation()
+{
+	OnCloseTargetInventoryRequested.Broadcast();
+}
+
+void UInventoryComponent::RequestMoveBetweenInventories(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex)
+{
+	if (!SourceInventory || !TargetInventory)
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - SourceInventory or TargetInventory is null", FString(__FUNCTION__));
+		return;
+	}
+
+	if (!GetOwner())
+	{
+		UE_LOGFMT(LogProjectA, Warning, "{0} - Owner is null", FString(__FUNCTION__));
+		return;
+	}
+
+	if (!GetOwner()->HasAuthority())
+	{
+		Server_RequestMoveBetweenInventories(SourceInventory, TargetInventory, SourceSlotIndex, TargetSlotIndex);
+		return;
+	}
+
+	MoveItemToOtherInventory(SourceInventory, TargetInventory, SourceSlotIndex, TargetSlotIndex);
+}
+
+void UInventoryComponent::Server_RequestMoveBetweenInventories_Implementation(UInventory* SourceInventory, UInventory* TargetInventory, int32 SourceSlotIndex, int32 TargetSlotIndex)
+{
+	RequestMoveBetweenInventories(SourceInventory, TargetInventory, SourceSlotIndex, TargetSlotIndex);
+}

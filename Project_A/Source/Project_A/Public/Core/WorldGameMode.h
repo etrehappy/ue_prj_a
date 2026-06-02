@@ -9,8 +9,12 @@
 
 #include "CoreMinimal.h"
 #include "GeneralGameMode.h"
+#include "Engine/StreamableManager.h"
+#include "Character/CharacterSaveData.h"
 
 #include "WorldGameMode.generated.h"
+
+class UQuestDefinition;
 
 /**
  * @struct FCharacterSpawnDefinition
@@ -29,10 +33,24 @@ struct FCharacterSpawnDefinition
 };
 
 /**
+ * @struct FPlayerSessionData
+ * @brief Per-player session data stored server-side on the World server.
+ */
+USTRUCT()
+struct FPlayerSessionData
+{
+	GENERATED_BODY()
+
+	FString AccountId{};
+	FString SessionToken{};
+	FName   CharacterId{NAME_None};
+};
+
+/**
  * @class AWorldGameMode
  * @brief Game mode for the main world map. 
  */
-UCLASS()
+UCLASS(Config = NetSetCustom)
 class PROJECT_A_API AWorldGameMode : public AGeneralGameMode
 {
 	GENERATED_BODY()
@@ -57,7 +75,23 @@ public:
 	 * @param[in,out] RequesterPawn
 	 * @param[in,out] TargetPawn
 	 */
+	UFUNCTION(BlueprintCallable)
 	void TryJoinParty(APawn* RequesterPawn, APawn* TargetPawn);
+
+	/**
+	 * @brief Called by WorldGameMode after character save data is loaded.
+	 * Applies saved position, health and quest progress to the newly spawned pawn.
+	 */
+	void ApplySaveDataToPawn(APawn* InPawn, const FCharacterSaveData& SaveData);
+
+	/**
+	 * @brief Collects current character state from the pawn and saves it via CharacterService.
+	 * Called in Logout() before the player disconnects.
+	 */
+	void SaveCharacterFromPawn(APlayerController* PC);
+
+	/** @brief Returns the session data for a connected PlayerController, or nullptr if not found. */
+	const FPlayerSessionData* GetSessionData(APlayerController* PC) const;
 
 protected:
 	/**
@@ -65,6 +99,10 @@ protected:
 	 */
 	virtual FString InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId,
 		const FString& Options, const FString& Portal) override; // Unreal AGameModeBase
+
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
+	virtual void Logout(AController* Exiting) override;
 	
 private:
 	// Heartbeat related functions
@@ -90,6 +128,29 @@ private:
 	 */
 	void PushPartyMembersToClients(FName PartyId);
 
+	/**
+	 * @brief Loads character save data and applies it to the player's pawn.
+	 * Called from PostLogin after the pawn is ready.
+	 */
+	void LoadAndApplyCharacterData(APlayerController* PC);
+
+
+	// Helpers LoadAndApplyCharacterData
+private:
+	/**
+	 * @brief Try to obtain session data for a player. Returns true when valid session data is available.
+	 */
+	bool TryGetSessionForPlayer(APlayerController* PC, FString& OutAccountId, FString& OutSessionToken, FName& OutCharacterId) const;
+
+	/**
+	 * @brief Called when character save data successfully loaded for a player.
+	 */
+	void HandleCharacterLoaded(APlayerController* PC, const FString& AccountId, FName CharacterId, const FCharacterSaveData& SaveData);
+
+	/**
+	 * @brief Called when character load failed for a player.
+	 */
+	void HandleCharacterLoadError(const FString& AccountId, FName CharacterId, const FString& Error);
 
 
 						/* === C++ member variables === */
@@ -102,6 +163,12 @@ private:
 	FTimerHandle HeartbeatSendTimerHandle{};
 
 	int32 NextPartyNumericId{1};
+
+	/**
+	 * @brief Per-player session data: AccountId, SessionToken, CharacterId.
+	 * Populated in InitNewPlayer, cleared in Logout.
+	 */
+	TMap<TWeakObjectPtr<APlayerController>, FPlayerSessionData> PlayerSessionDataMap{};
 
 	
 						/* === Unreal Engine UPROPERTY === */
@@ -143,4 +210,9 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FName, FCharacterSpawnDefinition> CharacterDefinitionById{};
 
+	UPROPERTY(EditDefaultsOnly, Config, Category = "Network")
+	FString HubHeartbeatAddress{};
+
+	UPROPERTY(EditDefaultsOnly, Config, Category = "Network")
+	int32 HubHeartbeatPort{};
 };

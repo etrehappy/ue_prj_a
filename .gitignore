@@ -110,6 +110,12 @@ Launch bats/Editor_StartWorldServer.bat
 Launch bats/Log/
 
 Project_A/Archive/
+AuthServer/
+CharacterServer/
+
+!AuthServer/auth_server.py
+!CharacterServer/character_server.py
+
 .github/build_scripts/
 
 Logs/

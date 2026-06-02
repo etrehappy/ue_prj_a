@@ -71,14 +71,14 @@ void AWeaponMelee::TickAttack(float DeltaTime)
 
 void AWeaponMelee::Client_StopAttack_Implementation()
 {   
-	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
+	//UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
 
 	AWeaponBase::SetIsWeaponAttacking(false);  
 }
 
 void AWeaponMelee::Client_StartAttack_Implementation()
 {
-	UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
+	//UE_LOGFMT(LogWeaponPlugin, Log, "{0} - called", FString(__FUNCTION__));
 
 	AWeaponBase::SetIsWeaponAttacking(true);
 	LastTipPosition = AWeaponBase::MeshComponent->GetSocketLocation(::TipSocketName);
@@ -88,13 +88,13 @@ void AWeaponMelee::Client_StartAttack_Implementation()
 void AWeaponMelee::Client_DrawDebug_Implementation(FVector LastBase, FVector BaseNow, FVector LastTip, FVector TipNow, float Radius)
 {
 #if WITH_EDITOR
-	DrawDebugSphere(GetWorld(), LastTip, Radius, 12, FColor::Red, false, 0.02f);
+	/*DrawDebugSphere(GetWorld(), LastTip, Radius, 12, FColor::Red, false, 0.02f);
 	DrawDebugSphere(GetWorld(), TipNow, Radius, 12, FColor::Red, false, 0.02f);
 
 	DrawDebugSphere(GetWorld(), LastBase, Radius, 12, FColor::Blue, false, 0.02f);
 	DrawDebugSphere(GetWorld(), BaseNow, Radius, 12, FColor::Blue, false, 0.02f);
 
-	DrawDebugLine(GetWorld(), BaseNow, TipNow, FColor::Green, false, 0.02f, 0, 1.f);
+	DrawDebugLine(GetWorld(), BaseNow, TipNow, FColor::Green, false, 0.02f, 0, 1.f);*/
 #endif
 }
 
@@ -171,7 +171,7 @@ void AWeaponMelee::Server_SendSwingPositions_Implementation(const FVector LastBa
 			return;
 		}
 
-		UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Hit Actor: {1}", FString(__FUNCTION__), *Hit.GetActor()->GetName());
+		//UE_LOGFMT(LogWeaponPlugin, Log, "{0} - Hit Actor: {1}", FString(__FUNCTION__), *Hit.GetActor()->GetName());
 				
 		UGameplayStatics::ApplyDamage(
 			Hit.GetActor(),

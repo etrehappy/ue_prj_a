@@ -32,7 +32,17 @@ void AEnemyBase::Tick(float DeltaTime)
 
 void AEnemyBase::InitializeFromTableData(const FEnemyRow& Data)
 {
-	const ENpcFaction Faction = Data.bIsFriendly ? ENpcFaction::Friendly : ENpcFaction::Enemy;
+	ENpcFaction Faction{};
+
+	if (Data.bIsFriendly)
+	{
+		Faction = ENpcFaction::Friendly;
+	}
+	else
+	{
+		Faction = ENpcFaction::Enemy;
+	}
+		
 	SetNpcCoreData(Data.MaxHealth, Data.Damage, Data.MoveSpeed, Faction);
 }
 

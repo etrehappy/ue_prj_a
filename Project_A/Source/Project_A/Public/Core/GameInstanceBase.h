@@ -25,6 +25,14 @@ public:
 	virtual void Init() override;
 	virtual void Shutdown() override;  
 
+	// Auth
+	void SetAccountId(const FString& InAccountId) { AccountId = InAccountId; }
+	FString GetAccountId() const { return AccountId; }
+	void SetSessionToken(const FString& InToken) { SessionToken = InToken; }
+	FString GetSessionToken() const { return SessionToken; }
+	bool IsAuthenticated() const;
+	void ClearSession();
+
 private:
 	virtual void OnStart() override;
 	void OnPostLoadMap(UWorld* LoadedWorld);
@@ -71,4 +79,15 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly)
 	FString PendingErrorMessage{};
+
+private:
+	/**
+	 * @brief Unique identifier of the authenticated account. Persists across map travels for the lifetime of the game instance.
+	 */
+	FString AccountId{};
+
+	/**
+	 * @brief Used to validate requests on the server. Persists across map travels for the lifetime of the game instance.
+	 */
+	FString SessionToken{};
 };

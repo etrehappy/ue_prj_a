@@ -10,11 +10,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "BaseHud.h"
+#include "DialogueManagerSubsystem.h"
 
 #include "GeneralHud.generated.h"
 
 class UGeneralWidget;
 struct FInteractionActionType;
+class UInventoryComponent;
 
 /**
  * @class AGeneralHud
@@ -26,6 +28,10 @@ class UI_API AGeneralHud : public ABaseHud
 	GENERATED_BODY()
 
 						/* === C++ member functions and variables === */
+public:
+	void SetDeathMenuVisibleState(bool bVisible);
+	bool IsDeathMenuVisibleState() const { return bDeathMenuVisible; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -37,7 +43,11 @@ private:
 	 * @return true if the widget was successfully created and added, false otherwise.
 	 */
 	bool CreateMainWidget();
-	
+
+	void RebindPawnInventoryUiDelegates();
+
+	bool bDeathMenuVisible{false};
+	TWeakObjectPtr<UInventoryComponent> BoundInventoryComponent{};
 
 						/* === Unreal Engine UFUNCTION and UPROPERTY === */
 public:
@@ -59,6 +69,24 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ShowInteractionMenu(AActor* TargetActor, const TArray<FInteractionActionType>& Actions);
 
+	UFUNCTION(BlueprintCallable)
+	void ToggleQuestJournal();
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleMainMenu();
+
+	UFUNCTION(BlueprintCallable)
+	void SubmitDialogueChoice(const FGuid SessionId, FName ChoiceId);
+
+	UFUNCTION(BlueprintCallable)
+	void CloseDialogue();
+
+	UFUNCTION(BlueprintNativeEvent)
+	void ShowDialogueNode(const FDialogueNodeRuntime& Node);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void HideDialogue();
+
 protected:
 	/**
 	 * @brief The class type of the general widget to create and manage.
@@ -71,4 +99,5 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UGeneralWidget> MainWidget{};
+
 };

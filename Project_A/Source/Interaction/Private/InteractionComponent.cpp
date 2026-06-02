@@ -31,8 +31,13 @@ void UInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 void UInteractionComponent::UpdateInteractionFocus()
 {
+    AActor* PreviousFocusedActor = FocusedActor.Get();
     FocusedActor = FindBestCandidate();
-    OnFocusChanged.Broadcast(FocusedActor.Get());
+
+    if (PreviousFocusedActor != FocusedActor.Get())
+    {
+        OnFocusChanged.Broadcast(FocusedActor.Get());
+    }
 }
 
 void UInteractionComponent::TryInteract()
@@ -64,7 +69,6 @@ void UInteractionComponent::Server_TryInteract_Implementation()
     }
 
     Server_RequestInteraction(BestCandidate);
-    //Interactable->Interact(Interactor);
 }
 
 APawn* UInteractionComponent::GetInteractor() const
@@ -113,7 +117,7 @@ bool UInteractionComponent::IsWithinInteractionRange(APawn* Interactor, AActor* 
     const FVector InteractorForwardVector = Interactor->GetController() ? Interactor->GetController()->GetControlRotation().Vector() : Interactor->GetActorForwardVector();
 
 #if WITH_EDITOR
-    Client_ShowInteractionFeedback(Interactor->GetActorLocation(), InteractorForwardVector, DistanceToInteractableActor, FMath::DegreesToRadians(Interactable->GetInteractionAngle()));
+    //Client_ShowInteractionFeedback(Interactor->GetActorLocation(), InteractorForwardVector, DistanceToInteractableActor, FMath::DegreesToRadians(Interactable->GetInteractionAngle()));
 #endif // WITH_EDITOR
 
     if (DistanceToInteractableActor > Interactable->GetInteractionDistance())
@@ -180,6 +184,11 @@ void UInteractionComponent::Server_SubmitInteractionAction_Implementation(AActor
     bool bActionAllowed = false;
     for (const FInteractionActionType& Action : Actions)
     {
+        if (!Action.Definition || !Action.Definition->ActionTag.IsValid())
+        {
+            continue;
+        }          
+
         if (Action.Definition->ActionTag.MatchesTagExact(ActionId))
         {
             bActionAllowed = Action.bIsEnabled;
@@ -248,9 +257,15 @@ void UInteractionComponent::Server_RequestInteraction_Implementation(AActor* Tar
 
     if (Actions.Num() == 0)
     {
-        UE_LOGFMT(LogProjectA, Warning, "{0} - No interaction actions available for {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        // Direct interaction path (e.g. NPC starts dialogue immediately in BuildInteractionActions).
+        const bool bHandledWithoutMenu = Interactable->ExecuteInteractionAction(Interactor, FGameplayTag{});
+        if (!bHandledWithoutMenu)
+        {
+            UE_LOGFMT(LogProjectA, Warning, "{0} - No interaction actions available for {1}", FString(__FUNCTION__), *TargetActor->GetName());
+        }
+
         return;
-	}    
+    }
 
     Client_InteractionAvailable(TargetActor, Actions);
 }
@@ -262,6 +277,11 @@ void UInteractionComponent::OtherBeginOverlap(AActor* OtherActor)
     if (!OtherActor)
     {
         UE_LOGFMT(LogProjectA, Warning, "{0} - OtherBeginOverlap called with null OtherActor", FString(__FUNCTION__));
+        return;
+    }
+
+    if (!IsValid(OtherActor) || OtherActor->IsActorBeingDestroyed())
+    {
         return;
     }
     
@@ -307,33 +327,28 @@ AActor* UInteractionComponent::FindBestCandidate()
 
     const FVector InteractorForwardVector = Interactor->GetController() ? Interactor->GetController()->GetControlRotation().Vector() : Interactor->GetActorForwardVector();
     const FVector InteractorLocation = Interactor->GetActorLocation();
+       
 
-    for (auto& Ptr : Candidates)
+    for (auto It = Candidates.CreateIterator(); It; ++It)
     {
-        AActor* Candidate = Ptr.Get();
-        if (!Candidate) continue;
-        if (Candidate == Interactor)
+        AActor* Candidate = It->Get();
+
+        // Важно: забываем удалённые/невалидные объекты.
+        if (!IsValid(Candidate) || Candidate->IsActorBeingDestroyed())
         {
-			//UE_LOGFMT(LogProjectA, Log, "{0} - Skipping self candidate", FString(__FUNCTION__));
+            It.RemoveCurrent();
             continue;
         }
-        
-        // Normalised direction from Interactor to candidate.
+
+        if (Candidate == Interactor)
+        {
+            continue;
+        }
+
         const FVector Direction = (Candidate->GetActorLocation() - InteractorLocation).GetSafeNormal();
-        
-        // The scalar product between the direction of gaze and the direction towards the actor.
-        // Shows how far ahead the object is: 1 — directly in front of the line of sight, 0 — to the side, -1 — behind.
-        float Dot = FVector::DotProduct(InteractorForwardVector, Direction);
-
-        // Distance to candidate.
-        float Dist = FVector::Dist(InteractorLocation, Candidate->GetActorLocation());
-
-        // The larger 'Dot', the better, as the object is closer to the centre of vision. 
-        // The smaller 'Dist', the better, as the object is physically closer. 
-        // 2.f and 0.01f - empirical weighting coefficients.
-        float Score = Dot * 2.f - Dist * 0.01f;
-
-        //UE_LOGFMT(LogProjectA, Verbose, "{0} - Candidate {1}: Dot={2:.3f}, Dist={3:.1f}, Score={4:.3f}", FString(__FUNCTION__), *Candidate->GetName(), Dot, Dist, Score);
+        const float Dot = FVector::DotProduct(InteractorForwardVector, Direction);
+        const float Dist = FVector::Dist(InteractorLocation, Candidate->GetActorLocation());
+        const float Score = Dot * 2.f - Dist * 0.01f;
 
         if (Score > BestScore)
         {

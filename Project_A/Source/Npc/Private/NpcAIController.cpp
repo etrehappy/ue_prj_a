@@ -4,6 +4,8 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 #include "Components/StateTreeAIComponent.h"
+#include "NpcAlertSubsystem.h"
+#include "Engine/World.h"
 
 #include "ProjectALog.h"
 
@@ -57,14 +59,33 @@ void ANpcAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 		return;
 	}
 
+	if (ControlledNpc->IsDead())
+	{
+		return;
+	}
+
 	if (Stimulus.WasSuccessfullySensed() && IsHostileActor(Actor))
 	{
-		ControlledNpc->SetCurrentTarget(Actor);
+		if (!ControlledNpc->TryApplySharedTarget(Actor, ControlledNpc))
+		{
+			return;
+		}
+
 		SetFocus(Actor);
+
 		if (StateTreeAIComponent)
 		{
 			StateTreeAIComponent->RestartLogic();
 		}
+
+		if (UWorld* World = GetWorld())
+		{
+			if (UNpcAlertSubsystem* AlertSubsystem = World->GetSubsystem<UNpcAlertSubsystem>())
+			{
+				AlertSubsystem->BroadcastTargetSpotted(ControlledNpc, Actor);
+			}
+		}
+
 		return;
 	}
 
@@ -88,7 +109,7 @@ bool ANpcAIController::IsHostileActor(const AActor* Actor) const
 		return OtherNpc->GetNpcFaction() != ControlledNpc->GetNpcFaction();
 	}
 
-	return ControlledNpc->GetNpcFaction() == ENpcFaction::Enemy;
+	return ControlledNpc->GetNpcFaction() == ENpcFaction::Enemy || ControlledNpc->GetNpcFaction() == ENpcFaction::EnemyGoblin;
 }
 
 void ANpcAIController::ClearCurrentTarget()

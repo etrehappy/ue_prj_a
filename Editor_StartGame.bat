@@ -10,6 +10,13 @@ if not exist %UE_EDITOR% (
     exit /b
 )
 
+set NO_PROXY=127.0.0.1,localhost
+set no_proxy=127.0.0.1,localhost
+set HTTP_PROXY=
+set HTTPS_PROXY=
+set http_proxy=
+set https_proxy=
+
 REM ---------- Client ----------
 echo Start Client...
 start %CLIENT_NAME% %UE_EDITOR% ^

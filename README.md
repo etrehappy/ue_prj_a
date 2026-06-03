@@ -858,7 +858,7 @@
 
 <b>Основное</b>
 <br>
-<br> [ <--- ВИДЕО ---> ](https://drive.google.com/file/d/1Plk3Ji1PsBtoj2JAaNfkJmNjNaDNpOqD/view?usp=sharing)
+<br> <--- ВИДЕО ---> [низкое качество, 120 Мб](https://drive.google.com/file/d/1mjTMhdUVPkWjG9rq936KAGA_K6jGz-b2/view?usp=sharing) или [1,2 Гб](https://drive.google.com/file/d/1Plk3Ji1PsBtoj2JAaNfkJmNjNaDNpOqD/view?usp=sharing)
 
 - [x] есть игровое меню;
 - [x] используются модели, отличные от примитивных;
